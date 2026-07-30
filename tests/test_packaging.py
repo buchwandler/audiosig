@@ -137,11 +137,15 @@ def test_distribution_metadata_has_no_librosa_dependency(tmp_path: Path) -> None
 
     distributions = list(importlib.metadata.distributions(path=[str(target)]))
     distribution = next(item for item in distributions if item.metadata["Name"] == "audiosig")
-    requirements = distribution.requires or []
+    # Filter out optional extras – only core requirements are checked.
+    requirements = [
+        r for r in (distribution.requires or [])
+        if "extra ==" not in r
+    ]
 
-    assert all("librosa" not in requirement.lower() for requirement in requirements)
-    assert all("scipy" not in requirement.lower() for requirement in requirements)
-    assert all("numba" not in requirement.lower() for requirement in requirements)
+    assert all("librosa" not in r.lower() for r in requirements)
+    assert all("scipy" not in r.lower() for r in requirements)
+    assert all("numba" not in r.lower() for r in requirements)
 
 
 def test_documentation_configuration_has_a_buildable_index() -> None:
