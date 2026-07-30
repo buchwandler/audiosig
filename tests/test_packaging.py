@@ -137,7 +137,7 @@ def test_distribution_metadata_has_no_librosa_dependency(tmp_path: Path) -> None
 
     distributions = list(importlib.metadata.distributions(path=[str(target)]))
     distribution = next(item for item in distributions if item.metadata["Name"] == "audiosig")
-    # Filter out optional extras – only core requirements are checked.
+    # Filter out optional extras - only core requirements are checked.
     requirements = [r for r in (distribution.requires or []) if "extra ==" not in r]
 
     assert all("librosa" not in r.lower() for r in requirements)
