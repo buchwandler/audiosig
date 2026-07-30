@@ -1,0 +1,90 @@
+"""Speech-oriented time and pitch effects."""
+
+from __future__ import annotations
+
+import numpy as np
+
+from ._resampling import resample_to_length
+from ._spectral import istft, phase_vocoder, stft
+from ._validation import validate_audio, validate_integer, validate_positive
+from .exceptions import InvalidParameterError
+
+
+def time_stretch(
+    audio: np.ndarray,
+    rate: float,
+    *,
+    axis: int = -1,
+    n_fft: int = 2048,
+    hop_length: int | None = None,
+) -> np.ndarray:
+    """Change duration while approximately preserving pitch.
+
+    Rates above one are faster and shorter; rates below one are slower and
+    longer. This phase-vocoder implementation is intended for speech and
+    moderate prosody changes.
+    """
+    source, normalized_axis = validate_audio(audio, axis=axis)
+    stretch = validate_positive(rate, "rate")
+    fft_size = validate_integer(n_fft, "n_fft", minimum=2)
+    hop = validate_integer(hop_length if hop_length is not None else fft_size // 4, "hop_length")
+    if hop > fft_size:
+        raise InvalidParameterError("hop_length must not exceed n_fft")
+    input_length = source.shape[normalized_axis]
+    requested_length = input_length / stretch
+    if not np.isfinite(requested_length) or requested_length > np.iinfo(np.intp).max:
+        raise InvalidParameterError("requested stretched length is too large")
+    target_length = max(1, round(requested_length))
+    if stretch == 1.0:
+        return np.array(source, dtype=source.dtype, copy=True)
+    moved = np.moveaxis(source, normalized_axis, -1)
+    padded_length = max(input_length, fft_size)
+    if padded_length != input_length:
+        moved = np.pad(moved, [(0, 0)] * (moved.ndim - 1) + [(0, padded_length - input_length)])
+    spectrum = stft(moved, n_fft=fft_size, hop_length=hop, center=True)
+    transformed = phase_vocoder(spectrum, rate=stretch, hop_length=hop, n_fft=fft_size)
+    result = istft(
+        transformed,
+        n_fft=fft_size,
+        hop_length=hop,
+        length=target_length,
+        center=True,
+        dtype=source.dtype,
+    )
+    return np.moveaxis(result, -1, normalized_axis).astype(source.dtype, copy=False)
+
+
+def pitch_shift(
+    audio: np.ndarray,
+    *,
+    sample_rate: int,
+    semitones: float,
+    bins_per_octave: int = 12,
+    axis: int = -1,
+    n_fft: int = 2048,
+    hop_length: int | None = None,
+    filter_width: int = 32,
+) -> np.ndarray:
+    """Shift pitch by semitones while retaining the exact input duration."""
+    source, normalized_axis = validate_audio(audio, axis=axis)
+    validate_positive(sample_rate, "sample_rate")
+    bins = validate_integer(bins_per_octave, "bins_per_octave")
+    shift = float(semitones)
+    if not np.isfinite(shift):
+        raise InvalidParameterError("semitones must be finite")
+    if shift == 0.0:
+        return np.array(source, dtype=source.dtype, copy=True)
+    ratio = 2.0 ** (shift / bins)
+    stretched = time_stretch(
+        source,
+        rate=1.0 / ratio,
+        axis=normalized_axis,
+        n_fft=n_fft,
+        hop_length=hop_length,
+    )
+    return resample_to_length(
+        stretched,
+        source.shape[normalized_axis],
+        axis=normalized_axis,
+        filter_width=filter_width,
+    )
