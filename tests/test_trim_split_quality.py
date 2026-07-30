@@ -19,7 +19,6 @@ from audiosig import (
     trim,
 )
 
-
 pytestmark = pytest.mark.quality
 
 
@@ -81,7 +80,7 @@ def test_activity_to_intervals_returns_sorted_non_overlapping_ranges() -> None:
     assert intervals.shape[1] == 2
     assert np.all(intervals[:, 0] < intervals[:, 1])
     assert np.all(intervals[1:, 0] >= intervals[:-1, 1])
-    assert np.all((0 <= intervals) & (intervals <= 101))
+    assert np.all((intervals >= 0) & (intervals <= 101))
 
 
 def test_activity_to_intervals_validation() -> None:

@@ -15,7 +15,6 @@ from audiosig import InvalidParameterError, resample
 from audiosig._resampling import resample_to_length
 from tests._quality_helpers import dominant_frequency, scalar_rms, tone_amplitude
 
-
 pytestmark = pytest.mark.quality
 
 

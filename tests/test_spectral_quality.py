@@ -6,14 +6,11 @@ this module independently defines AudioSig's contracts and fixtures.
 
 from __future__ import annotations
 
-from collections.abc import Callable
-
 import numpy as np
 import pytest
 
 from audiosig._spectral import istft, phase_vocoder, stft
 from audiosig.exceptions import AudioShapeError, InvalidParameterError
-
 
 pytestmark = pytest.mark.quality
 
@@ -155,9 +152,8 @@ def test_phase_vocoder_output_shape_and_finite_values(
 ) -> None:
     n_fft = 512
     hop_length = 128
-    spectrum = (
-        rng.standard_normal((n_fft // 2 + 1, 12))
-        + 1j * rng.standard_normal((n_fft // 2 + 1, 12))
+    spectrum = rng.standard_normal((n_fft // 2 + 1, 12)) + 1j * rng.standard_normal(
+        (n_fft // 2 + 1, 12)
     )
 
     stretched = phase_vocoder(
@@ -182,9 +178,8 @@ def test_phase_vocoder_magnitudes_at_exact_source_frames(
 ) -> None:
     n_fft = 256
     hop_length = 64
-    spectrum = (
-        rng.standard_normal((n_fft // 2 + 1, 10))
-        + 1j * rng.standard_normal((n_fft // 2 + 1, 10))
+    spectrum = rng.standard_normal((n_fft // 2 + 1, 10)) + 1j * rng.standard_normal(
+        (n_fft // 2 + 1, 10)
     )
 
     stretched = phase_vocoder(
@@ -210,9 +205,8 @@ def test_phase_vocoder_magnitudes_at_exact_source_frames(
 def test_phase_vocoder_batch_independence(rng: np.random.Generator) -> None:
     n_fft = 256
     hop_length = 64
-    spectrum = (
-        rng.standard_normal((2, n_fft // 2 + 1, 8))
-        + 1j * rng.standard_normal((2, n_fft // 2 + 1, 8))
+    spectrum = rng.standard_normal((2, n_fft // 2 + 1, 8)) + 1j * rng.standard_normal(
+        (2, n_fft // 2 + 1, 8)
     )
 
     combined = phase_vocoder(

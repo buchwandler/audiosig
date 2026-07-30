@@ -16,7 +16,6 @@ from audiosig import (
     find_speech_start,
 )
 
-
 pytestmark = pytest.mark.quality
 
 

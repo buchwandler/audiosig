@@ -14,8 +14,11 @@ import pytest
 
 import audiosig
 
-
-librosa = pytest.importorskip("librosa")
+try:
+    import librosa
+    import librosa.effects  # verify lazy deps resolve
+except (ImportError, ModuleNotFoundError):
+    pytest.skip("librosa or its transitive dependencies unavailable", allow_module_level=True)
 pytestmark = pytest.mark.librosa_compat
 
 

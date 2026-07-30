@@ -14,7 +14,6 @@ import pytest
 from audiosig import InvalidParameterError, pitch_shift, time_stretch
 from tests._quality_helpers import dominant_frequency, normalized_correlation
 
-
 pytestmark = pytest.mark.quality
 
 
