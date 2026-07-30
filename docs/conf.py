@@ -7,8 +7,26 @@ copyright = "2026, AudioSig contributors"
 author = "AudioSig contributors"
 release = "0.1"
 
-extensions: list[str] = []
+extensions = ["myst_parser"]
 templates_path: list[str] = []
 exclude_patterns: list[str] = []
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"
 html_static_path: list[str] = []
+
+# MyST parser configuration
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "replacements",
+    "smartquotes",
+    "substitution",
+    "tasklist",
+]

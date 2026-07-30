@@ -18,3 +18,22 @@ speech is found.
 
 See the repository README and ``AUDIOSIG_TRIM_VAD_BRIEF.md`` for the detailed
 replacement boundary and downstream audit status.
+
+Documentation
+-------------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   getting-started.md
+   api-reference.md
+   examples.md
+   advanced.md
+
+Indices and tables
+------------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
