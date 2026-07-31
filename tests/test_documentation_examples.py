@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from audiosig import AudioShapeError, split, time_stretch, trim
+from audiosig import split, time_stretch, trim
 
 
 def test_advanced_empty_audio_documentation_contract() -> None:
@@ -16,8 +16,9 @@ def test_advanced_empty_audio_documentation_contract() -> None:
     intervals = split(empty)
     assert len(intervals) == 0
 
-    with pytest.raises(AudioShapeError):
-        time_stretch(empty, rate=1.0)
+    stretched = time_stretch(empty, rate=1.0)
+    assert stretched.shape == empty.shape
+    assert not np.shares_memory(stretched, empty)
 
 
 def test_advanced_silent_audio_documentation_example() -> None:

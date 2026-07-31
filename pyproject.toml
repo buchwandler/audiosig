@@ -73,6 +73,7 @@ addopts = ["-ra", "--strict-markers", "--strict-config"]
 filterwarnings = ["error"]
 markers = [
   "quality: deterministic native DSP quality-control test",
+  "downstream: numeric downstream contract test",
   "librosa_compat: optional differential test against pinned librosa",
   "packaging: post-build wheel and source-distribution test",
   "slow: numerically heavier quality-control test",

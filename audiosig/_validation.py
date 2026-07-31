@@ -42,6 +42,33 @@ def validate_positive(value: float, name: str) -> float:
     return result
 
 
+def validate_finite(value: float, name: str) -> float:
+    """Return a finite scalar, rejecting booleans."""
+    if isinstance(value, (bool, np.bool_)):
+        raise InvalidParameterError(f"{name} must be finite")
+    result = float(value)
+    if not np.isfinite(result):
+        raise InvalidParameterError(f"{name} must be finite")
+    return result
+
+
+def validate_boolean(value: bool, name: str) -> bool:
+    """Return a validated boolean scalar."""
+    if not isinstance(value, (bool, np.bool_)):
+        raise InvalidParameterError(f"{name} must be a boolean")
+    return bool(value)
+
+
+def validate_gain_db(value: float, name: str = "db") -> float:
+    """Validate gain, allowing negative infinity as mute."""
+    if isinstance(value, (bool, np.bool_)):
+        raise InvalidParameterError(f"{name} must be finite or negative infinity")
+    result = float(value)
+    if np.isnan(result) or result == np.inf:
+        raise InvalidParameterError(f"{name} must be finite or negative infinity")
+    return result
+
+
 def validate_integer(value: int, name: str, *, minimum: int = 1) -> int:
     """Validate an integer-valued parameter without accepting booleans."""
     if isinstance(value, bool) or not isinstance(value, (int, np.integer)):

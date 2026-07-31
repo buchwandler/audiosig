@@ -32,3 +32,17 @@ def test_peak_normalize_and_silence() -> None:
         peak_normalize(source, peak=0)
     with pytest.raises(InvalidParameterError):
         peak_normalize(source, eps=-1)
+
+
+def test_amplitude_operations_accept_empty_arrays() -> None:
+    empty = np.empty((2, 0), dtype=np.float32)
+    gain = apply_gain_db(empty, 6.0)
+    normalized = peak_normalize(empty)
+    assert gain.shape == normalized.shape == empty.shape
+    assert gain.dtype == normalized.dtype == empty.dtype
+    assert not np.shares_memory(gain, empty)
+    assert not np.shares_memory(normalized, empty)
+    with pytest.raises(InvalidParameterError):
+        apply_gain_db(empty, np.nan)
+    with pytest.raises(InvalidParameterError):
+        peak_normalize(empty, peak=0)

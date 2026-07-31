@@ -15,6 +15,7 @@ from audiosig import (
     frame_signal,
     frames_to_samples,
     median_filter_numpy,
+    minmax_normalize,
     non_silent_frames,
     normalized_energy_vad,
     power_to_db,
@@ -101,6 +102,21 @@ def test_activity_to_intervals_clips_and_merges_active_runs() -> None:
 
     np.testing.assert_array_equal(intervals, [[4, 12], [16, 22]])
     assert intervals.dtype == np.int64
+
+
+def test_activity_to_intervals_filters_short_runs() -> None:
+    activity = np.array([False, True, False, True, True, False, True, True, True])
+
+    intervals = activity_to_intervals(
+        activity,
+        hop_length=4,
+        sample_count=36,
+        min_frames=2,
+    )
+
+    np.testing.assert_array_equal(intervals, [[12, 20], [24, 36]])
+    with pytest.raises(InvalidParameterError):
+        activity_to_intervals(activity, hop_length=4, sample_count=36, min_frames=0)
 
 
 @pytest.mark.parametrize("activity", [np.array([], dtype=bool), np.zeros(4, dtype=bool)])
@@ -200,6 +216,42 @@ def test_frame_rms_returns_centered_frame_values() -> None:
     assert values.dtype == np.float32
 
 
+def test_frame_rms_can_pad_and_normalize_trailing_frame() -> None:
+    source = np.array([0.0, 1.0, 0.0, 0.0, 0.5], dtype=np.float32)
+    without_tail = frame_rms(
+        source,
+        frame_length=4,
+        hop_length=4,
+        center=False,
+        pad_end=False,
+    )
+    with_tail = frame_rms(
+        source,
+        frame_length=4,
+        hop_length=4,
+        center=False,
+        pad_end=True,
+        normalize=True,
+    )
+    assert without_tail.shape == (1,)
+    assert with_tail.shape == (2,)
+    assert with_tail.dtype == np.float32
+    assert np.min(with_tail) == 0.0
+    assert np.max(with_tail) == 1.0
+
+
+def test_minmax_normalize_contract() -> None:
+    values = np.array([[1.0, 3.0, 5.0], [2.0, 2.0, 2.0]], dtype=np.float32)
+    normalized = minmax_normalize(values, axis=1)
+    assert normalized.dtype == np.float32
+    np.testing.assert_allclose(normalized, [[0.0, 0.5, 1.0], [0.0, 0.0, 0.0]])
+    assert minmax_normalize(np.empty((2, 0), dtype=np.float64)).shape == (2, 0)
+    with pytest.raises(InvalidParameterError):
+        minmax_normalize(np.array(1.0))
+    with pytest.raises(InvalidParameterError):
+        minmax_normalize(np.array([0.0, np.nan]))
+
+
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])
 def test_frame_rms_honors_requested_dtype(dtype: type[np.floating]) -> None:
     source = np.array([0.0, 0.25, -0.5, 1.0], dtype=np.float32)
@@ -287,6 +339,16 @@ def test_normalized_energy_vad_and_speech_start() -> None:
             1000,
             frame_duration_ms=10,
             energy_threshold=0.2,
+        )
+        == 10
+    )
+    assert (
+        find_speech_start(
+            source,
+            1000,
+            frame_duration_ms=10,
+            energy_threshold=0.2,
+            top_db=20.0,
         )
         == 10
     )

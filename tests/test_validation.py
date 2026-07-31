@@ -7,12 +7,17 @@ from audiosig import AudioShapeError, InvalidParameterError, resample, time_stre
 from audiosig._validation import validate_axis, validate_choices, validate_positive
 
 
-@pytest.mark.parametrize(
-    "value", [np.array(1.0), np.array([], dtype=np.float32), np.array([1], dtype=np.int16)]
-)
+@pytest.mark.parametrize("value", [np.array(1.0), np.array([1], dtype=np.int16)])
 def test_rejects_invalid_shapes_and_dtypes(value: np.ndarray) -> None:
     with pytest.raises(AudioShapeError):
         time_stretch(value, 1.1)
+
+
+def test_empty_effects_are_valid_after_parameter_validation() -> None:
+    empty = np.array([], dtype=np.float32)
+    result = time_stretch(empty, 1.1)
+    assert result.shape == empty.shape
+    assert not np.shares_memory(result, empty)
 
 
 @pytest.mark.parametrize("value", [np.nan, np.inf, -np.inf])

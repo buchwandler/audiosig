@@ -10,6 +10,7 @@ import numpy as np
 from ._framing import frame
 from ._validation import (
     validate_audio,
+    validate_axis,
     validate_choices,
     validate_integer,
     validate_positive,
@@ -235,6 +236,8 @@ def frame_rms(
     axis: int = -1,
     center: bool = True,
     pad_mode: str = "constant",
+    pad_end: bool = False,
+    normalize: bool = False,
     dtype: np.dtype | type = np.float32,
 ) -> np.ndarray:
     """Compute RMS amplitude for each analysis frame."""
@@ -245,10 +248,12 @@ def frame_rms(
         axis=axis,
         center=center,
         pad_mode=pad_mode,
+        pad_end=pad_end,
     )
     squared = abs2(frames, dtype=dtype)
     energy: np.ndarray = np.mean(squared, axis=-1, dtype=dtype)
-    return cast(np.ndarray, np.sqrt(energy).astype(dtype, copy=False))
+    result = cast(np.ndarray, np.sqrt(energy).astype(dtype, copy=False))
+    return minmax_normalize(result, axis=-1, dtype=dtype) if normalize else result
 
 
 def short_time_energy(
@@ -258,6 +263,7 @@ def short_time_energy(
     hop_length: int = 512,
     axis: int = -1,
     center: bool = False,
+    pad_end: bool = False,
 ) -> np.ndarray:
     """Calculate mean-square energy for each frame."""
     frames = frame_signal(
@@ -266,6 +272,7 @@ def short_time_energy(
         hop_length=hop_length,
         axis=axis,
         center=center,
+        pad_end=pad_end,
     )
     return cast(np.ndarray, np.mean(np.square(frames, dtype=np.float64), axis=-1))
 
@@ -277,6 +284,7 @@ def zero_crossing_rate(
     hop_length: int = 512,
     axis: int = -1,
     center: bool = False,
+    pad_end: bool = False,
     normalize: bool = False,
 ) -> np.ndarray:
     """Calculate zero-crossing rates for each frame."""
@@ -286,13 +294,14 @@ def zero_crossing_rate(
         hop_length=hop_length,
         axis=axis,
         center=center,
+        pad_end=pad_end,
     )
     if frames.shape[-1] < 2:
         result = np.zeros(frames.shape[:-1], dtype=np.float64)
     else:
         signs = np.signbit(frames)
         result = np.mean(signs[..., 1:] != signs[..., :-1], axis=-1)
-    return _minmax_normalize(result) if normalize else cast(np.ndarray, result)
+    return minmax_normalize(result) if normalize else cast(np.ndarray, result)
 
 
 def spectral_flux(
@@ -302,6 +311,7 @@ def spectral_flux(
     hop_length: int = 512,
     axis: int = -1,
     center: bool = False,
+    pad_end: bool = False,
     window: str = "hann",
     normalize: bool = False,
 ) -> np.ndarray:
@@ -312,13 +322,14 @@ def spectral_flux(
         hop_length=hop_length,
         axis=axis,
         center=center,
+        pad_end=pad_end,
     )
     window_name = validate_choices(window, ("hann", "hamming"), "window")
     taper = np.hanning(frames.shape[-1]) if window_name == "hann" else np.hamming(frames.shape[-1])
     magnitudes = np.abs(np.fft.rfft(frames * taper, axis=-1))
     difference = np.diff(magnitudes, axis=-2, prepend=magnitudes[..., :1, :])
     result = np.sum(np.maximum(difference, 0.0), axis=-1)
-    return _minmax_normalize(result) if normalize else cast(np.ndarray, result)
+    return minmax_normalize(result) if normalize else cast(np.ndarray, result)
 
 
 def median_filter_numpy(
@@ -359,16 +370,50 @@ def median_filter_numpy(
     return result
 
 
-def _minmax_normalize(values: np.ndarray) -> np.ndarray:
-    array = np.asarray(values, dtype=np.float64)
-    if array.shape[-1] == 0:
-        return array
-    minimum = np.min(array, axis=-1, keepdims=True)
-    maximum = np.max(array, axis=-1, keepdims=True)
+def minmax_normalize(
+    values: np.ndarray,
+    *,
+    axis: int = -1,
+    dtype: np.dtype | type | None = None,
+) -> np.ndarray:
+    """Scale finite values to ``[0, 1]`` independently along ``axis``.
+
+    Constant slices become zeros. Empty axes are preserved without reduction.
+    Float32 and float64 inputs retain their dtype by default; other inputs use
+    float64 unless an explicit output dtype is supplied.
+    """
+    array = np.asarray(values)
+    if array.ndim == 0:
+        raise InvalidParameterError("values must have at least one dimension")
+    normalized_axis = validate_axis(axis, array.ndim)
+    try:
+        finite = np.isfinite(array)
+    except TypeError:
+        raise InvalidParameterError("values must contain finite numeric values") from None
+    if not np.all(finite):
+        raise InvalidParameterError("values must contain finite values")
+    if dtype is None:
+        output_dtype = (
+            array.dtype
+            if array.dtype in (np.dtype(np.float32), np.dtype(np.float64))
+            else np.dtype(np.float64)
+        )
+    else:
+        output_dtype = np.dtype(dtype)
+    if array.shape[normalized_axis] == 0:
+        return np.empty(array.shape, dtype=output_dtype)
+    working = np.asarray(array, dtype=output_dtype)
+    minimum = np.min(working, axis=normalized_axis, keepdims=True)
+    maximum = np.max(working, axis=normalized_axis, keepdims=True)
     span = maximum - minimum
     return cast(
         np.ndarray,
-        np.divide(array - minimum, span, out=np.zeros_like(array), where=span > 0),
+        np.divide(
+            working - minimum,
+            span,
+            out=np.zeros_like(working, dtype=output_dtype),
+            where=span > 0,
+        ),
     )
 
 
@@ -415,6 +460,7 @@ def activity_to_intervals(
     *,
     hop_length: int,
     sample_count: int,
+    min_frames: int = 1,
 ) -> np.ndarray:
     """Convert a one-dimensional frame mask to clipped sample intervals.
 
@@ -426,12 +472,18 @@ def activity_to_intervals(
         raise InvalidParameterError("activity must be one-dimensional")
     hop = validate_integer(hop_length, "hop_length")
     count = validate_integer(sample_count, "sample_count", minimum=0)
+    minimum = validate_integer(min_frames, "min_frames")
     if mask.size == 0 or not np.any(mask) or count == 0:
         return np.empty((0, 2), dtype=np.int64)
     padded = np.pad(mask.astype(np.int8), (1, 1))
-    frame_edges = np.flatnonzero(np.diff(padded))
+    frame_edges = np.flatnonzero(np.diff(padded)).reshape(-1, 2)
+    run_lengths = frame_edges[:, 1] - frame_edges[:, 0]
+    frame_edges = frame_edges[run_lengths >= minimum]
+    if frame_edges.size == 0:
+        return np.empty((0, 2), dtype=np.int64)
     sample_edges = np.minimum(frame_edges.astype(np.int64) * hop, count)
-    return cast(np.ndarray, sample_edges.astype(np.int64, copy=False).reshape(-1, 2))
+    intervals = sample_edges.astype(np.int64, copy=False)
+    return cast(np.ndarray, intervals[intervals[:, 1] > intervals[:, 0]])
 
 
 def split(
@@ -503,15 +555,17 @@ def normalized_energy_vad(
     threshold = float(energy_threshold)
     if not np.isfinite(threshold) or not 0 <= threshold <= 1:
         raise InvalidParameterError("energy_threshold must be finite and in [0, 1]")
-    frames = frame_signal(
+    frame_energy = frame_rms(
         source,
         frame_length=length,
         hop_length=length,
         axis=normalized_axis,
+        center=False,
         pad_end=pad_end,
+        normalize=True,
+        dtype=np.float64,
     )
-    frame_energy = np.sqrt(np.mean(np.square(frames, dtype=np.float64), axis=-1))
-    return cast(np.ndarray, _minmax_normalize(frame_energy) > threshold)
+    return cast(np.ndarray, frame_energy > threshold)
 
 
 def relative_db_vad(
@@ -608,6 +662,7 @@ def find_speech_start(
     frame_length: int = 2048,
     hop_length: int = 512,
     threshold_db: float = 40.0,
+    top_db: float | None = None,
     axis: int = -1,
     pad_end: bool = False,
 ) -> int:
@@ -620,6 +675,7 @@ def find_speech_start(
         frame_length=frame_length,
         hop_length=hop_length,
         threshold_db=threshold_db,
+        top_db=top_db,
         axis=axis,
         pad_end=pad_end,
     )

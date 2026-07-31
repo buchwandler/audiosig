@@ -61,6 +61,7 @@ def test_wheel_contains_typing_marker_and_required_modules() -> None:
         "audiosig/py.typed",
         "audiosig/silence.py",
         "audiosig/effects.py",
+        "audiosig/speech.py",
         "audiosig/_resampling.py",
         "audiosig/_spectral.py",
     }
@@ -110,6 +111,10 @@ import audiosig
 assert audiosig.__version__
 assert callable(audiosig.trim)
 assert callable(audiosig.resample)
+assert callable(audiosig.resample_to_length)
+assert callable(audiosig.resample_speed)
+assert callable(audiosig.minmax_normalize)
+assert callable(audiosig.apply_speech_effects)
 """
     subprocess.run(
         [sys.executable, "-I", "-c", code, str(target)],

@@ -65,6 +65,12 @@ higher = pitch_shift(audio, sample_rate=24000, semitones=2.0)
 lower = pitch_shift(audio, sample_rate=24000, semitones=-5.0)
 ```
 
+#### `apply_speech_effects(audio, *, sample_rate, rate=1.0, semitones=0.0, gain_db=0.0, axis=-1, clip=False, n_fft=2048, hop_length=None, filter_width=32, rolloff=0.945)`
+
+Apply numeric speech effects in the order pitch shift, pitch-preserving time
+stretch, and gain. This compositor does not parse SSMD strings and raises
+typed AudioSig exceptions for invalid input or parameters.
+
 ---
 
 ### Resampling
@@ -100,6 +106,25 @@ downsampled = resample(audio_48k, source_rate=48000, target_rate=16000)
 
 # Upsample from 8kHz to 24kHz
 upsampled = resample(audio_8k, source_rate=8000, target_rate=24000)
+```
+
+#### `resample_to_length(audio, length, *, axis=-1, filter_width=32, rolloff=0.945)`
+
+Resample audio to an exact sample count along the selected sample axis. This
+is a sample-count operation, not a sample-rate conversion. `length` may be
+zero; an empty input can only be resampled to zero samples.
+
+#### `resample_speed(audio, speed, *, axis=-1, filter_width=32, rolloff=0.945)`
+
+Change playback speed by resampling. Values above one make audio shorter and
+higher pitched; values below one make it longer and lower pitched. Use
+`time_stretch` when pitch should remain approximately unchanged.
+
+```python
+from audiosig import resample_speed, resample_to_length
+
+exact = resample_to_length(audio_48k, 12_000)
+faster = resample_speed(audio_48k, speed=1.25)
 ```
 
 ---
@@ -330,15 +355,19 @@ Split audio into overlapping frames.
 
 ---
 
-### `frame_rms(audio, *, frame_length=2048, hop_length=512, axis=-1, center=True, pad_mode='constant', dtype=np.float32)`
+### `frame_rms(audio, *, frame_length=2048, hop_length=512, axis=-1, center=True, pad_mode='constant', pad_end=False, normalize=False, dtype=np.float32)`
 
 Compute RMS amplitude for each frame.
 
 **Returns:** np.ndarray - RMS values per frame
 
+Set `pad_end=True` to include a zero-padded trailing partial frame. Set
+`normalize=True` to scale each leading-dimension slice independently to
+`[0, 1]`.
+
 ---
 
-### `short_time_energy(audio, *, frame_length=2048, hop_length=512, axis=-1, center=False)`
+### `short_time_energy(audio, *, frame_length=2048, hop_length=512, axis=-1, center=False, pad_end=False)`
 
 Calculate mean-square energy for each frame.
 
@@ -346,7 +375,7 @@ Calculate mean-square energy for each frame.
 
 ---
 
-### `zero_crossing_rate(audio, *, frame_length=2048, hop_length=512, axis=-1, center=False, normalize=False)`
+### `zero_crossing_rate(audio, *, frame_length=2048, hop_length=512, axis=-1, center=False, pad_end=False, normalize=False)`
 
 Calculate zero-crossing rate for each frame.
 
@@ -358,7 +387,7 @@ Calculate zero-crossing rate for each frame.
 
 ---
 
-### `spectral_flux(audio, *, frame_length=2048, hop_length=512, axis=-1, center=False, window='hann', normalize=False)`
+### `spectral_flux(audio, *, frame_length=2048, hop_length=512, axis=-1, center=False, pad_end=False, window='hann', normalize=False)`
 
 Calculate spectral flux between adjacent frames.
 
@@ -451,9 +480,10 @@ Return boolean mask of non-silent frames.
 
 ---
 
-#### `activity_to_intervals(activity, *, hop_length, sample_count)`
+#### `activity_to_intervals(activity, *, hop_length, sample_count, min_frames=1)`
 
-Convert frame activity mask to sample intervals.
+Convert frame activity mask to clipped sample intervals. `min_frames` filters
+out active runs shorter than the requested number of frames.
 
 **Returns:** np.ndarray - Half-open `[start, end)` intervals
 

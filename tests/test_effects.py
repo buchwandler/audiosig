@@ -45,6 +45,30 @@ def test_neutral_effects_return_copies() -> None:
     np.testing.assert_array_equal(result, source)
 
 
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+def test_empty_effects_preserve_shape_dtype_and_validate_parameters(
+    dtype: type[np.floating],
+) -> None:
+    empty = np.empty((2, 0), dtype=dtype)
+    stretched = time_stretch(empty, 0.75, axis=1, n_fft=16, hop_length=4)
+    shifted = pitch_shift(
+        empty,
+        sample_rate=24_000,
+        semitones=2.0,
+        axis=1,
+        n_fft=16,
+        hop_length=4,
+    )
+    assert stretched.shape == shifted.shape == empty.shape
+    assert stretched.dtype == shifted.dtype == np.dtype(dtype)
+    assert not np.shares_memory(stretched, empty)
+    assert not np.shares_memory(shifted, empty)
+    with pytest.raises(InvalidParameterError):
+        time_stretch(empty, 0.0, axis=1)
+    with pytest.raises(InvalidParameterError):
+        pitch_shift(empty, sample_rate=0, semitones=2.0, axis=1)
+
+
 def test_effect_parameter_edges() -> None:
     source = np.ones(32, dtype=np.float32)
     with pytest.raises(InvalidParameterError):

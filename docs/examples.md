@@ -73,7 +73,7 @@ c5 = transpose(audio, semitones=3.0)
 ### Resampling Examples
 
 ```python
-from audiosig import resample
+from audiosig import resample, resample_speed, resample_to_length
 
 # Create audio at 48kHz
 audio_48k = create_sine_wave(440, duration=1.0, sample_rate=48000)
@@ -86,6 +86,10 @@ print(f"16kHz: {len(audio_16k)} samples")  # 1/3 of original
 # Upsample to 96kHz
 audio_96k = resample(audio_48k, source_rate=48000, target_rate=96000)
 print(f"96kHz: {len(audio_96k)} samples")  # 2x original
+
+# Exact sample-count and playback-speed operations
+exact = resample_to_length(audio_48k, 12_000)
+faster_playback = resample_speed(audio_48k, speed=1.25)
 ```
 
 ## Silence Detection and VAD

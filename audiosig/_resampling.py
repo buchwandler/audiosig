@@ -11,7 +11,7 @@ from ._validation import (
     validate_integer,
     validate_positive,
 )
-from .exceptions import InvalidParameterError
+from .exceptions import AudioShapeError, InvalidParameterError
 
 
 def resample(
@@ -29,12 +29,14 @@ def resample(
     ``length_mode='round'`` preserves AudioSig's historical sizing; ``ceil``
     provides librosa-compatible output length semantics.
     """
-    source, normalized_axis = validate_audio(audio, axis=axis)
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
     source_hz = validate_positive(source_rate, "source_rate")
     target_hz = validate_positive(target_rate, "target_rate")
     width, cutoff = validate_filter(filter_width, rolloff)
     mode = validate_choices(length_mode, ("round", "ceil"), "length_mode")
     input_length = source.shape[normalized_axis]
+    if input_length == 0:
+        return np.array(source, dtype=source.dtype, copy=True)
     requested_length = input_length * target_hz / source_hz
     if not np.isfinite(requested_length) or requested_length > np.iinfo(np.intp).max:
         raise InvalidParameterError("requested resampled length is too large")
@@ -74,15 +76,56 @@ def resample_to_length(
     filter_width: int = 32,
     rolloff: float = 0.945,
 ) -> np.ndarray:
-    """Resample audio to an exact number of samples."""
-    source, normalized_axis = validate_audio(audio, axis=axis)
-    target_length = validate_integer(length, "length")
-    if target_length == source.shape[normalized_axis]:
+    """Resample audio to exactly ``length`` samples along ``axis``."""
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
+    target_length = validate_integer(length, "length", minimum=0)
+    validate_filter(filter_width, rolloff)
+    input_length = source.shape[normalized_axis]
+    if target_length == input_length:
         return np.array(source, dtype=source.dtype, copy=True)
+    if target_length == 0:
+        shape = list(source.shape)
+        shape[normalized_axis] = 0
+        return np.empty(shape, dtype=source.dtype)
+    if input_length == 0:
+        raise AudioShapeError("empty audio cannot be resampled to a non-zero length")
     return resample(
         source,
-        source_rate=float(source.shape[normalized_axis]),
+        source_rate=float(input_length),
         target_rate=float(target_length),
+        axis=normalized_axis,
+        filter_width=filter_width,
+        rolloff=rolloff,
+    )
+
+
+def resample_speed(
+    audio: np.ndarray,
+    speed: float,
+    *,
+    axis: int = -1,
+    filter_width: int = 32,
+    rolloff: float = 0.945,
+) -> np.ndarray:
+    """Change playback speed by resampling, including its pitch.
+
+    ``speed > 1`` makes audio faster, shorter, and higher pitched. ``speed < 1``
+    makes audio slower, longer, and lower pitched. Use :func:`time_stretch`
+    when pitch should remain approximately unchanged.
+    """
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
+    multiplier = validate_positive(speed, "speed")
+    validate_filter(filter_width, rolloff)
+    input_length = source.shape[normalized_axis]
+    if input_length == 0:
+        return np.array(source, dtype=source.dtype, copy=True)
+    requested = input_length / multiplier
+    if not np.isfinite(requested) or requested > np.iinfo(np.intp).max:
+        raise InvalidParameterError("requested playback-speed length is too large")
+    target_length = max(1, round(requested))
+    return resample_to_length(
+        source,
+        target_length,
         axis=normalized_axis,
         filter_width=filter_width,
         rolloff=rolloff,

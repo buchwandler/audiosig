@@ -16,13 +16,22 @@ pip install audiosig
 
 ```python
 import numpy as np
-from audiosig import pitch_shift, time_stretch
+from audiosig import (
+    apply_speech_effects,
+    pitch_shift,
+    resample_speed,
+    resample_to_length,
+    time_stretch,
+)
 
 sample_rate = 24_000
 audio = np.zeros(sample_rate, dtype=np.float32)
 
 faster = time_stretch(audio, rate=1.1)
 higher = pitch_shift(audio, sample_rate=sample_rate, semitones=2.0)
+exact = resample_to_length(audio, 12_000)
+faster_playback = resample_speed(audio, speed=1.25)
+speech_effects = apply_speech_effects(audio, sample_rate=sample_rate, rate=1.1)
 ```
 
 AudioSig accepts `float32` and `float64` NumPy arrays shaped as `(samples,)`,
@@ -32,8 +41,10 @@ floating-point dtype.
 
 `time_stretch(rate=1.1)` makes audio faster and shorter; rates below one make
 it slower and longer. `pitch_shift(semitones=2)` raises pitch while preserving
-the exact input length. Resampling uses a finite windowed-sinc low-pass filter
-and produces `round(input_length * target_rate / source_rate)` samples.
+the exact input length. `resample_speed` changes both duration and pitch,
+while `resample_to_length` targets an exact sample count. Regular resampling
+uses a finite windowed-sinc low-pass filter and produces
+`round(input_length * target_rate / source_rate)` samples.
 
 ## Silence trimming and VAD
 
@@ -86,13 +97,17 @@ The package is licensed under Apache-2.0. See
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) for the provenance boundary
 of the clean-room silence/VAD implementation.
 
-## Downstream integration
+## PyKokoro integration
 
-PyKokoro is intended to depend on `audiosig>=0.1,<0.2` for volume, rate, pitch,
-and silence/VAD processing. PyKokoro should keep parsing SSMD strings at its
-application boundary, catch `AudioSignalError`, and return the original audio
-when a prosody transform fails. TTSForge should depend on PyKokoro and should
-not import AudioSig directly unless it develops an independent DSP use case.
+AudioSig provides numeric DSP only. PyKokoro should parse SSMD strings at its
+application boundary, call AudioSig with numeric parameters, catch
+`AudioSignalError`, and decide whether to log, retry, or return the original
+audio. A stable dependency range such as `audiosig>=0.1.0,<0.2` should only be
+declared after that release is published on the intended package index.
+
+The relevant numeric operations are `apply_speech_effects`, `apply_gain_db`,
+`energy_based_vad`, `frame_rms`, `resample`, `resample_speed`,
+`resample_to_length`, `trim`, and `activity_to_intervals`.
 
 This checkout contains AudioSig only; downstream source changes and release
 verification require the PyKokoro and TTSForge repositories.

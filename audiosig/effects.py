@@ -6,7 +6,13 @@ import numpy as np
 
 from ._resampling import resample_to_length
 from ._spectral import istft, phase_vocoder, stft
-from ._validation import validate_audio, validate_integer, validate_positive
+from ._validation import (
+    validate_audio,
+    validate_filter,
+    validate_finite,
+    validate_integer,
+    validate_positive,
+)
 from .exceptions import InvalidParameterError
 
 
@@ -24,13 +30,15 @@ def time_stretch(
     longer. This phase-vocoder implementation is intended for speech and
     moderate prosody changes.
     """
-    source, normalized_axis = validate_audio(audio, axis=axis)
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
     stretch = validate_positive(rate, "rate")
     fft_size = validate_integer(n_fft, "n_fft", minimum=2)
     hop = validate_integer(hop_length if hop_length is not None else fft_size // 4, "hop_length")
     if hop > fft_size:
         raise InvalidParameterError("hop_length must not exceed n_fft")
     input_length = source.shape[normalized_axis]
+    if input_length == 0:
+        return np.array(source, dtype=source.dtype, copy=True)
     requested_length = input_length / stretch
     if not np.isfinite(requested_length) or requested_length > np.iinfo(np.intp).max:
         raise InvalidParameterError("requested stretched length is too large")
@@ -66,12 +74,17 @@ def pitch_shift(
     filter_width: int = 32,
 ) -> np.ndarray:
     """Shift pitch by semitones while retaining the exact input duration."""
-    source, normalized_axis = validate_audio(audio, axis=axis)
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
     validate_positive(sample_rate, "sample_rate")
     bins = validate_integer(bins_per_octave, "bins_per_octave")
-    shift = float(semitones)
-    if not np.isfinite(shift):
-        raise InvalidParameterError("semitones must be finite")
+    shift = validate_finite(semitones, "semitones")
+    fft_size = validate_integer(n_fft, "n_fft", minimum=2)
+    hop = validate_integer(hop_length if hop_length is not None else fft_size // 4, "hop_length")
+    if hop > fft_size:
+        raise InvalidParameterError("hop_length must not exceed n_fft")
+    validate_filter(filter_width, 0.945)
+    if source.shape[normalized_axis] == 0:
+        return np.array(source, dtype=source.dtype, copy=True)
     if shift == 0.0:
         return np.array(source, dtype=source.dtype, copy=True)
     ratio = 2.0 ** (shift / bins)

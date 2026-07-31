@@ -127,9 +127,9 @@ intervals = split(empty)
 assert len(intervals) == 0
 ```
 
-`trim`, `split`, and selected analysis helpers accept empty arrays. Audio
-effects such as `time_stretch` and `pitch_shift` require a non-empty sample
-axis and raise `AudioShapeError` for empty audio.
+All public transformations, including `time_stretch`, `pitch_shift`, gain,
+normalization, and resampling, accept an empty sample axis after validating
+their parameters and return an empty copy with the original shape and dtype.
 
 ### Silent Audio
 

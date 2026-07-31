@@ -3,8 +3,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from audiosig import InvalidParameterError, resample
-from audiosig._resampling import resample_to_length
+from audiosig import (
+    AudioShapeError,
+    InvalidParameterError,
+    resample,
+    resample_speed,
+    resample_to_length,
+)
 
 
 def test_resample_length_identity_dc_and_batch() -> None:
@@ -28,8 +33,53 @@ def test_resample_sine_frequency_and_exact_length() -> None:
     assert abs(dominant - 3000) < 20
     assert resample_to_length(source, 1234).shape == (1234,)
     np.testing.assert_array_equal(resample_to_length(source, source.size), source)
+    assert resample_to_length(source, 0).shape == (0,)
+
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+def test_resample_to_length_public_empty_axes_and_identity(dtype: type[np.floating]) -> None:
+    source = np.arange(12, dtype=dtype).reshape(2, 2, 3)
+    identity = resample_to_length(source, 3, axis=-1)
+    assert identity is not source
+    assert not np.shares_memory(identity, source)
+    np.testing.assert_array_equal(identity, source)
+
+    transposed = np.moveaxis(source, -1, 0)
+    assert resample_to_length(transposed, 5, axis=0).shape == (5, 2, 2)
+    assert resample_to_length(source, 0).shape == (2, 2, 0)
+
+    empty = np.empty((2, 0), dtype=dtype)
+    empty_copy = resample_to_length(empty, 0)
+    assert empty_copy.shape == empty.shape
+    assert not np.shares_memory(empty_copy, empty)
+    with pytest.raises(AudioShapeError):
+        resample_to_length(empty, 1)
+
+
+@pytest.mark.parametrize("speed", [0.5, 0.75, 1.0, 1.25, 1.5, 2.0])
+def test_resample_speed_exact_length_and_identity(speed: float) -> None:
+    source = np.sin(np.linspace(0, 20, 101, dtype=np.float64))
+    result = resample_speed(source, speed)
+    assert result.shape == (max(1, round(source.size / speed)),)
+    assert result.dtype == source.dtype
+    assert np.isfinite(result).all()
+    if speed == 1.0:
+        assert not np.shares_memory(result, source)
+        np.testing.assert_array_equal(result, source)
+
+
+def test_resample_empty_inputs_and_validation() -> None:
+    empty = np.empty((2, 0), dtype=np.float32)
+    assert resample(empty, source_rate=24_000, target_rate=16_000).shape == empty.shape
+    assert resample_speed(empty, 2.0).shape == empty.shape
     with pytest.raises(InvalidParameterError):
-        resample_to_length(source, 0)
+        resample_to_length(np.ones(4, dtype=np.float32), -1)
+    with pytest.raises(InvalidParameterError):
+        resample_to_length(np.ones(4, dtype=np.float32), 1.5)
+    with pytest.raises(InvalidParameterError):
+        resample_speed(np.ones(4, dtype=np.float32), 0.0)
+    with pytest.raises(InvalidParameterError):
+        resample_speed(np.ones(4, dtype=np.float32), np.inf)
 
 
 @pytest.mark.parametrize(
