@@ -90,14 +90,16 @@ Synthetic examples are available under [`examples/`](examples/README.md). They
 use sine waves and seeded noise, so no input recordings or optional packages
 are required.
 
-AudioSig provides a speech-oriented NumPy WSOLA backend for moderate rate and
-prosody changes, plus a basic phase-vocoder backend for generic numerical use.
-The speech-effects compositor uses WSOLA by default and combines pitch and
-rate in one time-scale pass. Native pitch shifting does not currently preserve
-vocal formants, and neither backend is intended to replace a studio-grade
-processor for extreme transformations. Invalid arrays and parameters raise
-typed `AudioSig` exceptions so applications can choose their own fail-open or
-fail-fast policy.
+AudioSig provides speech-oriented NumPy WSOLA and experimental ESOLA backends
+for moderate rate and prosody changes, plus a basic phase-vocoder backend for
+generic numerical use. Select ESOLA with `method="esola"` and provide
+`sample_rate`; its supported rate range is `0.5 <= rate <= 2.0`. The
+speech-effects compositor uses WSOLA by default and combines pitch and rate in
+one time-scale pass. ESOLA is not a general music stretcher, does not claim
+formant preservation, and has not been validated as an extreme-speed solution.
+All public effects preserve exact output-length, dtype, axis, copy, and finite
+input contracts. Invalid arrays and parameters raise typed `AudioSig`
+exceptions so applications can choose their own fail-open or fail-fast policy.
 
 AudioSig supports Python 3.10 through 3.14 and requires NumPy 1.24 or newer.
 The package is licensed under Apache-2.0. See

@@ -101,3 +101,21 @@ def test_effects_support_odd_fft_sizes_and_finite_batch_outputs() -> None:
     assert stretched.dtype == batch.dtype == shifted.dtype
     assert np.isfinite(stretched).all() and np.isfinite(shifted).all()
     np.testing.assert_allclose(stretched[1], stretched[0] * 0.5, atol=2e-3)
+
+
+def test_esola_time_stretch_and_pitch_shift_public_contracts() -> None:
+    source = sine(220, 16_000, 16_000, np.float32)
+    stretched = time_stretch(source, 1.25, sample_rate=16_000, method="esola")
+    shifted = pitch_shift(source, sample_rate=16_000, semitones=7.0, method="esola")
+    assert stretched.shape == (round(source.size / 1.25),)
+    assert shifted.shape == source.shape
+    assert stretched.dtype == shifted.dtype == source.dtype
+    assert np.isfinite(stretched).all() and np.isfinite(shifted).all()
+
+
+def test_esola_rate_and_sample_rate_validation() -> None:
+    source = sine(220, 16_000, 4000)
+    with pytest.raises(InvalidParameterError, match="sample_rate"):
+        time_stretch(source, 1.2, method="esola")
+    with pytest.raises(InvalidParameterError, match="interval"):
+        time_stretch(source, 2.1, sample_rate=16_000, method="esola")

@@ -110,7 +110,7 @@ def wsola_time_stretch(
     flat = moved.reshape((-1, input_length))
     lane_count = flat.size // input_length
     output = np.zeros((lane_count, target_length), dtype=np.float64)
-    normalization = np.zeros(target_length, dtype=np.float64)
+    normalization = np.zeros((lane_count, target_length), dtype=np.float64)
     window = np.sin(np.pi * (np.arange(frame_length, dtype=np.float64) + 0.5) / frame_length)
 
     for lane_index, lane in enumerate(flat):
@@ -136,8 +136,8 @@ def wsola_time_stretch(
             output_end = min(target_length, synthesis_start + frame_length)
             frame_size = output_end - synthesis_start
             lane_output[synthesis_start:output_end] += frame[:frame_size] * window[:frame_size]
-            normalization[synthesis_start:output_end] += window[:frame_size]
+            normalization[lane_index, synthesis_start:output_end] += window[:frame_size]
 
-    output /= np.maximum(normalization[None, :], np.finfo(np.float64).eps)
+    output /= np.maximum(normalization, np.finfo(np.float64).eps)
     reshaped = output.reshape((*moved.shape[:-1], target_length))
     return np.moveaxis(reshaped, -1, normalized_axis).astype(source.dtype, copy=False)

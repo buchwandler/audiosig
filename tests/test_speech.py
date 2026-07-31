@@ -129,3 +129,20 @@ def test_speech_effects_clipping_and_validation() -> None:
         apply_speech_effects(source, sample_rate=24_000, semitones=np.inf)
     with pytest.raises(InvalidParameterError):
         apply_speech_effects(source, sample_rate=24_000, hop_length=33, n_fft=32)
+
+
+def test_speech_effects_supports_esola_and_keeps_one_tsm_pass() -> None:
+    source = tone(4800, dtype=np.float64)
+    result = apply_speech_effects(
+        source,
+        sample_rate=24_000,
+        rate=1.25,
+        semitones=2.0,
+        method="esola",
+    )
+    assert result.shape == (round(source.size / 1.25),)
+    assert result.dtype == source.dtype
+    assert np.isfinite(result).all()
+
+    with pytest.raises(InvalidParameterError, match="interval"):
+        apply_speech_effects(source, sample_rate=24_000, rate=2.0, semitones=-12.0, method="esola")

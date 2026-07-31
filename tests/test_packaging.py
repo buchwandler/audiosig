@@ -62,6 +62,7 @@ def test_wheel_contains_typing_marker_and_required_modules() -> None:
         "audiosig/silence.py",
         "audiosig/effects.py",
         "audiosig/speech.py",
+        "audiosig/_esola.py",
         "audiosig/_resampling.py",
         "audiosig/_spectral.py",
     }

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Literal
-
 import numpy as np
 
 from ._resampling import resample_to_length
@@ -17,7 +15,7 @@ from ._validation import (
     validate_positive,
 )
 from .amplitude import apply_gain_db
-from .effects import time_stretch
+from .effects import TimeStretchMethod, time_stretch
 from .exceptions import InvalidParameterError
 
 
@@ -30,7 +28,7 @@ def apply_speech_effects(
     gain_db: float = 0.0,
     axis: int = -1,
     clip: bool = False,
-    method: Literal["wsola", "phase_vocoder"] = "wsola",
+    method: TimeStretchMethod = "wsola",
     n_fft: int = 2048,
     hop_length: int | None = None,
     filter_width: int = 32,
@@ -40,7 +38,9 @@ def apply_speech_effects(
 
     Pitch and rate are planned as one time-scale modification pass followed
     by at most one resample. ``wsola`` is the speech-oriented default, while
-    ``phase_vocoder`` remains available for compatibility and comparison.
+    ``phase_vocoder`` and experimental ``esola`` remain available for
+    compatibility and comparison. ESOLA supports computed TSM rates from 0.5
+    through 2.0.
     This function accepts numeric values only; downstream applications remain
     responsible for parsing SSMD or other user-facing effect syntax.
     """
@@ -58,8 +58,8 @@ def apply_speech_effects(
     if hop > fft_size:
         raise InvalidParameterError("hop_length must not exceed n_fft")
     width, _ = validate_filter(filter_width, rolloff)
-    if method not in ("wsola", "phase_vocoder"):
-        raise InvalidParameterError("method must be one of ('wsola', 'phase_vocoder')")
+    if method not in ("wsola", "phase_vocoder", "esola"):
+        raise InvalidParameterError("method must be one of ('wsola', 'phase_vocoder', 'esola')")
 
     result = np.array(source, dtype=source.dtype, copy=True)
     if result.shape[normalized_axis] == 0:

@@ -12,8 +12,8 @@ Change audio duration while approximately preserving pitch.
 
 - `audio` (np.ndarray): Input audio array
 - `rate` (float): Stretch factor. Values > 1.0 make audio faster/shorter, < 1.0 slower/longer
-- `sample_rate` (int, optional): Required when `method='wsola'`; used to derive speech-time windows
-- `method` (`'phase_vocoder'` or `'wsola'`): Select the generic or speech-oriented backend
+- `sample_rate` (int, optional): Required when `method='wsola'` or `method='esola'`; used for speech-time geometry
+- `method` (`'phase_vocoder'`, `'wsola'`, or `'esola'`): Select the generic or speech-oriented backend
 - `axis` (int): Sample axis (default: -1)
 - `n_fft` (int): FFT window size (default: 2048)
 - `hop_length` (int, optional): Hop size. Defaults to n_fft // 4
@@ -24,6 +24,10 @@ Change audio duration while approximately preserving pitch.
 
 - `InvalidParameterError`: If rate is not positive or parameters are invalid
 - `AudioShapeError`: If audio array is invalid
+
+ESOLA is an experimental speech backend with exact output length
+`round(input_samples / rate)` and supported rates from 0.5 through 2.0. It
+does not make a general music-quality or formant-preservation claim.
 
 **Example:**
 
@@ -52,7 +56,7 @@ Shift pitch by semitones while preserving exact input duration.
 - `n_fft` (int): FFT window size (default: 2048)
 - `hop_length` (int, optional): Hop size
 - `filter_width` (int): Resampling filter width (default: 32)
-- `method` (`'phase_vocoder'` or `'wsola'`): Time-scale backend used before resampling
+- `method` (`'phase_vocoder'`, `'wsola'`, or `'esola'`): Time-scale backend used before resampling
 - `rolloff` (float): Pitch-resampler rolloff (default: 0.945)
 
 **Returns:** np.ndarray - Pitch-shifted audio with exact same length as input
@@ -73,7 +77,8 @@ lower = pitch_shift(audio, sample_rate=24000, semitones=-5.0)
 
 Apply numeric speech effects using one planned pitch/rate time-scale pass,
 optional resampling, and gain. WSOLA is the default speech backend;
-`method='phase_vocoder'` selects the generic reference path. The output length
+`method='phase_vocoder'` selects the generic reference path and
+`method='esola'` selects the experimental epoch-synchronous path. The output length
 is exactly `round(input_samples / rate)` for non-empty input, and `rolloff`
 controls the pitch resampler. Native pitch shifting does not preserve vocal
 formants. This compositor does not parse SSMD strings and raises typed

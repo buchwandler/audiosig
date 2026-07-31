@@ -8,6 +8,7 @@ import csv
 import json
 import wave
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 
@@ -70,10 +71,13 @@ def _metric(
     method: str,
     rate: float,
     semitones: float,
+    requested_length: int | None = None,
+    runtime_seconds: float | None = None,
 ) -> dict[str, object]:
     values = np.asarray(audio, dtype=np.float64)
     samples = values.shape[-1]
-    return {
+    differences = np.diff(values, axis=-1) if samples > 1 else np.empty(0)
+    record: dict[str, object] = {
         "method": method,
         "rate": rate,
         "semitones": semitones,
@@ -82,8 +86,21 @@ def _metric(
         "duration_seconds": samples / sample_rate,
         "rms": float(np.sqrt(np.mean(np.square(values), dtype=np.float64))),
         "peak": float(np.max(np.abs(values))) if values.size else 0.0,
+        "length_error": samples - requested_length if requested_length is not None else 0,
+        "continuity_max_jump": float(np.max(np.abs(differences))) if differences.size else 0.0,
+        "continuity_rms_jump": (
+            float(np.sqrt(np.mean(np.square(differences), dtype=np.float64)))
+            if differences.size
+            else 0.0
+        ),
         "finite": bool(np.isfinite(values).all()),
     }
+    if runtime_seconds is not None:
+        record["runtime_seconds"] = runtime_seconds
+        record["real_time_factor"] = (
+            samples / sample_rate / runtime_seconds if runtime_seconds > 0 else float("inf")
+        )
+    return record
 
 
 def _number(value: float) -> str:
@@ -99,31 +116,61 @@ def compare(
     audio, sample_rate = _read_pcm(input_path)
     records: list[dict[str, object]] = []
     for rate in rates:
-        pv = time_stretch(audio, rate, method="phase_vocoder")
-        wsola = time_stretch(audio, rate, sample_rate=sample_rate, method="wsola")
-        for method, rendered in (("phase_vocoder", pv), ("wsola", wsola)):
+        target_length = max(1, round(audio.shape[-1] / rate))
+        rendered_methods = []
+        for method, kwargs in (
+            ("phase_vocoder", {"method": "phase_vocoder"}),
+            ("wsola", {"method": "wsola", "sample_rate": sample_rate}),
+            ("esola", {"method": "esola", "sample_rate": sample_rate}),
+        ):
+            started = perf_counter()
+            rendered = time_stretch(audio, rate, **kwargs)
+            elapsed = perf_counter() - started
+            rendered_methods.append((method, rendered, elapsed))
+        for method, rendered, elapsed in rendered_methods:
             filename = f"{method}_rate-{_number(rate)}.wav"
-            _write_pcm(output_dir / filename, rendered, sample_rate)
-            records.append(_metric(rendered, sample_rate, method=method, rate=rate, semitones=0.0))
-        for pitch in semitones:
-            rendered = apply_speech_effects(
-                audio,
-                sample_rate=sample_rate,
-                rate=rate,
-                semitones=pitch,
-                method="wsola",
-            )
-            filename = f"combined_wsola_rate-{_number(rate)}_pitch-{_number(pitch)}st.wav"
             _write_pcm(output_dir / filename, rendered, sample_rate)
             records.append(
                 _metric(
                     rendered,
                     sample_rate,
-                    method="combined_wsola",
+                    method=method,
                     rate=rate,
-                    semitones=pitch,
+                    semitones=0.0,
+                    requested_length=target_length,
+                    runtime_seconds=elapsed,
                 )
             )
+        for pitch in semitones:
+            pitch_ratio = float(np.exp2(pitch / 12.0))
+            backend_rate = rate / pitch_ratio
+            combined_methods = [("wsola", True)]
+            combined_methods.append(("esola", 0.5 <= backend_rate <= 2.0))
+            for method, supported in combined_methods:
+                if not supported:
+                    continue
+                started = perf_counter()
+                rendered = apply_speech_effects(
+                    audio,
+                    sample_rate=sample_rate,
+                    rate=rate,
+                    semitones=pitch,
+                    method=method,
+                )
+                elapsed = perf_counter() - started
+                filename = f"combined_{method}_rate-{_number(rate)}_pitch-{_number(pitch)}st.wav"
+                _write_pcm(output_dir / filename, rendered, sample_rate)
+                records.append(
+                    _metric(
+                        rendered,
+                        sample_rate,
+                        method=f"combined_{method}",
+                        rate=rate,
+                        semitones=pitch,
+                        requested_length=target_length,
+                        runtime_seconds=elapsed,
+                    )
+                )
     return records
 
 

@@ -68,6 +68,20 @@ def test_wsola_supports_non_final_sample_axis_and_independent_lanes() -> None:
     np.testing.assert_allclose(result[1, :, 0], result[0, :, 0] * 0.5, atol=1e-6)
 
 
+def test_wsola_batch_lane_matches_standalone_amplitude() -> None:
+    audio = source(dtype=np.float64)
+    standalone = time_stretch(audio, 1.2, sample_rate=24_000, method="wsola")
+    batch = time_stretch(
+        np.stack([audio, audio]),
+        1.2,
+        sample_rate=24_000,
+        method="wsola",
+        axis=-1,
+    )
+    np.testing.assert_array_equal(batch[0], standalone)
+    np.testing.assert_array_equal(batch[1], standalone)
+
+
 def test_wsola_is_deterministic_and_requires_sample_rate() -> None:
     audio = source()
     first = time_stretch(audio, 1.1, sample_rate=24_000, method="wsola")

@@ -18,13 +18,15 @@ from ._validation import (
 )
 from .exceptions import InvalidParameterError
 
+TimeStretchMethod = Literal["phase_vocoder", "wsola", "esola"]
+
 
 def time_stretch(
     audio: np.ndarray,
     rate: float,
     *,
     sample_rate: int | None = None,
-    method: Literal["phase_vocoder", "wsola"] = "phase_vocoder",
+    method: TimeStretchMethod = "phase_vocoder",
     axis: int = -1,
     n_fft: int = 2048,
     hop_length: int | None = None,
@@ -33,13 +35,14 @@ def time_stretch(
 
     Rates above one are faster and shorter; rates below one are slower and
     longer. ``phase_vocoder`` is the generic numerical backend; ``wsola`` is
-    speech-oriented and requires ``sample_rate``.
+    speech-oriented and requires ``sample_rate``. ``esola`` is an experimental
+    epoch-synchronous speech backend and supports rates from 0.5 through 2.0.
     """
     source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
     stretch = validate_positive(rate, "rate")
-    selected_method = validate_choices(method, ("phase_vocoder", "wsola"), "method")
-    if selected_method == "wsola" and sample_rate is None:
-        raise InvalidParameterError("sample_rate is required when method='wsola'")
+    selected_method = validate_choices(method, ("phase_vocoder", "wsola", "esola"), "method")
+    if selected_method in ("wsola", "esola") and sample_rate is None:
+        raise InvalidParameterError(f"sample_rate is required when method='{selected_method}'")
     sample_hz = validate_positive(sample_rate, "sample_rate") if sample_rate is not None else None
     fft_size = validate_integer(n_fft, "n_fft", minimum=2)
     hop = validate_integer(hop_length if hop_length is not None else fft_size // 4, "hop_length")
@@ -61,6 +64,16 @@ def time_stretch(
         return wsola_time_stretch(
             source,
             rate=stretch,
+            sample_rate=int(sample_hz),
+            axis=normalized_axis,
+        )
+    if selected_method == "esola":
+        from ._esola import esola_time_stretch
+
+        assert sample_hz is not None
+        return esola_time_stretch(
+            source,
+            stretch,
             sample_rate=int(sample_hz),
             axis=normalized_axis,
         )
@@ -87,7 +100,7 @@ def pitch_shift(
     sample_rate: int,
     semitones: float,
     bins_per_octave: int = 12,
-    method: Literal["phase_vocoder", "wsola"] = "phase_vocoder",
+    method: TimeStretchMethod = "phase_vocoder",
     axis: int = -1,
     n_fft: int = 2048,
     hop_length: int | None = None,
