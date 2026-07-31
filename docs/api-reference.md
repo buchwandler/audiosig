@@ -4,7 +4,7 @@
 
 ### Time and Pitch Effects
 
-#### `time_stretch(audio, rate, *, axis=-1, n_fft=2048, hop_length=None)`
+#### `time_stretch(audio, rate, *, sample_rate=None, method='phase_vocoder', axis=-1, n_fft=2048, hop_length=None)`
 
 Change audio duration while approximately preserving pitch.
 
@@ -12,6 +12,8 @@ Change audio duration while approximately preserving pitch.
 
 - `audio` (np.ndarray): Input audio array
 - `rate` (float): Stretch factor. Values > 1.0 make audio faster/shorter, < 1.0 slower/longer
+- `sample_rate` (int, optional): Required when `method='wsola'`; used to derive speech-time windows
+- `method` (`'phase_vocoder'` or `'wsola'`): Select the generic or speech-oriented backend
 - `axis` (int): Sample axis (default: -1)
 - `n_fft` (int): FFT window size (default: 2048)
 - `hop_length` (int, optional): Hop size. Defaults to n_fft // 4
@@ -36,7 +38,7 @@ slower = time_stretch(audio, rate=0.8)  # 20% slower
 
 ---
 
-#### `pitch_shift(audio, *, sample_rate, semitones, bins_per_octave=12, axis=-1, n_fft=2048, hop_length=None, filter_width=32)`
+#### `pitch_shift(audio, *, sample_rate, semitones, bins_per_octave=12, method='phase_vocoder', axis=-1, n_fft=2048, hop_length=None, filter_width=32, rolloff=0.945)`
 
 Shift pitch by semitones while preserving exact input duration.
 
@@ -50,6 +52,8 @@ Shift pitch by semitones while preserving exact input duration.
 - `n_fft` (int): FFT window size (default: 2048)
 - `hop_length` (int, optional): Hop size
 - `filter_width` (int): Resampling filter width (default: 32)
+- `method` (`'phase_vocoder'` or `'wsola'`): Time-scale backend used before resampling
+- `rolloff` (float): Pitch-resampler rolloff (default: 0.945)
 
 **Returns:** np.ndarray - Pitch-shifted audio with exact same length as input
 
@@ -65,11 +69,15 @@ higher = pitch_shift(audio, sample_rate=24000, semitones=2.0)
 lower = pitch_shift(audio, sample_rate=24000, semitones=-5.0)
 ```
 
-#### `apply_speech_effects(audio, *, sample_rate, rate=1.0, semitones=0.0, gain_db=0.0, axis=-1, clip=False, n_fft=2048, hop_length=None, filter_width=32, rolloff=0.945)`
+#### `apply_speech_effects(audio, *, sample_rate, rate=1.0, semitones=0.0, gain_db=0.0, axis=-1, clip=False, method='wsola', n_fft=2048, hop_length=None, filter_width=32, rolloff=0.945)`
 
-Apply numeric speech effects in the order pitch shift, pitch-preserving time
-stretch, and gain. This compositor does not parse SSMD strings and raises
-typed AudioSig exceptions for invalid input or parameters.
+Apply numeric speech effects using one planned pitch/rate time-scale pass,
+optional resampling, and gain. WSOLA is the default speech backend;
+`method='phase_vocoder'` selects the generic reference path. The output length
+is exactly `round(input_samples / rate)` for non-empty input, and `rolloff`
+controls the pitch resampler. Native pitch shifting does not preserve vocal
+formants. This compositor does not parse SSMD strings and raises typed
+AudioSig exceptions for invalid input or parameters.
 
 ---
 

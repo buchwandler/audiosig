@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 import numpy as np
 
 from ._resampling import resample_to_length
 from ._spectral import istft, phase_vocoder, stft
 from ._validation import (
     validate_audio,
+    validate_choices,
     validate_filter,
     validate_finite,
     validate_integer,
@@ -20,6 +23,8 @@ def time_stretch(
     audio: np.ndarray,
     rate: float,
     *,
+    sample_rate: int | None = None,
+    method: Literal["phase_vocoder", "wsola"] = "phase_vocoder",
     axis: int = -1,
     n_fft: int = 2048,
     hop_length: int | None = None,
@@ -27,11 +32,15 @@ def time_stretch(
     """Change duration while approximately preserving pitch.
 
     Rates above one are faster and shorter; rates below one are slower and
-    longer. This phase-vocoder implementation is intended for speech and
-    moderate prosody changes.
+    longer. ``phase_vocoder`` is the generic numerical backend; ``wsola`` is
+    speech-oriented and requires ``sample_rate``.
     """
     source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
     stretch = validate_positive(rate, "rate")
+    selected_method = validate_choices(method, ("phase_vocoder", "wsola"), "method")
+    if selected_method == "wsola" and sample_rate is None:
+        raise InvalidParameterError("sample_rate is required when method='wsola'")
+    sample_hz = validate_positive(sample_rate, "sample_rate") if sample_rate is not None else None
     fft_size = validate_integer(n_fft, "n_fft", minimum=2)
     hop = validate_integer(hop_length if hop_length is not None else fft_size // 4, "hop_length")
     if hop > fft_size:
@@ -45,6 +54,16 @@ def time_stretch(
     target_length = max(1, round(requested_length))
     if stretch == 1.0:
         return np.array(source, dtype=source.dtype, copy=True)
+    if selected_method == "wsola":
+        from ._wsola import wsola_time_stretch
+
+        assert sample_hz is not None
+        return wsola_time_stretch(
+            source,
+            rate=stretch,
+            sample_rate=int(sample_hz),
+            axis=normalized_axis,
+        )
     moved = np.moveaxis(source, normalized_axis, -1)
     padded_length = max(input_length, fft_size)
     if padded_length != input_length:
@@ -68,12 +87,18 @@ def pitch_shift(
     sample_rate: int,
     semitones: float,
     bins_per_octave: int = 12,
+    method: Literal["phase_vocoder", "wsola"] = "phase_vocoder",
     axis: int = -1,
     n_fft: int = 2048,
     hop_length: int | None = None,
     filter_width: int = 32,
+    rolloff: float = 0.945,
 ) -> np.ndarray:
-    """Shift pitch by semitones while retaining the exact input duration."""
+    """Shift pitch by semitones while retaining the exact input duration.
+
+    Pitch shifting uses pitch-preserving time-scale modification followed by
+    resampling, so native processing does not preserve vocal formants.
+    """
     source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
     validate_positive(sample_rate, "sample_rate")
     bins = validate_integer(bins_per_octave, "bins_per_octave")
@@ -82,7 +107,7 @@ def pitch_shift(
     hop = validate_integer(hop_length if hop_length is not None else fft_size // 4, "hop_length")
     if hop > fft_size:
         raise InvalidParameterError("hop_length must not exceed n_fft")
-    validate_filter(filter_width, 0.945)
+    width, cutoff = validate_filter(filter_width, rolloff)
     if source.shape[normalized_axis] == 0:
         return np.array(source, dtype=source.dtype, copy=True)
     if shift == 0.0:
@@ -101,6 +126,8 @@ def pitch_shift(
     stretched = time_stretch(
         source,
         rate=rate,
+        sample_rate=sample_rate,
+        method=method,
         axis=normalized_axis,
         n_fft=n_fft,
         hop_length=hop_length,
@@ -109,5 +136,6 @@ def pitch_shift(
         stretched,
         source.shape[normalized_axis],
         axis=normalized_axis,
-        filter_width=filter_width,
+        filter_width=width,
+        rolloff=cutoff,
     )

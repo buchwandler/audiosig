@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 import numpy as np
 
+from ._resampling import resample_to_length
 from ._validation import (
     validate_audio,
     validate_boolean,
@@ -14,7 +17,7 @@ from ._validation import (
     validate_positive,
 )
 from .amplitude import apply_gain_db
-from .effects import pitch_shift, time_stretch
+from .effects import time_stretch
 from .exceptions import InvalidParameterError
 
 
@@ -27,6 +30,7 @@ def apply_speech_effects(
     gain_db: float = 0.0,
     axis: int = -1,
     clip: bool = False,
+    method: Literal["wsola", "phase_vocoder"] = "wsola",
     n_fft: int = 2048,
     hop_length: int | None = None,
     filter_width: int = 32,
@@ -34,7 +38,9 @@ def apply_speech_effects(
 ) -> np.ndarray:
     """Apply pitch, pitch-preserving rate, and gain to speech.
 
-    Operations are applied in the order pitch shift, time stretch, and gain.
+    Pitch and rate are planned as one time-scale modification pass followed
+    by at most one resample. ``wsola`` is the speech-oriented default, while
+    ``phase_vocoder`` remains available for compatibility and comparison.
     This function accepts numeric values only; downstream applications remain
     responsible for parsing SSMD or other user-facing effect syntax.
     """
@@ -52,28 +58,38 @@ def apply_speech_effects(
     if hop > fft_size:
         raise InvalidParameterError("hop_length must not exceed n_fft")
     width, _ = validate_filter(filter_width, rolloff)
+    if method not in ("wsola", "phase_vocoder"):
+        raise InvalidParameterError("method must be one of ('wsola', 'phase_vocoder')")
 
     result = np.array(source, dtype=source.dtype, copy=True)
     if result.shape[normalized_axis] == 0:
         return result
 
-    if shift != 0.0:
-        result = pitch_shift(
-            result,
-            sample_rate=int(sample_rate),
-            semitones=shift,
-            axis=normalized_axis,
-            n_fft=fft_size,
-            hop_length=hop,
-            filter_width=width,
-        )
-    if stretch != 1.0:
+    octaves = shift / 12.0
+    max_octaves = np.log2(np.finfo(np.float64).max)
+    min_octaves = np.log2(np.nextafter(0.0, 1.0))
+    if not min_octaves <= octaves <= max_octaves:
+        raise InvalidParameterError("semitones produces an unrepresentable pitch ratio")
+    pitch_ratio = float(np.exp2(octaves))
+    tsm_rate = stretch / pitch_ratio
+    target_length = max(1, round(result.shape[normalized_axis] / stretch))
+    if not np.isclose(tsm_rate, 1.0):
         result = time_stretch(
             result,
-            stretch,
+            tsm_rate,
+            sample_rate=int(sample_rate),
+            method=method,
             axis=normalized_axis,
             n_fft=fft_size,
             hop_length=hop,
+        )
+    if result.shape[normalized_axis] != target_length:
+        result = resample_to_length(
+            result,
+            target_length,
+            axis=normalized_axis,
+            filter_width=width,
+            rolloff=rolloff,
         )
     if gain != 0.0 or gain == -np.inf:
         result = apply_gain_db(result, gain, clip=clip_value)

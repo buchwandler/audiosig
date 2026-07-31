@@ -1,14 +1,30 @@
 # Advanced Topics
 
-## Understanding the Phase Vocoder
+## Choosing a time-stretch backend
 
-AudioSig's time stretching uses a phase vocoder algorithm:
+AudioSig has two explicit time-stretch backends. The basic phase vocoder is a
+generic numerical reference path; it uses STFT/ISTFT phase propagation and can
+sound phasey around transients. WSOLA is the speech-oriented default for
+`apply_speech_effects` and searches for waveform-similar splice points in the
+time domain. It is primarily intended for mono speech and moderate rates,
+roughly `0.67 <= rate <= 1.50`.
 
-1. **STFT**: Convert audio to frequency domain using Short-Time Fourier Transform
-2. **Phase Modification**: Adjust phase to change timing while preserving pitch
-3. **ISTFT**: Convert back to time domain
+Use WSOLA when processing speech:
 
-### Parameters
+```python
+from audiosig import apply_speech_effects, time_stretch
+
+stretched = time_stretch(
+    audio,
+    rate=1.2,
+    sample_rate=24_000,
+    method="wsola",
+)
+speech = apply_speech_effects(audio, sample_rate=24_000, rate=1.2)
+```
+
+Use the basic phase vocoder for generic array processing or controlled
+comparisons:
 
 ```python
 from audiosig import time_stretch
@@ -17,16 +33,23 @@ from audiosig import time_stretch
 result = time_stretch(
     audio,
     rate=1.2,
+    method="phase_vocoder",
     n_fft=4096,        # Higher = better frequency resolution, worse time resolution
     hop_length=1024,   # Controls overlap between frames
 )
 ```
 
-### Trade-offs
+### Backend trade-offs
 
-- **Larger n_fft**: Better frequency separation, worse time precision
-- **Smaller n_fft**: Better time precision, worse frequency separation
-- **hop_length**: Typically n_fft // 4 for good quality
+- **WSOLA frame/overlap/search**: Defaults are 30/10/10 ms and are sample-rate aware; larger searches cost more and can select less stable matches.
+- **Phase-vocoder n_fft**: Larger values improve frequency separation but worsen time precision.
+- **Phase-vocoder hop_length**: Typically n_fft // 4 for the basic backend.
+
+The compositor plans pitch and rate together using `tsm_rate = rate / pitch_ratio`, then resamples once when necessary. If `rate == pitch_ratio`,
+the time-scale pass is skipped. `rolloff` is passed to the pitch resampler.
+Both backends preserve exact output-length and dtype contracts. Pitch shifting
+changes the spectral envelope with F0, so native pitch shifting does not
+preserve vocal formants; larger shifts are more artifact-prone.
 
 ## Resampling Internals
 

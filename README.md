@@ -90,11 +90,14 @@ Synthetic examples are available under [`examples/`](examples/README.md). They
 use sine waves and seeded noise, so no input recordings or optional packages
 are required.
 
-The phase vocoder and resampler are optimized for speech, TTS, and moderate
-prosody changes. They are portable numerical building blocks, not a claim of
-transparent extreme music-production quality. Invalid arrays and parameters
-raise typed `AudioSig` exceptions so applications can choose their own
-fail-open or fail-fast policy.
+AudioSig provides a speech-oriented NumPy WSOLA backend for moderate rate and
+prosody changes, plus a basic phase-vocoder backend for generic numerical use.
+The speech-effects compositor uses WSOLA by default and combines pitch and
+rate in one time-scale pass. Native pitch shifting does not currently preserve
+vocal formants, and neither backend is intended to replace a studio-grade
+processor for extreme transformations. Invalid arrays and parameters raise
+typed `AudioSig` exceptions so applications can choose their own fail-open or
+fail-fast policy.
 
 AudioSig supports Python 3.10 through 3.14 and requires NumPy 1.24 or newer.
 The package is licensed under Apache-2.0. See

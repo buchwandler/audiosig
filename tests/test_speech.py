@@ -41,6 +41,7 @@ def test_speech_effects_apply_all_effects_and_exact_length() -> None:
         rate=1.25,
         semitones=2.0,
         gain_db=6.0,
+        method="phase_vocoder",
         n_fft=256,
         hop_length=64,
     )
@@ -51,23 +52,18 @@ def test_speech_effects_apply_all_effects_and_exact_length() -> None:
     np.testing.assert_array_equal(source, original)
 
 
-def test_speech_effects_operation_order(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_speech_effects_combined_plan_uses_one_tsm_pass(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[str] = []
 
-    def fake_pitch(audio: np.ndarray, **kwargs: object) -> np.ndarray:
-        calls.append("pitch")
-        return audio
-
-    def fake_rate(audio: np.ndarray, rate: float, **kwargs: object) -> np.ndarray:
-        calls.append("rate")
+    def fake_stretch(audio: np.ndarray, rate: float, **kwargs: object) -> np.ndarray:
+        calls.append(f"stretch:{rate:.6f}")
         return audio
 
     def fake_gain(audio: np.ndarray, db: float, **kwargs: object) -> np.ndarray:
         calls.append("gain")
         return audio
 
-    monkeypatch.setattr(speech_module, "pitch_shift", fake_pitch)
-    monkeypatch.setattr(speech_module, "time_stretch", fake_rate)
+    monkeypatch.setattr(speech_module, "time_stretch", fake_stretch)
     monkeypatch.setattr(speech_module, "apply_gain_db", fake_gain)
 
     apply_speech_effects(
@@ -79,7 +75,44 @@ def test_speech_effects_operation_order(monkeypatch: pytest.MonkeyPatch) -> None
         n_fft=32,
         hop_length=8,
     )
-    assert calls == ["pitch", "rate", "gain"]
+    assert calls == ["stretch:0.979989", "gain"]
+
+
+def test_speech_effects_matching_rate_and_pitch_uses_only_resampling(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[str] = []
+
+    def fake_stretch(audio: np.ndarray, rate: float, **kwargs: object) -> np.ndarray:
+        calls.append("stretch")
+        return audio
+
+    def fake_resample(audio: np.ndarray, length: int, **kwargs: object) -> np.ndarray:
+        calls.append(f"resample:{length}")
+        return np.zeros(length, dtype=audio.dtype)
+
+    monkeypatch.setattr(speech_module, "time_stretch", fake_stretch)
+    monkeypatch.setattr(speech_module, "resample_to_length", fake_resample)
+    apply_speech_effects(
+        tone(128), sample_rate=24_000, rate=2.0, semitones=12.0, method="phase_vocoder"
+    )
+    assert calls == ["resample:64"]
+
+
+def test_speech_effects_passes_rolloff_to_pitch_resampler(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_resample(audio: np.ndarray, length: int, **kwargs: object) -> np.ndarray:
+        captured.update(kwargs)
+        return np.zeros(length, dtype=audio.dtype)
+
+    monkeypatch.setattr(speech_module, "resample_to_length", fake_resample)
+    apply_speech_effects(
+        tone(128), sample_rate=24_000, semitones=2.0, method="phase_vocoder", rolloff=0.8
+    )
+    assert captured["rolloff"] == 0.8
 
 
 def test_speech_effects_clipping_and_validation() -> None:
