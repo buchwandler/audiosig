@@ -87,10 +87,20 @@ def pitch_shift(
         return np.array(source, dtype=source.dtype, copy=True)
     if shift == 0.0:
         return np.array(source, dtype=source.dtype, copy=True)
-    ratio = 2.0 ** (shift / bins)
+    octaves = shift / bins
+    max_octaves = np.log2(np.finfo(np.float64).max)
+    min_octaves = np.log2(np.nextafter(0.0, 1.0))
+    if not min_octaves <= octaves <= max_octaves:
+        raise InvalidParameterError("semitones produces an unrepresentable pitch ratio")
+    ratio = float(np.exp2(octaves))
+    if not np.isfinite(ratio) or ratio <= 0.0:
+        raise InvalidParameterError("semitones produces an invalid pitch ratio")
+    rate = 1.0 / ratio
+    if not np.isfinite(rate) or rate <= 0.0:
+        raise InvalidParameterError("semitones produces an invalid pitch rate")
     stretched = time_stretch(
         source,
-        rate=1.0 / ratio,
+        rate=rate,
         axis=normalized_axis,
         n_fft=n_fft,
         hop_length=hop_length,

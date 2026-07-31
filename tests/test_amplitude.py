@@ -46,3 +46,18 @@ def test_amplitude_operations_accept_empty_arrays() -> None:
         apply_gain_db(empty, np.nan)
     with pytest.raises(InvalidParameterError):
         peak_normalize(empty, peak=0)
+
+
+@pytest.mark.parametrize("db", [1e308, np.finfo(np.float64).max])
+def test_gain_rejects_unrepresentable_finite_db(db: float) -> None:
+    audio = np.ones(8, dtype=np.float32)
+    with pytest.raises(InvalidParameterError, match=r"gain|representable|finite"):
+        apply_gain_db(audio, db)
+
+
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+def test_peak_normalize_rejects_target_outside_dtype_range(dtype: type[np.floating]) -> None:
+    audio = np.ones(8, dtype=dtype)
+    target = 1e39 if dtype is np.float32 else float("inf")
+    with pytest.raises(InvalidParameterError, match=r"range|finite"):
+        peak_normalize(audio, peak=target)

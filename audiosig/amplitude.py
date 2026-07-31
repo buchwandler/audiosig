@@ -16,7 +16,16 @@ def apply_gain_db(audio: np.ndarray, db: float, *, clip: bool = False) -> np.nda
     if gain_db == -np.inf:
         result = np.zeros_like(source)
     else:
-        multiplier = 10.0 ** (gain_db / 20.0)
+        exponent = gain_db / 20.0
+        max_exponent = np.log10(np.finfo(np.float64).max)
+        if exponent > max_exponent:
+            raise InvalidParameterError("db produces an unrepresentable gain")
+        multiplier = 10.0**exponent
+        if source.size:
+            maximum = float(np.max(np.abs(source)))
+            dtype_limit = float(np.finfo(source.dtype).max)
+            if maximum and multiplier > dtype_limit / maximum:
+                raise InvalidParameterError("db produces a non-finite output")
         result = np.multiply(source, multiplier, dtype=source.dtype)
     if clip_value:
         result = np.clip(result, -1.0, 1.0).astype(source.dtype, copy=False)
@@ -30,6 +39,9 @@ def peak_normalize(audio: np.ndarray, *, peak: float = 1.0, eps: float = 1e-12) 
     tolerance = float(eps)
     if not np.isfinite(target) or target <= 0:
         raise InvalidParameterError("peak must be finite and positive")
+    dtype_limit = float(np.finfo(source.dtype).max)
+    if target > dtype_limit:
+        raise InvalidParameterError(f"peak exceeds the finite range of {source.dtype}")
     if not np.isfinite(tolerance) or tolerance < 0:
         raise InvalidParameterError("eps must be finite and non-negative")
     if source.size == 0:
@@ -37,4 +49,7 @@ def peak_normalize(audio: np.ndarray, *, peak: float = 1.0, eps: float = 1e-12) 
     maximum = float(np.max(np.abs(source)))
     if maximum <= tolerance:
         return np.array(source, dtype=source.dtype, copy=True)
-    return np.array(source * (target / maximum), dtype=source.dtype, copy=True)
+    result = np.asarray(source * (target / maximum), dtype=source.dtype)
+    if not np.isfinite(result).all():
+        raise InvalidParameterError("peak produces a non-finite output")
+    return np.array(result, dtype=source.dtype, copy=True)

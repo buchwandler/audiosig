@@ -5,7 +5,8 @@ from __future__ import annotations
 project = "AudioSig"
 copyright = "2026, AudioSig contributors"
 author = "AudioSig contributors"
-release = "0.1"
+version = "0.1"
+release = "0.1.0"
 
 extensions = ["myst_parser"]
 templates_path: list[str] = []

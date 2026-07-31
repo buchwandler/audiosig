@@ -3,24 +3,22 @@ schema_version: 2
 object_type: release_entry
 versioning:
   schema_version: 1
-  revision: 1
-entry_id: entry-0009
-release_version: 0.1.0
-kind: docs
-summary:
-  README overview plus detailed API, getting-started, advanced, and examples
-  documentation
+  revision: 2
+entry_id: entry-0007
+release_version: 0.1.0-prepublication
+kind: added
+summary: Audio framing, short-time energy, zero-crossing rate, and spectral flux utilities
 status: accepted
 audience: null
 scopes: []
 source_refs: []
 paths:
-  - README.md
+  - audiosig/_framing.py
 issues: []
 prs: []
 sources: []
 contributors: []
 breaking: false
 internal: false
-order: 9
+order: 7
 ---

@@ -156,6 +156,11 @@ def test_documentation_configuration_has_a_buildable_index() -> None:
     assert Path("docs/requirements.txt").is_file()
 
 
+def test_release_files_exist() -> None:
+    assert Path("audiosig/py.typed").is_file()
+    assert Path("docs/index.rst").is_file()
+
+
 def test_import_boundary() -> None:
     root = str(Path.cwd().resolve())
     code = """

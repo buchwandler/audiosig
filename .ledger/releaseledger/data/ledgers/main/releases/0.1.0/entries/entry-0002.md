@@ -8,8 +8,8 @@ entry_id: entry-0002
 release_version: 0.1.0
 kind: added
 summary:
-  Windowed-sinc resampler with selectable length modes (round, ceil, floor,
-  truncate)
+  Windowed-sinc resampler with rounded output sizing and an optional librosa-compatible
+  ceiling mode
 status: accepted
 audience: null
 scopes: []

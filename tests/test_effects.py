@@ -82,6 +82,13 @@ def test_effect_parameter_edges() -> None:
     np.testing.assert_array_equal(pitch_shift(source, sample_rate=24000, semitones=0), source)
 
 
+@pytest.mark.parametrize("semitones", [1e308, -1e308])
+def test_pitch_shift_rejects_unrepresentable_finite_ratio(semitones: float) -> None:
+    audio = np.ones(4096, dtype=np.float32)
+    with pytest.raises(InvalidParameterError, match=r"ratio|pitch"):
+        pitch_shift(audio, sample_rate=24_000, semitones=semitones)
+
+
 def test_effects_support_odd_fft_sizes_and_finite_batch_outputs() -> None:
     source = sine(440, 24000, 4000, np.float32)
     batch = np.stack([source, source * 0.5])

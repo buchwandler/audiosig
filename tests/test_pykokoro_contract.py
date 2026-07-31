@@ -33,7 +33,8 @@ def test_contract_does_not_import_forbidden_dsp_packages() -> None:
 import json, sys
 sys.path.insert(0, sys.argv[1])
 import audiosig
-forbidden = {'librosa', 'scipy', 'sklearn', 'audiomentations', 'torch', 'numba', 'signalsmith_stretch'}
+forbidden = {'librosa', 'scipy', 'sklearn', 'audiomentations',
+             'torch', 'numba', 'signalsmith_stretch'}
 print(json.dumps(sorted(forbidden.intersection(sys.modules))))
 """
     result = subprocess.run(

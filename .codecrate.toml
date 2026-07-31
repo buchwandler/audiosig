@@ -8,14 +8,17 @@ exclude = ["*/.venv/*", "context_pykokoro.*"]
 gitignore_allow = ["audiosig/_version.py"]
 include = [
   "**/*.py",
+  "**/*.pyi",
   "**/*.toml",
   "**/*.md",
+  "**/*.rst",
   "**/*.json",
   "**/*.txt",
   "**/*.csv",
   "**/*.tsv",
   "**/*.yaml",
   "**/*.yml",
+  "**/py.typed",
   "LICENSE",
 ]
 split_max_chars = 0

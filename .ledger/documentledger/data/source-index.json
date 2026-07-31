@@ -51,16 +51,16 @@
     },
     "py:file:audiosig/__init__.py": {
       "hashes": {
-        "body_hash": "dea9666cb547614c7eb4cfc573facdbce8bfa9dd8d630f50529dd5f9d91e1c05",
-        "content_hash": "dea9666cb547614c7eb4cfc573facdbce8bfa9dd8d630f50529dd5f9d91e1c05",
-        "decorator_hash": "dea9666cb547614c7eb4cfc573facdbce8bfa9dd8d630f50529dd5f9d91e1c05",
-        "docstring_hash": "dea9666cb547614c7eb4cfc573facdbce8bfa9dd8d630f50529dd5f9d91e1c05",
-        "file_hash": "dea9666cb547614c7eb4cfc573facdbce8bfa9dd8d630f50529dd5f9d91e1c05",
-        "public_contract_hash": "dea9666cb547614c7eb4cfc573facdbce8bfa9dd8d630f50529dd5f9d91e1c05",
-        "signature_hash": "dea9666cb547614c7eb4cfc573facdbce8bfa9dd8d630f50529dd5f9d91e1c05"
+        "body_hash": "b2b980028deffc46f2798a91c0199aac5fc2f370242ab0dd37c49ee0c5c26f6a",
+        "content_hash": "b2b980028deffc46f2798a91c0199aac5fc2f370242ab0dd37c49ee0c5c26f6a",
+        "decorator_hash": "b2b980028deffc46f2798a91c0199aac5fc2f370242ab0dd37c49ee0c5c26f6a",
+        "docstring_hash": "b2b980028deffc46f2798a91c0199aac5fc2f370242ab0dd37c49ee0c5c26f6a",
+        "file_hash": "b2b980028deffc46f2798a91c0199aac5fc2f370242ab0dd37c49ee0c5c26f6a",
+        "public_contract_hash": "b2b980028deffc46f2798a91c0199aac5fc2f370242ab0dd37c49ee0c5c26f6a",
+        "signature_hash": "b2b980028deffc46f2798a91c0199aac5fc2f370242ab0dd37c49ee0c5c26f6a"
       },
       "kind": "file",
-      "line_span": [1, 72],
+      "line_span": [1, 78],
       "path": "audiosig/__init__.py",
       "qualname": "audiosig/__init__.py",
       "signature": "audiosig/__init__.py",
@@ -85,16 +85,16 @@
     },
     "py:file:audiosig/_resampling.py": {
       "hashes": {
-        "body_hash": "d7c9ffd4634e2953d9796eafd0a5ad9f22832198ecfcf5b5ee2f228c711ec3cf",
-        "content_hash": "d7c9ffd4634e2953d9796eafd0a5ad9f22832198ecfcf5b5ee2f228c711ec3cf",
-        "decorator_hash": "d7c9ffd4634e2953d9796eafd0a5ad9f22832198ecfcf5b5ee2f228c711ec3cf",
-        "docstring_hash": "d7c9ffd4634e2953d9796eafd0a5ad9f22832198ecfcf5b5ee2f228c711ec3cf",
-        "file_hash": "d7c9ffd4634e2953d9796eafd0a5ad9f22832198ecfcf5b5ee2f228c711ec3cf",
-        "public_contract_hash": "d7c9ffd4634e2953d9796eafd0a5ad9f22832198ecfcf5b5ee2f228c711ec3cf",
-        "signature_hash": "d7c9ffd4634e2953d9796eafd0a5ad9f22832198ecfcf5b5ee2f228c711ec3cf"
+        "body_hash": "a237f6bc81607d0178fe3897d00003c962d8cad6530bf696b4f2e4f1bf69e987",
+        "content_hash": "a237f6bc81607d0178fe3897d00003c962d8cad6530bf696b4f2e4f1bf69e987",
+        "decorator_hash": "a237f6bc81607d0178fe3897d00003c962d8cad6530bf696b4f2e4f1bf69e987",
+        "docstring_hash": "a237f6bc81607d0178fe3897d00003c962d8cad6530bf696b4f2e4f1bf69e987",
+        "file_hash": "a237f6bc81607d0178fe3897d00003c962d8cad6530bf696b4f2e4f1bf69e987",
+        "public_contract_hash": "a237f6bc81607d0178fe3897d00003c962d8cad6530bf696b4f2e4f1bf69e987",
+        "signature_hash": "a237f6bc81607d0178fe3897d00003c962d8cad6530bf696b4f2e4f1bf69e987"
       },
       "kind": "file",
-      "line_span": [1, 89],
+      "line_span": [1, 132],
       "path": "audiosig/_resampling.py",
       "qualname": "audiosig/_resampling.py",
       "signature": "audiosig/_resampling.py",
@@ -119,16 +119,16 @@
     },
     "py:file:audiosig/_validation.py": {
       "hashes": {
-        "body_hash": "6e00f9c7e84b356425bff67526136b60be95a4264431c13e7c8446cb10e17418",
-        "content_hash": "6e00f9c7e84b356425bff67526136b60be95a4264431c13e7c8446cb10e17418",
-        "decorator_hash": "6e00f9c7e84b356425bff67526136b60be95a4264431c13e7c8446cb10e17418",
-        "docstring_hash": "6e00f9c7e84b356425bff67526136b60be95a4264431c13e7c8446cb10e17418",
-        "file_hash": "6e00f9c7e84b356425bff67526136b60be95a4264431c13e7c8446cb10e17418",
-        "public_contract_hash": "6e00f9c7e84b356425bff67526136b60be95a4264431c13e7c8446cb10e17418",
-        "signature_hash": "6e00f9c7e84b356425bff67526136b60be95a4264431c13e7c8446cb10e17418"
+        "body_hash": "980e15ff06bc522ae59aeb6d2cf70477a041d625ff10e037f3e8c911018a6c22",
+        "content_hash": "980e15ff06bc522ae59aeb6d2cf70477a041d625ff10e037f3e8c911018a6c22",
+        "decorator_hash": "980e15ff06bc522ae59aeb6d2cf70477a041d625ff10e037f3e8c911018a6c22",
+        "docstring_hash": "980e15ff06bc522ae59aeb6d2cf70477a041d625ff10e037f3e8c911018a6c22",
+        "file_hash": "980e15ff06bc522ae59aeb6d2cf70477a041d625ff10e037f3e8c911018a6c22",
+        "public_contract_hash": "980e15ff06bc522ae59aeb6d2cf70477a041d625ff10e037f3e8c911018a6c22",
+        "signature_hash": "980e15ff06bc522ae59aeb6d2cf70477a041d625ff10e037f3e8c911018a6c22"
       },
       "kind": "file",
-      "line_span": [1, 80],
+      "line_span": [1, 107],
       "path": "audiosig/_validation.py",
       "qualname": "audiosig/_validation.py",
       "signature": "audiosig/_validation.py",
@@ -136,13 +136,13 @@
     },
     "py:file:audiosig/_version.py": {
       "hashes": {
-        "body_hash": "b407b234e5a0f69928b448bfe56800c1871736f6c317e0b11463b3e657a8cbc7",
-        "content_hash": "b407b234e5a0f69928b448bfe56800c1871736f6c317e0b11463b3e657a8cbc7",
-        "decorator_hash": "b407b234e5a0f69928b448bfe56800c1871736f6c317e0b11463b3e657a8cbc7",
-        "docstring_hash": "b407b234e5a0f69928b448bfe56800c1871736f6c317e0b11463b3e657a8cbc7",
-        "file_hash": "b407b234e5a0f69928b448bfe56800c1871736f6c317e0b11463b3e657a8cbc7",
-        "public_contract_hash": "b407b234e5a0f69928b448bfe56800c1871736f6c317e0b11463b3e657a8cbc7",
-        "signature_hash": "b407b234e5a0f69928b448bfe56800c1871736f6c317e0b11463b3e657a8cbc7"
+        "body_hash": "9ffe6f749b0f36eef0679ecb1ae44be7ce6ebe597e862baf654056cdd1b44505",
+        "content_hash": "9ffe6f749b0f36eef0679ecb1ae44be7ce6ebe597e862baf654056cdd1b44505",
+        "decorator_hash": "9ffe6f749b0f36eef0679ecb1ae44be7ce6ebe597e862baf654056cdd1b44505",
+        "docstring_hash": "9ffe6f749b0f36eef0679ecb1ae44be7ce6ebe597e862baf654056cdd1b44505",
+        "file_hash": "9ffe6f749b0f36eef0679ecb1ae44be7ce6ebe597e862baf654056cdd1b44505",
+        "public_contract_hash": "9ffe6f749b0f36eef0679ecb1ae44be7ce6ebe597e862baf654056cdd1b44505",
+        "signature_hash": "9ffe6f749b0f36eef0679ecb1ae44be7ce6ebe597e862baf654056cdd1b44505"
       },
       "kind": "file",
       "line_span": [1, 24],
@@ -153,16 +153,16 @@
     },
     "py:file:audiosig/amplitude.py": {
       "hashes": {
-        "body_hash": "67f93b1e3aa8bc4bf68b6342d8425c20be2e46bc58a2211ac0ec3d8c4aa57d7b",
-        "content_hash": "67f93b1e3aa8bc4bf68b6342d8425c20be2e46bc58a2211ac0ec3d8c4aa57d7b",
-        "decorator_hash": "67f93b1e3aa8bc4bf68b6342d8425c20be2e46bc58a2211ac0ec3d8c4aa57d7b",
-        "docstring_hash": "67f93b1e3aa8bc4bf68b6342d8425c20be2e46bc58a2211ac0ec3d8c4aa57d7b",
-        "file_hash": "67f93b1e3aa8bc4bf68b6342d8425c20be2e46bc58a2211ac0ec3d8c4aa57d7b",
-        "public_contract_hash": "67f93b1e3aa8bc4bf68b6342d8425c20be2e46bc58a2211ac0ec3d8c4aa57d7b",
-        "signature_hash": "67f93b1e3aa8bc4bf68b6342d8425c20be2e46bc58a2211ac0ec3d8c4aa57d7b"
+        "body_hash": "dca92242bc2fabaeca6b504909d3dc280cfdf4af86e4cd43ea7037cf88f2c4c6",
+        "content_hash": "dca92242bc2fabaeca6b504909d3dc280cfdf4af86e4cd43ea7037cf88f2c4c6",
+        "decorator_hash": "dca92242bc2fabaeca6b504909d3dc280cfdf4af86e4cd43ea7037cf88f2c4c6",
+        "docstring_hash": "dca92242bc2fabaeca6b504909d3dc280cfdf4af86e4cd43ea7037cf88f2c4c6",
+        "file_hash": "dca92242bc2fabaeca6b504909d3dc280cfdf4af86e4cd43ea7037cf88f2c4c6",
+        "public_contract_hash": "dca92242bc2fabaeca6b504909d3dc280cfdf4af86e4cd43ea7037cf88f2c4c6",
+        "signature_hash": "dca92242bc2fabaeca6b504909d3dc280cfdf4af86e4cd43ea7037cf88f2c4c6"
       },
       "kind": "file",
-      "line_span": [1, 41],
+      "line_span": [1, 55],
       "path": "audiosig/amplitude.py",
       "qualname": "audiosig/amplitude.py",
       "signature": "audiosig/amplitude.py",
@@ -170,16 +170,16 @@
     },
     "py:file:audiosig/effects.py": {
       "hashes": {
-        "body_hash": "93b219acf0ef2cafc3de5dfaa4953619b98c10b878e64b02561681481e082517",
-        "content_hash": "93b219acf0ef2cafc3de5dfaa4953619b98c10b878e64b02561681481e082517",
-        "decorator_hash": "93b219acf0ef2cafc3de5dfaa4953619b98c10b878e64b02561681481e082517",
-        "docstring_hash": "93b219acf0ef2cafc3de5dfaa4953619b98c10b878e64b02561681481e082517",
-        "file_hash": "93b219acf0ef2cafc3de5dfaa4953619b98c10b878e64b02561681481e082517",
-        "public_contract_hash": "93b219acf0ef2cafc3de5dfaa4953619b98c10b878e64b02561681481e082517",
-        "signature_hash": "93b219acf0ef2cafc3de5dfaa4953619b98c10b878e64b02561681481e082517"
+        "body_hash": "95200d581b772e47593f2415d56b45ed36b276df750b418e8d138f048decb61f",
+        "content_hash": "95200d581b772e47593f2415d56b45ed36b276df750b418e8d138f048decb61f",
+        "decorator_hash": "95200d581b772e47593f2415d56b45ed36b276df750b418e8d138f048decb61f",
+        "docstring_hash": "95200d581b772e47593f2415d56b45ed36b276df750b418e8d138f048decb61f",
+        "file_hash": "95200d581b772e47593f2415d56b45ed36b276df750b418e8d138f048decb61f",
+        "public_contract_hash": "95200d581b772e47593f2415d56b45ed36b276df750b418e8d138f048decb61f",
+        "signature_hash": "95200d581b772e47593f2415d56b45ed36b276df750b418e8d138f048decb61f"
       },
       "kind": "file",
-      "line_span": [1, 90],
+      "line_span": [1, 113],
       "path": "audiosig/effects.py",
       "qualname": "audiosig/effects.py",
       "signature": "audiosig/effects.py",
@@ -204,20 +204,37 @@
     },
     "py:file:audiosig/silence.py": {
       "hashes": {
-        "body_hash": "63d288bbc290cc5eea1aff91362d7cb3a1bfe892aec39607caa8f3461e42e296",
-        "content_hash": "63d288bbc290cc5eea1aff91362d7cb3a1bfe892aec39607caa8f3461e42e296",
-        "decorator_hash": "63d288bbc290cc5eea1aff91362d7cb3a1bfe892aec39607caa8f3461e42e296",
-        "docstring_hash": "63d288bbc290cc5eea1aff91362d7cb3a1bfe892aec39607caa8f3461e42e296",
-        "file_hash": "63d288bbc290cc5eea1aff91362d7cb3a1bfe892aec39607caa8f3461e42e296",
-        "public_contract_hash": "63d288bbc290cc5eea1aff91362d7cb3a1bfe892aec39607caa8f3461e42e296",
-        "signature_hash": "63d288bbc290cc5eea1aff91362d7cb3a1bfe892aec39607caa8f3461e42e296"
+        "body_hash": "936db74acdf62e968adb770e3591f65b841030999e4b77892a23ee11499ef198",
+        "content_hash": "936db74acdf62e968adb770e3591f65b841030999e4b77892a23ee11499ef198",
+        "decorator_hash": "936db74acdf62e968adb770e3591f65b841030999e4b77892a23ee11499ef198",
+        "docstring_hash": "936db74acdf62e968adb770e3591f65b841030999e4b77892a23ee11499ef198",
+        "file_hash": "936db74acdf62e968adb770e3591f65b841030999e4b77892a23ee11499ef198",
+        "public_contract_hash": "936db74acdf62e968adb770e3591f65b841030999e4b77892a23ee11499ef198",
+        "signature_hash": "936db74acdf62e968adb770e3591f65b841030999e4b77892a23ee11499ef198"
       },
       "kind": "file",
-      "line_span": [1, 732],
+      "line_span": [1, 777],
       "path": "audiosig/silence.py",
       "qualname": "audiosig/silence.py",
       "signature": "audiosig/silence.py",
       "source_id": "py:file:audiosig/silence.py"
+    },
+    "py:file:audiosig/speech.py": {
+      "hashes": {
+        "body_hash": "2218c56e38e089892a476f2d5f77dfb738d3a05562fc911c9717d54fefe34f24",
+        "content_hash": "2218c56e38e089892a476f2d5f77dfb738d3a05562fc911c9717d54fefe34f24",
+        "decorator_hash": "2218c56e38e089892a476f2d5f77dfb738d3a05562fc911c9717d54fefe34f24",
+        "docstring_hash": "2218c56e38e089892a476f2d5f77dfb738d3a05562fc911c9717d54fefe34f24",
+        "file_hash": "2218c56e38e089892a476f2d5f77dfb738d3a05562fc911c9717d54fefe34f24",
+        "public_contract_hash": "2218c56e38e089892a476f2d5f77dfb738d3a05562fc911c9717d54fefe34f24",
+        "signature_hash": "2218c56e38e089892a476f2d5f77dfb738d3a05562fc911c9717d54fefe34f24"
+      },
+      "kind": "file",
+      "line_span": [1, 82],
+      "path": "audiosig/speech.py",
+      "qualname": "audiosig/speech.py",
+      "signature": "audiosig/speech.py",
+      "source_id": "py:file:audiosig/speech.py"
     },
     "py:file:tests/__init__.py": {
       "hashes": {
@@ -272,33 +289,50 @@
     },
     "py:file:tests/test_amplitude.py": {
       "hashes": {
-        "body_hash": "d4b47ab4505281144482df4aa6beeaba56d5f34240073c4af449fe764977f3da",
-        "content_hash": "d4b47ab4505281144482df4aa6beeaba56d5f34240073c4af449fe764977f3da",
-        "decorator_hash": "d4b47ab4505281144482df4aa6beeaba56d5f34240073c4af449fe764977f3da",
-        "docstring_hash": "d4b47ab4505281144482df4aa6beeaba56d5f34240073c4af449fe764977f3da",
-        "file_hash": "d4b47ab4505281144482df4aa6beeaba56d5f34240073c4af449fe764977f3da",
-        "public_contract_hash": "d4b47ab4505281144482df4aa6beeaba56d5f34240073c4af449fe764977f3da",
-        "signature_hash": "d4b47ab4505281144482df4aa6beeaba56d5f34240073c4af449fe764977f3da"
+        "body_hash": "a1efc840e0f0459a2465645cbade4c98985e2b254d9ad89b48000a57508e25b2",
+        "content_hash": "a1efc840e0f0459a2465645cbade4c98985e2b254d9ad89b48000a57508e25b2",
+        "decorator_hash": "a1efc840e0f0459a2465645cbade4c98985e2b254d9ad89b48000a57508e25b2",
+        "docstring_hash": "a1efc840e0f0459a2465645cbade4c98985e2b254d9ad89b48000a57508e25b2",
+        "file_hash": "a1efc840e0f0459a2465645cbade4c98985e2b254d9ad89b48000a57508e25b2",
+        "public_contract_hash": "a1efc840e0f0459a2465645cbade4c98985e2b254d9ad89b48000a57508e25b2",
+        "signature_hash": "a1efc840e0f0459a2465645cbade4c98985e2b254d9ad89b48000a57508e25b2"
       },
       "kind": "file",
-      "line_span": [1, 34],
+      "line_span": [1, 63],
       "path": "tests/test_amplitude.py",
       "qualname": "tests/test_amplitude.py",
       "signature": "tests/test_amplitude.py",
       "source_id": "py:file:tests/test_amplitude.py"
     },
-    "py:file:tests/test_effects.py": {
+    "py:file:tests/test_documentation_examples.py": {
       "hashes": {
-        "body_hash": "881e30698b624c068ad9ab5bcb333415bcc3cf3c8581fe82ee0953081a5b046b",
-        "content_hash": "881e30698b624c068ad9ab5bcb333415bcc3cf3c8581fe82ee0953081a5b046b",
-        "decorator_hash": "881e30698b624c068ad9ab5bcb333415bcc3cf3c8581fe82ee0953081a5b046b",
-        "docstring_hash": "881e30698b624c068ad9ab5bcb333415bcc3cf3c8581fe82ee0953081a5b046b",
-        "file_hash": "881e30698b624c068ad9ab5bcb333415bcc3cf3c8581fe82ee0953081a5b046b",
-        "public_contract_hash": "881e30698b624c068ad9ab5bcb333415bcc3cf3c8581fe82ee0953081a5b046b",
-        "signature_hash": "881e30698b624c068ad9ab5bcb333415bcc3cf3c8581fe82ee0953081a5b046b"
+        "body_hash": "514b4568c040043f373b4e1b0845de8f377a0ceb1a8f5ec964bed033e967aa9d",
+        "content_hash": "514b4568c040043f373b4e1b0845de8f377a0ceb1a8f5ec964bed033e967aa9d",
+        "decorator_hash": "514b4568c040043f373b4e1b0845de8f377a0ceb1a8f5ec964bed033e967aa9d",
+        "docstring_hash": "514b4568c040043f373b4e1b0845de8f377a0ceb1a8f5ec964bed033e967aa9d",
+        "file_hash": "514b4568c040043f373b4e1b0845de8f377a0ceb1a8f5ec964bed033e967aa9d",
+        "public_contract_hash": "514b4568c040043f373b4e1b0845de8f377a0ceb1a8f5ec964bed033e967aa9d",
+        "signature_hash": "514b4568c040043f373b4e1b0845de8f377a0ceb1a8f5ec964bed033e967aa9d"
       },
       "kind": "file",
-      "line_span": [1, 72],
+      "line_span": [1, 33],
+      "path": "tests/test_documentation_examples.py",
+      "qualname": "tests/test_documentation_examples.py",
+      "signature": "tests/test_documentation_examples.py",
+      "source_id": "py:file:tests/test_documentation_examples.py"
+    },
+    "py:file:tests/test_effects.py": {
+      "hashes": {
+        "body_hash": "b95f38c8629bf9cb6b25024e13866130fd611f2f28bb35f4cc955cefc280a611",
+        "content_hash": "b95f38c8629bf9cb6b25024e13866130fd611f2f28bb35f4cc955cefc280a611",
+        "decorator_hash": "b95f38c8629bf9cb6b25024e13866130fd611f2f28bb35f4cc955cefc280a611",
+        "docstring_hash": "b95f38c8629bf9cb6b25024e13866130fd611f2f28bb35f4cc955cefc280a611",
+        "file_hash": "b95f38c8629bf9cb6b25024e13866130fd611f2f28bb35f4cc955cefc280a611",
+        "public_contract_hash": "b95f38c8629bf9cb6b25024e13866130fd611f2f28bb35f4cc955cefc280a611",
+        "signature_hash": "b95f38c8629bf9cb6b25024e13866130fd611f2f28bb35f4cc955cefc280a611"
+      },
+      "kind": "file",
+      "line_span": [1, 103],
       "path": "tests/test_effects.py",
       "qualname": "tests/test_effects.py",
       "signature": "tests/test_effects.py",
@@ -357,33 +391,50 @@
     },
     "py:file:tests/test_packaging.py": {
       "hashes": {
-        "body_hash": "8455a949316b2e86f765489142878f2f8dff69ba92a73586143dd15a4fd2b5e8",
-        "content_hash": "8455a949316b2e86f765489142878f2f8dff69ba92a73586143dd15a4fd2b5e8",
-        "decorator_hash": "8455a949316b2e86f765489142878f2f8dff69ba92a73586143dd15a4fd2b5e8",
-        "docstring_hash": "8455a949316b2e86f765489142878f2f8dff69ba92a73586143dd15a4fd2b5e8",
-        "file_hash": "8455a949316b2e86f765489142878f2f8dff69ba92a73586143dd15a4fd2b5e8",
-        "public_contract_hash": "8455a949316b2e86f765489142878f2f8dff69ba92a73586143dd15a4fd2b5e8",
-        "signature_hash": "8455a949316b2e86f765489142878f2f8dff69ba92a73586143dd15a4fd2b5e8"
+        "body_hash": "201743ac34f7b4f4e31e208f7d153100e7ff6b98dfda5c796095abe692f8ac90",
+        "content_hash": "201743ac34f7b4f4e31e208f7d153100e7ff6b98dfda5c796095abe692f8ac90",
+        "decorator_hash": "201743ac34f7b4f4e31e208f7d153100e7ff6b98dfda5c796095abe692f8ac90",
+        "docstring_hash": "201743ac34f7b4f4e31e208f7d153100e7ff6b98dfda5c796095abe692f8ac90",
+        "file_hash": "201743ac34f7b4f4e31e208f7d153100e7ff6b98dfda5c796095abe692f8ac90",
+        "public_contract_hash": "201743ac34f7b4f4e31e208f7d153100e7ff6b98dfda5c796095abe692f8ac90",
+        "signature_hash": "201743ac34f7b4f4e31e208f7d153100e7ff6b98dfda5c796095abe692f8ac90"
       },
       "kind": "file",
-      "line_span": [1, 166],
+      "line_span": [1, 176],
       "path": "tests/test_packaging.py",
       "qualname": "tests/test_packaging.py",
       "signature": "tests/test_packaging.py",
       "source_id": "py:file:tests/test_packaging.py"
     },
-    "py:file:tests/test_resampling.py": {
+    "py:file:tests/test_pykokoro_contract.py": {
       "hashes": {
-        "body_hash": "4b5b53305addc3cd6cd3062a0f559e12dac3607987a9f62256d184b3d4323fe3",
-        "content_hash": "4b5b53305addc3cd6cd3062a0f559e12dac3607987a9f62256d184b3d4323fe3",
-        "decorator_hash": "4b5b53305addc3cd6cd3062a0f559e12dac3607987a9f62256d184b3d4323fe3",
-        "docstring_hash": "4b5b53305addc3cd6cd3062a0f559e12dac3607987a9f62256d184b3d4323fe3",
-        "file_hash": "4b5b53305addc3cd6cd3062a0f559e12dac3607987a9f62256d184b3d4323fe3",
-        "public_contract_hash": "4b5b53305addc3cd6cd3062a0f559e12dac3607987a9f62256d184b3d4323fe3",
-        "signature_hash": "4b5b53305addc3cd6cd3062a0f559e12dac3607987a9f62256d184b3d4323fe3"
+        "body_hash": "1c1f04d9d0a6cd0de3277760cc5958cde1853fd9f05e8cd7b838c60d63593bc1",
+        "content_hash": "1c1f04d9d0a6cd0de3277760cc5958cde1853fd9f05e8cd7b838c60d63593bc1",
+        "decorator_hash": "1c1f04d9d0a6cd0de3277760cc5958cde1853fd9f05e8cd7b838c60d63593bc1",
+        "docstring_hash": "1c1f04d9d0a6cd0de3277760cc5958cde1853fd9f05e8cd7b838c60d63593bc1",
+        "file_hash": "1c1f04d9d0a6cd0de3277760cc5958cde1853fd9f05e8cd7b838c60d63593bc1",
+        "public_contract_hash": "1c1f04d9d0a6cd0de3277760cc5958cde1853fd9f05e8cd7b838c60d63593bc1",
+        "signature_hash": "1c1f04d9d0a6cd0de3277760cc5958cde1853fd9f05e8cd7b838c60d63593bc1"
       },
       "kind": "file",
-      "line_span": [1, 81],
+      "line_span": [1, 152],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "tests/test_pykokoro_contract.py",
+      "signature": "tests/test_pykokoro_contract.py",
+      "source_id": "py:file:tests/test_pykokoro_contract.py"
+    },
+    "py:file:tests/test_resampling.py": {
+      "hashes": {
+        "body_hash": "ba08d178d3f1fb9423e2af27769e215c7f829eeb7a8c6495879803c591ab6060",
+        "content_hash": "ba08d178d3f1fb9423e2af27769e215c7f829eeb7a8c6495879803c591ab6060",
+        "decorator_hash": "ba08d178d3f1fb9423e2af27769e215c7f829eeb7a8c6495879803c591ab6060",
+        "docstring_hash": "ba08d178d3f1fb9423e2af27769e215c7f829eeb7a8c6495879803c591ab6060",
+        "file_hash": "ba08d178d3f1fb9423e2af27769e215c7f829eeb7a8c6495879803c591ab6060",
+        "public_contract_hash": "ba08d178d3f1fb9423e2af27769e215c7f829eeb7a8c6495879803c591ab6060",
+        "signature_hash": "ba08d178d3f1fb9423e2af27769e215c7f829eeb7a8c6495879803c591ab6060"
+      },
+      "kind": "file",
+      "line_span": [1, 131],
       "path": "tests/test_resampling.py",
       "qualname": "tests/test_resampling.py",
       "signature": "tests/test_resampling.py",
@@ -408,16 +459,16 @@
     },
     "py:file:tests/test_silence.py": {
       "hashes": {
-        "body_hash": "25677103537d4d33d500341c872be8b5483d9c6052b998c609a220dd8677f12b",
-        "content_hash": "25677103537d4d33d500341c872be8b5483d9c6052b998c609a220dd8677f12b",
-        "decorator_hash": "25677103537d4d33d500341c872be8b5483d9c6052b998c609a220dd8677f12b",
-        "docstring_hash": "25677103537d4d33d500341c872be8b5483d9c6052b998c609a220dd8677f12b",
-        "file_hash": "25677103537d4d33d500341c872be8b5483d9c6052b998c609a220dd8677f12b",
-        "public_contract_hash": "25677103537d4d33d500341c872be8b5483d9c6052b998c609a220dd8677f12b",
-        "signature_hash": "25677103537d4d33d500341c872be8b5483d9c6052b998c609a220dd8677f12b"
+        "body_hash": "422994dcac7599d7adf5fb2d97582acc39dfa2135ed93e719ec5707176b35289",
+        "content_hash": "422994dcac7599d7adf5fb2d97582acc39dfa2135ed93e719ec5707176b35289",
+        "decorator_hash": "422994dcac7599d7adf5fb2d97582acc39dfa2135ed93e719ec5707176b35289",
+        "docstring_hash": "422994dcac7599d7adf5fb2d97582acc39dfa2135ed93e719ec5707176b35289",
+        "file_hash": "422994dcac7599d7adf5fb2d97582acc39dfa2135ed93e719ec5707176b35289",
+        "public_contract_hash": "422994dcac7599d7adf5fb2d97582acc39dfa2135ed93e719ec5707176b35289",
+        "signature_hash": "422994dcac7599d7adf5fb2d97582acc39dfa2135ed93e719ec5707176b35289"
       },
       "kind": "file",
-      "line_span": [1, 55],
+      "line_span": [1, 74],
       "path": "tests/test_silence.py",
       "qualname": "tests/test_silence.py",
       "signature": "tests/test_silence.py",
@@ -457,6 +508,40 @@
       "signature": "tests/test_spectral_quality.py",
       "source_id": "py:file:tests/test_spectral_quality.py"
     },
+    "py:file:tests/test_speech.py": {
+      "hashes": {
+        "body_hash": "2ace51078baeb49ed5bd04c679d82019116edd303ac07e07cb5dc9292e8cc640",
+        "content_hash": "2ace51078baeb49ed5bd04c679d82019116edd303ac07e07cb5dc9292e8cc640",
+        "decorator_hash": "2ace51078baeb49ed5bd04c679d82019116edd303ac07e07cb5dc9292e8cc640",
+        "docstring_hash": "2ace51078baeb49ed5bd04c679d82019116edd303ac07e07cb5dc9292e8cc640",
+        "file_hash": "2ace51078baeb49ed5bd04c679d82019116edd303ac07e07cb5dc9292e8cc640",
+        "public_contract_hash": "2ace51078baeb49ed5bd04c679d82019116edd303ac07e07cb5dc9292e8cc640",
+        "signature_hash": "2ace51078baeb49ed5bd04c679d82019116edd303ac07e07cb5dc9292e8cc640"
+      },
+      "kind": "file",
+      "line_span": [1, 98],
+      "path": "tests/test_speech.py",
+      "qualname": "tests/test_speech.py",
+      "signature": "tests/test_speech.py",
+      "source_id": "py:file:tests/test_speech.py"
+    },
+    "py:file:tests/test_speech_quality.py": {
+      "hashes": {
+        "body_hash": "29e1e9f4d98dc12b2422503ef81a3f9a9d940be0dbdec221d5f7b2cde3ce4974",
+        "content_hash": "29e1e9f4d98dc12b2422503ef81a3f9a9d940be0dbdec221d5f7b2cde3ce4974",
+        "decorator_hash": "29e1e9f4d98dc12b2422503ef81a3f9a9d940be0dbdec221d5f7b2cde3ce4974",
+        "docstring_hash": "29e1e9f4d98dc12b2422503ef81a3f9a9d940be0dbdec221d5f7b2cde3ce4974",
+        "file_hash": "29e1e9f4d98dc12b2422503ef81a3f9a9d940be0dbdec221d5f7b2cde3ce4974",
+        "public_contract_hash": "29e1e9f4d98dc12b2422503ef81a3f9a9d940be0dbdec221d5f7b2cde3ce4974",
+        "signature_hash": "29e1e9f4d98dc12b2422503ef81a3f9a9d940be0dbdec221d5f7b2cde3ce4974"
+      },
+      "kind": "file",
+      "line_span": [1, 24],
+      "path": "tests/test_speech_quality.py",
+      "qualname": "tests/test_speech_quality.py",
+      "signature": "tests/test_speech_quality.py",
+      "source_id": "py:file:tests/test_speech_quality.py"
+    },
     "py:file:tests/test_trim_split_quality.py": {
       "hashes": {
         "body_hash": "7d346ac1e633bd48c78669752078fdff1ae9f7f18b74d196c36041071712fc90",
@@ -476,16 +561,16 @@
     },
     "py:file:tests/test_trim_vad_compat.py": {
       "hashes": {
-        "body_hash": "c7305a6b49f3553195b0188caba6b3e4cca14b9052e7e98b777f0646ba5c5366",
-        "content_hash": "c7305a6b49f3553195b0188caba6b3e4cca14b9052e7e98b777f0646ba5c5366",
-        "decorator_hash": "c7305a6b49f3553195b0188caba6b3e4cca14b9052e7e98b777f0646ba5c5366",
-        "docstring_hash": "c7305a6b49f3553195b0188caba6b3e4cca14b9052e7e98b777f0646ba5c5366",
-        "file_hash": "c7305a6b49f3553195b0188caba6b3e4cca14b9052e7e98b777f0646ba5c5366",
-        "public_contract_hash": "c7305a6b49f3553195b0188caba6b3e4cca14b9052e7e98b777f0646ba5c5366",
-        "signature_hash": "c7305a6b49f3553195b0188caba6b3e4cca14b9052e7e98b777f0646ba5c5366"
+        "body_hash": "050fc878fff00ca59244e6233daec6c42d9651e0358ef495283b05fa96a0a284",
+        "content_hash": "050fc878fff00ca59244e6233daec6c42d9651e0358ef495283b05fa96a0a284",
+        "decorator_hash": "050fc878fff00ca59244e6233daec6c42d9651e0358ef495283b05fa96a0a284",
+        "docstring_hash": "050fc878fff00ca59244e6233daec6c42d9651e0358ef495283b05fa96a0a284",
+        "file_hash": "050fc878fff00ca59244e6233daec6c42d9651e0358ef495283b05fa96a0a284",
+        "public_contract_hash": "050fc878fff00ca59244e6233daec6c42d9651e0358ef495283b05fa96a0a284",
+        "signature_hash": "050fc878fff00ca59244e6233daec6c42d9651e0358ef495283b05fa96a0a284"
       },
       "kind": "file",
-      "line_span": [1, 446],
+      "line_span": [1, 508],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "tests/test_trim_vad_compat.py",
       "signature": "tests/test_trim_vad_compat.py",
@@ -510,16 +595,16 @@
     },
     "py:file:tests/test_validation.py": {
       "hashes": {
-        "body_hash": "4bd2810831d22d66f6d5871bcb2dc4b4ddf22de7bc53ca6d989d69cf8d8c313d",
-        "content_hash": "4bd2810831d22d66f6d5871bcb2dc4b4ddf22de7bc53ca6d989d69cf8d8c313d",
-        "decorator_hash": "4bd2810831d22d66f6d5871bcb2dc4b4ddf22de7bc53ca6d989d69cf8d8c313d",
-        "docstring_hash": "4bd2810831d22d66f6d5871bcb2dc4b4ddf22de7bc53ca6d989d69cf8d8c313d",
-        "file_hash": "4bd2810831d22d66f6d5871bcb2dc4b4ddf22de7bc53ca6d989d69cf8d8c313d",
-        "public_contract_hash": "4bd2810831d22d66f6d5871bcb2dc4b4ddf22de7bc53ca6d989d69cf8d8c313d",
-        "signature_hash": "4bd2810831d22d66f6d5871bcb2dc4b4ddf22de7bc53ca6d989d69cf8d8c313d"
+        "body_hash": "4f4e9258bab22b8693073a53e97a7b62838659d327e001400570a35390baca76",
+        "content_hash": "4f4e9258bab22b8693073a53e97a7b62838659d327e001400570a35390baca76",
+        "decorator_hash": "4f4e9258bab22b8693073a53e97a7b62838659d327e001400570a35390baca76",
+        "docstring_hash": "4f4e9258bab22b8693073a53e97a7b62838659d327e001400570a35390baca76",
+        "file_hash": "4f4e9258bab22b8693073a53e97a7b62838659d327e001400570a35390baca76",
+        "public_contract_hash": "4f4e9258bab22b8693073a53e97a7b62838659d327e001400570a35390baca76",
+        "signature_hash": "4f4e9258bab22b8693073a53e97a7b62838659d327e001400570a35390baca76"
       },
       "kind": "file",
-      "line_span": [1, 51],
+      "line_span": [1, 56],
       "path": "tests/test_validation.py",
       "qualname": "tests/test_validation.py",
       "signature": "tests/test_validation.py",
@@ -543,31 +628,47 @@
     },
     "py:function:audiosig/_resampling.py::resample": {
       "hashes": {
-        "body_hash": "911ff80c43f798d46c7ed08e641a3612a509f4660601b9a0335a2b19f465aeed",
-        "content_hash": "af49051fbc74b41d09afdc69e8da1b06dee7c7144e4dd11316c348744cbad524",
+        "body_hash": "42845e093adb1919759c43ef780f0308f282d799c6c806f3934f6da595faff92",
+        "content_hash": "360eaf8007ee75feb267de55a30c9c01c704543cac3314877646864968163cad",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "2b3400339a167905145af9cd8eb08d554541bd4d96dd321ff3a95abefc9398d0",
-        "public_contract_hash": "bab74ba7c3e0d2600a095ac006060b588985b30a5f65f14959ca921df00c7f34",
+        "public_contract_hash": "762733d1b7e8366a880f5d51f76250c57271b266f3acf28523d62e26d1a33780",
         "signature_hash": "a73ff6ddb94ed1986cb90bc05fceb5ad1b0c0a7725cb32ef7282f84fe5675e7e"
       },
       "kind": "function",
-      "line_span": [17, 66],
+      "line_span": [17, 68],
       "path": "audiosig/_resampling.py",
       "qualname": "resample",
       "signature": "resample(audio: np.ndarray, *, source_rate: float, target_rate: float, axis: int=-1, filter_width: int=32, rolloff: float=0.945, length_mode: str='round') -> np.ndarray",
       "source_id": "py:function:audiosig/_resampling.py::resample"
     },
+    "py:function:audiosig/_resampling.py::resample_speed": {
+      "hashes": {
+        "body_hash": "9916692e61fe0d2b74d15c449e54ad0a615a04d931f81fb80c6988e0052bf842",
+        "content_hash": "048afc0fa91710176b50ac6a096f38dceabbbe517639d3b4603934f2c72d0ff7",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "952000720dc1bdfb847b6f94b47f6afc0e7ea6ba950d808858048c6f62c75f91",
+        "public_contract_hash": "fe6ac42e3f773ed4fc10d96b4709beb8592006d4496f763b4dbb841aeffadc48",
+        "signature_hash": "fc9984535a71afdfa219b5c56e0de3d5fe4dbe4346641457d7beb59b1ee5b2e6"
+      },
+      "kind": "function",
+      "line_span": [102, 132],
+      "path": "audiosig/_resampling.py",
+      "qualname": "resample_speed",
+      "signature": "resample_speed(audio: np.ndarray, speed: float, *, axis: int=-1, filter_width: int=32, rolloff: float=0.945) -> np.ndarray",
+      "source_id": "py:function:audiosig/_resampling.py::resample_speed"
+    },
     "py:function:audiosig/_resampling.py::resample_to_length": {
       "hashes": {
-        "body_hash": "8f041082562be9e24ec05bad9f0da5982d53d243629261b1732f451afae715f3",
-        "content_hash": "f5f49af725def1918cfb05af7921182c973e08da3e15bf22912d87664ff37c0e",
+        "body_hash": "43a85c093d244ea69313b6bf25e25cb0eec34e9f709a191f0034ef9839c02bf1",
+        "content_hash": "39579ae815d32646e6bc65e4f7cbbb3b9f201de15ffd9a2ab38fa372119aefea",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "d61771c3329d39f3336ec9da4f9d5cc322f92ab981478abbb8692d1dd35fdd98",
-        "public_contract_hash": "39473f0a7f176d76374fe59d393f54a9dd8ad022256325adfa79848f822b0d4e",
+        "docstring_hash": "f889b9d3c3a58fd7cb16ea667397c16e7a1525c6b0c5168be2df2f2265da25c8",
+        "public_contract_hash": "7d883c1a146b952ac237f7f513b4fb46eb8e1cf961ff293d95039a56c23cb697",
         "signature_hash": "0cd82a7cbefedbb05d298b4b4444c9984cc517878b352e8bb0ab4c2aad2c21fb"
       },
       "kind": "function",
-      "line_span": [69, 89],
+      "line_span": [71, 99],
       "path": "audiosig/_resampling.py",
       "qualname": "resample_to_length",
       "signature": "resample_to_length(audio: np.ndarray, length: int, *, axis: int=-1, filter_width: int=32, rolloff: float=0.945) -> np.ndarray",
@@ -679,11 +780,27 @@
         "signature_hash": "f616075ce7a85e93ac1874176e2e7fdc7fc691a9db93e1be306d1d09cc15c5c4"
       },
       "kind": "function",
-      "line_span": [55, 64],
+      "line_span": [82, 91],
       "path": "audiosig/_validation.py",
       "qualname": "validate_axis",
       "signature": "validate_axis(axis: int, ndim: int) -> int",
       "source_id": "py:function:audiosig/_validation.py::validate_axis"
+    },
+    "py:function:audiosig/_validation.py::validate_boolean": {
+      "hashes": {
+        "body_hash": "e5ce7ac737e9a4506e194fcec20b4f3a20bc3280d45c606e60570219e57ef134",
+        "content_hash": "15c55fcf4aadceb16aa53d86818f2c0eb2c592313f30fbad51e9d7ec8ea58df8",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "ed33bef9338b89a79676effefc645eb53dde12bf394767241ac172dedfeb6de9",
+        "public_contract_hash": "6ae7aee6fa3aae69c8c4a7cec711d3c33fc045fb0d8d5bb3b762dfde4428d4c4",
+        "signature_hash": "835157d52dabc74cab0c33c26496aba856702d7faa615276c2aadda6a7c3a2b1"
+      },
+      "kind": "function",
+      "line_span": [55, 59],
+      "path": "audiosig/_validation.py",
+      "qualname": "validate_boolean",
+      "signature": "validate_boolean(value: bool, name: str) -> bool",
+      "source_id": "py:function:audiosig/_validation.py::validate_boolean"
     },
     "py:function:audiosig/_validation.py::validate_choices": {
       "hashes": {
@@ -695,7 +812,7 @@
         "signature_hash": "9f24f31c9b3915181a5a44ac9292bda642f9bd330befb883516c4cc653673c19"
       },
       "kind": "function",
-      "line_span": [76, 80],
+      "line_span": [103, 107],
       "path": "audiosig/_validation.py",
       "qualname": "validate_choices",
       "signature": "validate_choices(value: str, choices: Iterable[str], name: str) -> str",
@@ -711,11 +828,43 @@
         "signature_hash": "83cb98899413c83464ffa63bec4169f9dd0a15f3b265dc50ea9d12d870e52719"
       },
       "kind": "function",
-      "line_span": [67, 73],
+      "line_span": [94, 100],
       "path": "audiosig/_validation.py",
       "qualname": "validate_filter",
       "signature": "validate_filter(filter_width: int, rolloff: float) -> tuple[int, float]",
       "source_id": "py:function:audiosig/_validation.py::validate_filter"
+    },
+    "py:function:audiosig/_validation.py::validate_finite": {
+      "hashes": {
+        "body_hash": "6bc551a4a33b548178c39bac98e6ca419db82313374f8b15932a1c845c634155",
+        "content_hash": "22ca5e50d00e4f908d1bea43858ec067c6f687bc12a895bed9263fd6fca2c949",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "5a14bbae7e933293d9c03e985cb7fa6b0bd74b8c9d4dabf49e2e67c9a7221cf7",
+        "public_contract_hash": "6d4a6a12128ea04caf37d7b7c76a3b601384e4ed65ec90900582a98f271fc902",
+        "signature_hash": "e91ad3801ae0ba25ba187cab03a8ca304c03fe7a4e0b4792b3e16295c62cc2bd"
+      },
+      "kind": "function",
+      "line_span": [45, 52],
+      "path": "audiosig/_validation.py",
+      "qualname": "validate_finite",
+      "signature": "validate_finite(value: float, name: str) -> float",
+      "source_id": "py:function:audiosig/_validation.py::validate_finite"
+    },
+    "py:function:audiosig/_validation.py::validate_gain_db": {
+      "hashes": {
+        "body_hash": "a74cb124d560ed9d76b401620b92c8baf1d8ee63571e2e018d4c20747d15a366",
+        "content_hash": "91783c23b1f07cf999ddbea49f0886317d248c4040ed5269b1a5af4337d7bf8f",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "06e29b36dc78dc29ff259c5f8ed2687317daef31ea57c70a89f76e3d74378c36",
+        "public_contract_hash": "f750d647cf2c9dced230059f9dd8e10bb93f6c6f31f07fe628813fcb52654695",
+        "signature_hash": "8163083fe5e67c9016c39f564e4e42fc21cabe5f508023859a413648f41f33bd"
+      },
+      "kind": "function",
+      "line_span": [62, 69],
+      "path": "audiosig/_validation.py",
+      "qualname": "validate_gain_db",
+      "signature": "validate_gain_db(value: float, name: str='db') -> float",
+      "source_id": "py:function:audiosig/_validation.py::validate_gain_db"
     },
     "py:function:audiosig/_validation.py::validate_integer": {
       "hashes": {
@@ -727,7 +876,7 @@
         "signature_hash": "0f123d39d552480722c3632f9ba348dc9266d94eea9daa5bffeb95806a6f1d6e"
       },
       "kind": "function",
-      "line_span": [45, 52],
+      "line_span": [72, 79],
       "path": "audiosig/_validation.py",
       "qualname": "validate_integer",
       "signature": "validate_integer(value: int, name: str, *, minimum: int=1) -> int",
@@ -751,15 +900,15 @@
     },
     "py:function:audiosig/amplitude.py::apply_gain_db": {
       "hashes": {
-        "body_hash": "e39b9ffddf52cb1f06c35471dba8e019cfc017959a1a6ebe757cf825f0656d5a",
-        "content_hash": "327a15bafeada3487e14ea1cc5e767892906623e1797a5afd898829f0be1046e",
+        "body_hash": "b1da6b40bb8a271f08a87f1a9fc8d65e0b96d9180fc235596d181b58a3d8e00f",
+        "content_hash": "405425c5533000e0d7009617a85235e9e487dfdf406d79f9ffd6d9b57dcb86a5",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "ffae902048a001582803e6ecfa83a7c24bd9a2cb81b310f4b96cb7477572547a",
-        "public_contract_hash": "8f1c7ab5084d4ff6035a72b10f0e393887126d36ea6b0c60e2cb70233808dc1c",
+        "public_contract_hash": "1d354f27444322f9830eea052ac9d6dc461d6538f52247191e11f075250b5de4",
         "signature_hash": "24643311eb5e8e12c3cfb2888fc97a4daaa14e4fccc06003ed4b05948767bea7"
       },
       "kind": "function",
-      "line_span": [11, 26],
+      "line_span": [11, 32],
       "path": "audiosig/amplitude.py",
       "qualname": "apply_gain_db",
       "signature": "apply_gain_db(audio: np.ndarray, db: float, *, clip: bool=False) -> np.ndarray",
@@ -767,15 +916,15 @@
     },
     "py:function:audiosig/amplitude.py::peak_normalize": {
       "hashes": {
-        "body_hash": "b480b2efd3ee7e801871640ec47f9cc8e1a5a475c967ff29b9250ecd32c61ed5",
-        "content_hash": "2e627eb363688a76d57ff18fece73f9a6defaa0b3e79ce832129dd83ec44c9c5",
+        "body_hash": "8803798453b14419c15eb90bbeb8fc4555c39f471bcaa4e1ff4480c6a9af48b2",
+        "content_hash": "d6b4c87b94d94b34b4717858392b40249ea61fcadeeab14b56b9be2519cb7b9a",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "911f34f78de6f52ba665a10e90568802851f2f47fb299a80856bdc3fdf3c777c",
-        "public_contract_hash": "f10fb364c629851f1f93105fd1a5ab961d8658be233d96e6278f7ffc6c9e2877",
+        "public_contract_hash": "7f0e5477751a6feae12dfd62aa9ba89640e9b2fbce9889923759843a3104e4fb",
         "signature_hash": "ce3a2dfd4da0c132bd54f1c77ccb1388f637d7aefd5c2c8bcd22797c2a0cd37e"
       },
       "kind": "function",
-      "line_span": [29, 41],
+      "line_span": [35, 55],
       "path": "audiosig/amplitude.py",
       "qualname": "peak_normalize",
       "signature": "peak_normalize(audio: np.ndarray, *, peak: float=1.0, eps: float=1e-12) -> np.ndarray",
@@ -783,15 +932,15 @@
     },
     "py:function:audiosig/effects.py::pitch_shift": {
       "hashes": {
-        "body_hash": "0ee463c5b44310899bfdbb2f3c146f01357bb5ee71ede7d88bad1e53fe1d9b96",
-        "content_hash": "60e6be4a74583dbdc9acc6cad3eebb508970c5fda043b84af9f447c09c3b6429",
+        "body_hash": "30a5d85870710ec4504bd64eaa71a8d23aac945b39c6f6ed699327a0bc433b17",
+        "content_hash": "eb6b5a19a71afc75ebc2d893ac580ec6626a13f765d5d717da7eaf3161c8c963",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "c46f3b35d21c7f82af6e17741c46679a82c2a5a0b07d7861ce33b83155e79b54",
-        "public_contract_hash": "9b28d53dbc68189972cdda646706e79b0abca32df6f50882d7b9592658b5c804",
+        "public_contract_hash": "c480c85d77e5bbfc2c45afeaa69880521e45f8bb03e814a4a574d40ad23b14eb",
         "signature_hash": "f465b90ad6bd3e81ad64a920aeda94065b64c5cf786ef6def4ebfdd420cfa19e"
       },
       "kind": "function",
-      "line_span": [57, 90],
+      "line_span": [65, 113],
       "path": "audiosig/effects.py",
       "qualname": "pitch_shift",
       "signature": "pitch_shift(audio: np.ndarray, *, sample_rate: int, semitones: float, bins_per_octave: int=12, axis: int=-1, n_fft: int=2048, hop_length: int | None=None, filter_width: int=32) -> np.ndarray",
@@ -799,15 +948,15 @@
     },
     "py:function:audiosig/effects.py::time_stretch": {
       "hashes": {
-        "body_hash": "9b29b95a3dd1039323481b9a7b1b59a7c57d282638f58084bd7899c6ee378a67",
-        "content_hash": "4045fe30eb1384514753feee6c4d066f0be78a42903a514fa15acc69f64338b9",
+        "body_hash": "1edd299e546d2aa6eec581b656858830813ee80c23bd4c4b8bb24c491c0d37e3",
+        "content_hash": "a476429e92668510b4d2405be954f716d6d55f00bd1f72a2447e15e67b4b78b3",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "e916e36e60a5c026adee3f87ea0704a5fe7fd650375f45367707d55ffef6d28a",
-        "public_contract_hash": "cbee9f577f87818a00e0172a1aabf3eff515a391c27a112a8c5babfcdcd8f067",
+        "public_contract_hash": "16d096f71bb2f193ce1360153c80132c892ad9a27fbd8dabc44eb42ebc8dd79b",
         "signature_hash": "bc78aed4ebe7cd62e6aea1b7a3f31c140b356cb275e63fa2c24bba9c27dc1ceb"
       },
       "kind": "function",
-      "line_span": [13, 54],
+      "line_span": [19, 62],
       "path": "audiosig/effects.py",
       "qualname": "time_stretch",
       "signature": "time_stretch(audio: np.ndarray, rate: float, *, axis: int=-1, n_fft: int=2048, hop_length: int | None=None) -> np.ndarray",
@@ -823,27 +972,11 @@
         "signature_hash": "8092194f7a2b99466efd8aa73897b97f9c608a579bfe8e5fb2afad9d4d094792"
       },
       "kind": "function",
-      "line_span": [129, 159],
+      "line_span": [130, 160],
       "path": "audiosig/silence.py",
       "qualname": "_frame_lengths",
       "signature": "_frame_lengths(*, frame_length: int | None, hop_length: int | None, sample_rate: int | None, frame_ms: float, hop_ms: float) -> tuple[int, int]",
       "source_id": "py:function:audiosig/silence.py::_frame_lengths"
-    },
-    "py:function:audiosig/silence.py::_minmax_normalize": {
-      "hashes": {
-        "body_hash": "8bda26c4b82e441cfb5a469ebd12ebbbbfb71c18f210d4205053401f355dca2e",
-        "content_hash": "5dedb79bbde20022b18ec1059439cca18fc4711b70d1c6607d401092aa1b74b9",
-        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "public_contract_hash": "0572740435728918f151b7371961844ded3db15006c997c4ff76f836e499690a",
-        "signature_hash": "04477689478102a6cd77e3b3e62df9190fc66c5b669d53fdd1e29f281c149707"
-      },
-      "kind": "function",
-      "line_span": [362, 372],
-      "path": "audiosig/silence.py",
-      "qualname": "_minmax_normalize",
-      "signature": "_minmax_normalize(values: np.ndarray) -> np.ndarray",
-      "source_id": "py:function:audiosig/silence.py::_minmax_normalize"
     },
     "py:function:audiosig/silence.py::_reference_value": {
       "hashes": {
@@ -855,7 +988,7 @@
         "signature_hash": "3a8c3e2492d316e2fa056ea546fa0ab1647379abe7995c1b14489a0d4126171d"
       },
       "kind": "function",
-      "line_span": [32, 43],
+      "line_span": [33, 44],
       "path": "audiosig/silence.py",
       "qualname": "_reference_value",
       "signature": "_reference_value(values: np.ndarray, ref: Reference) -> float",
@@ -871,7 +1004,7 @@
         "signature_hash": "d499815edfcf426c7fb461d83ad9fefd9e18d27ddb8ae017df118cdc1537e9bc"
       },
       "kind": "function",
-      "line_span": [23, 29],
+      "line_span": [24, 30],
       "path": "audiosig/silence.py",
       "qualname": "abs2",
       "signature": "abs2(values: np.ndarray, *, dtype: np.dtype | type | None=None) -> np.ndarray",
@@ -879,18 +1012,18 @@
     },
     "py:function:audiosig/silence.py::activity_to_intervals": {
       "hashes": {
-        "body_hash": "c46b3493f1b8fa475de2f483f574ce764643ba595945e910edb817edbd8e232f",
-        "content_hash": "6fd657e520b3af61c08dc412b98f63048203cf01036246ccbb6eba231126341b",
+        "body_hash": "f66f221df278d61c6fa5bb13d65c263bd08b5731b370bc43f888afaa32b25da6",
+        "content_hash": "a4da792f3119390709edd31a9848dc39e7a360f3d91411a1f44e90bbcf5170b0",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "7742e960b24eade3bb6373bf8a3cbf3879100d8a0712ceb4598110147b4620ca",
-        "public_contract_hash": "b734d0c9da4d8c58eff3e8ccf927fad971ed7f466e284a4f777c07cd4a8ccdfa",
-        "signature_hash": "e5c6a02d68444ee6b7db7cc9db190b546deafadc384dd7739b211cc03adc060e"
+        "public_contract_hash": "8036cd69706060d32f3d0737d4548bed14ab4920ea38b5f60064de96e81a2b77",
+        "signature_hash": "35fa90c14334300b64878088aaf0fa1848996f62a426d4574a2af746b1109279"
       },
       "kind": "function",
-      "line_span": [413, 434],
+      "line_span": [458, 486],
       "path": "audiosig/silence.py",
       "qualname": "activity_to_intervals",
-      "signature": "activity_to_intervals(activity: np.ndarray, *, hop_length: int, sample_count: int) -> np.ndarray",
+      "signature": "activity_to_intervals(activity: np.ndarray, *, hop_length: int, sample_count: int, min_frames: int=1) -> np.ndarray",
       "source_id": "py:function:audiosig/silence.py::activity_to_intervals"
     },
     "py:function:audiosig/silence.py::amplitude_to_db": {
@@ -903,7 +1036,7 @@
         "signature_hash": "a14ec429b9d47daeec919183de56921a9dd6cde1e505867b58723f4364f04ba7"
       },
       "kind": "function",
-      "line_span": [77, 97],
+      "line_span": [78, 98],
       "path": "audiosig/silence.py",
       "qualname": "amplitude_to_db",
       "signature": "amplitude_to_db(amplitude: np.ndarray, *, ref: Reference=1.0, amin: float=1e-05, top_db: float | None=None) -> np.ndarray",
@@ -919,7 +1052,7 @@
         "signature_hash": "81c6988c8c1c29cdbceb3175066ffd774e9067ce9c80d9ae20a38589766b7ddd"
       },
       "kind": "function",
-      "line_span": [556, 599],
+      "line_span": [610, 653],
       "path": "audiosig/silence.py",
       "qualname": "energy_based_vad",
       "signature": "energy_based_vad(audio: np.ndarray, sample_rate: int | None=None, *, frame_duration_ms: float=5.0, energy_threshold: float | None=None, frame_length: int=2048, hop_length: int=512, threshold_db: float=40.0, top_db: float | None=None, axis: int=-1, pad_end: bool=False) -> np.ndarray",
@@ -935,7 +1068,7 @@
         "signature_hash": "00ea4f52711d0a86d839c61b405db7009f810541e0ab1a730262bd6726949728"
       },
       "kind": "function",
-      "line_span": [640, 678],
+      "line_span": [685, 723],
       "path": "audiosig/silence.py",
       "qualname": "find_speech_bounds",
       "signature": "find_speech_bounds(audio: np.ndarray, sample_rate: int | None=None, *, frame_duration_ms: float=5.0, energy_threshold: float | None=None, frame_length: int=2048, hop_length: int=512, threshold_db: float=40.0, top_db: float | None=None, axis: int=-1, pad_end: bool=False) -> np.ndarray",
@@ -943,34 +1076,34 @@
     },
     "py:function:audiosig/silence.py::find_speech_start": {
       "hashes": {
-        "body_hash": "3a3b981c5c37a9da315a3c3035f37dccb3bfc688337162611885a8457a4839a0",
-        "content_hash": "83ddb2c68d4346f44a8c01c286b35593c6a0f51f4322273a9f059a01771614d8",
+        "body_hash": "86fea56d5e659280fc5d69b1d21a3a74a9e2d8d67e36172aa0e69f3a4f133df6",
+        "content_hash": "1176a88f3b888563b13b3339eca34048aeef4630e7807a3776e9941787aa6309",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "b0f5c1e99e55a3574ce84c424621da40bbd40b6f8b65b759621ed34b805bced1",
-        "public_contract_hash": "bc2e195bbff469fa9e785f07a8a472de90f6d719aa80085ad249d384df3fdf9c",
-        "signature_hash": "d0928f3c76e1958f8f2d17313d5a8e25dbade78a77bcd7da681aeb4cdc91ac39"
+        "public_contract_hash": "f2384718fe0f34c71acd7b0d49490663633fc6d5d1d3ec03228504454401a850",
+        "signature_hash": "831e94545e36e42b4d1e3047b5ba9075c5338be4c9f2c71c9c91ba1e2eb4cf7b"
       },
       "kind": "function",
-      "line_span": [602, 637],
+      "line_span": [656, 682],
       "path": "audiosig/silence.py",
       "qualname": "find_speech_start",
-      "signature": "find_speech_start(audio: np.ndarray, sample_rate: int | None=None, *, frame_duration_ms: float=5.0, energy_threshold: float | None=None, frame_length: int=2048, hop_length: int=512, threshold_db: float=40.0, axis: int=-1, pad_end: bool=False) -> int",
+      "signature": "find_speech_start(audio: np.ndarray, sample_rate: int | None=None, *, frame_duration_ms: float=5.0, energy_threshold: float | None=None, frame_length: int=2048, hop_length: int=512, threshold_db: float=40.0, top_db: float | None=None, axis: int=-1, pad_end: bool=False) -> int",
       "source_id": "py:function:audiosig/silence.py::find_speech_start"
     },
     "py:function:audiosig/silence.py::frame_rms": {
       "hashes": {
-        "body_hash": "616f24e620c926e0381c95e7fd1d5494b7ee8f322680ce221865d8eda654c723",
-        "content_hash": "7d917da23089d5621d2376e9a537fd8e0f800b640c23284f7de9cde673448712",
+        "body_hash": "5c9754a18b2f7545835e2c54ff68ebf8ad8eb866af05c20014f3f61f94a97ac8",
+        "content_hash": "9b45edff951f261bede004797a5462138f42c9c1be1fb456a995f629c0729086",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "ffd0ea772c02e767455453a56a65dbc31b22ce53b8da80c95e89b2ef49a11183",
-        "public_contract_hash": "e23879297f3c1bf1b42327419936db7f76dda9259119aeeeaa5659ecf2021399",
-        "signature_hash": "0c11b9bc65778e13c50c8d184791664e15a14b0204087081571c39a32f30abca"
+        "public_contract_hash": "ff67a351b8c94028eaf656e509088aa90d53135ce4b4a0f83ce6d75a9d851d7d",
+        "signature_hash": "091d61544b84110c8ea39f265152d700525ab64ee4ae9a5c9ae449934560c89d"
       },
       "kind": "function",
-      "line_span": [230, 251],
+      "line_span": [231, 256],
       "path": "audiosig/silence.py",
       "qualname": "frame_rms",
-      "signature": "frame_rms(audio: np.ndarray, *, frame_length: int=2048, hop_length: int=512, axis: int=-1, center: bool=True, pad_mode: str='constant', dtype: np.dtype | type=np.float32) -> np.ndarray",
+      "signature": "frame_rms(audio: np.ndarray, *, frame_length: int=2048, hop_length: int=512, axis: int=-1, center: bool=True, pad_mode: str='constant', pad_end: bool=False, normalize: bool=False, dtype: np.dtype | type=np.float32) -> np.ndarray",
       "source_id": "py:function:audiosig/silence.py::frame_rms"
     },
     "py:function:audiosig/silence.py::frame_signal": {
@@ -983,7 +1116,7 @@
         "signature_hash": "ee97eb07bf86d85032b9c5984f1cd0f58a862601d6ff491dc540529b7022f2ee"
       },
       "kind": "function",
-      "line_span": [162, 227],
+      "line_span": [163, 228],
       "path": "audiosig/silence.py",
       "qualname": "frame_signal",
       "signature": "frame_signal(audio: np.ndarray, *, frame_length: int | None=None, hop_length: int | None=None, sample_rate: int | None=None, frame_ms: float=20.0, hop_ms: float=10.0, axis: int=-1, center: bool=False, pad_mode: str='constant', pad_end: bool=False) -> np.ndarray",
@@ -999,7 +1132,7 @@
         "signature_hash": "d10107fcb80e024d8a9f8376200a6ddba7f8c9c2e1da82fa48d53ef6b58fc487"
       },
       "kind": "function",
-      "line_span": [100, 113],
+      "line_span": [101, 114],
       "path": "audiosig/silence.py",
       "qualname": "frames_to_samples",
       "signature": "frames_to_samples(frames: np.ndarray | int, *, hop_length: int=512, n_fft: int | None=None) -> np.ndarray | int",
@@ -1015,11 +1148,27 @@
         "signature_hash": "84ab040d24a082576b903d24c02934e1c7de47e5b94743510f7a67b3d1de0572"
       },
       "kind": "function",
-      "line_span": [324, 359],
+      "line_span": [335, 370],
       "path": "audiosig/silence.py",
       "qualname": "median_filter_numpy",
       "signature": "median_filter_numpy(values: np.ndarray, size: int=3, *, window_size: int | None=None, mode: str='edge') -> np.ndarray",
       "source_id": "py:function:audiosig/silence.py::median_filter_numpy"
+    },
+    "py:function:audiosig/silence.py::minmax_normalize": {
+      "hashes": {
+        "body_hash": "fac434218fce9c40c11e9a26337f7dc3495acf31686cb5386a474f780b455f4d",
+        "content_hash": "97fbf29d6a10f37582d535b5a291a172ce2339311e4c3c49aaf4fd12eef0139c",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "653e3b3915d9d66bd8a75fa4ec4c1ed922c811795a75d1f677af6f5490e3f117",
+        "public_contract_hash": "d066abeecdb57a40e55b9b556e1dec9ae7f7644a017633d8f4d261baafc02ce5",
+        "signature_hash": "0420cbf105c649247155eda53c504aa479cda8ec98a8b6b77e0921dd5cc2fb9d"
+      },
+      "kind": "function",
+      "line_span": [373, 417],
+      "path": "audiosig/silence.py",
+      "qualname": "minmax_normalize",
+      "signature": "minmax_normalize(values: np.ndarray, *, axis: int=-1, dtype: np.dtype | type | None=None) -> np.ndarray",
+      "source_id": "py:function:audiosig/silence.py::minmax_normalize"
     },
     "py:function:audiosig/silence.py::non_silent_frames": {
       "hashes": {
@@ -1031,7 +1180,7 @@
         "signature_hash": "99db3c50d19de183867e42fcec7912e80d669903e5b30532becbe57c2c7ee228"
       },
       "kind": "function",
-      "line_span": [375, 410],
+      "line_span": [420, 455],
       "path": "audiosig/silence.py",
       "qualname": "non_silent_frames",
       "signature": "non_silent_frames(audio: np.ndarray, *, top_db: float=60.0, ref: Reference=np.max, frame_length: int=2048, hop_length: int=512, aggregate: Aggregate=np.max, axis: int=-1, center: bool=True, pad_mode: str='constant') -> np.ndarray",
@@ -1039,15 +1188,15 @@
     },
     "py:function:audiosig/silence.py::normalized_energy_vad": {
       "hashes": {
-        "body_hash": "506323a20857cd628806736b7ce3a36686ead8e9b09c2278509a81052682d5fa",
-        "content_hash": "9eb27e8fc096d6513b037881cc8bc0f4a62cc8e7f9c7fb91e7dc2a2bed66dfdc",
+        "body_hash": "ff709200042aa1b7b32745c73e51600ef4f26c3984b8686a21207c6347f15aea",
+        "content_hash": "70f5edb755d0861e29f2a8c40b4cef6e2d79d01d288ba2c3cb4f2d2a6e25a8cc",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "7cfe9ada3c34ab7753a2806e38274caa174fa1c82332206e8336a0dfbb53c0b4",
-        "public_contract_hash": "3ac2008065f9a3f2eb1baed24296fdce80ba7322bb3d6e3794e9807425352e08",
+        "public_contract_hash": "e88583f47707954aa98b58f26ae86e05c36c02e130905f8fee9e577920de7929",
         "signature_hash": "3a93c57d15b1e3da52ade3ea1cae88e6433cc8f56103354352fe443f7877da00"
       },
       "kind": "function",
-      "line_span": [483, 514],
+      "line_span": [535, 568],
       "path": "audiosig/silence.py",
       "qualname": "normalized_energy_vad",
       "signature": "normalized_energy_vad(audio: np.ndarray, sample_rate: int, *, frame_duration_ms: float=5.0, energy_threshold: float=0.02, axis: int=-1, pad_end: bool=False) -> np.ndarray",
@@ -1063,7 +1212,7 @@
         "signature_hash": "19ee7a6637cb9978fc53fc2b18d249891887493d986ea21241a70afdc3076742"
       },
       "kind": "function",
-      "line_span": [46, 74],
+      "line_span": [47, 75],
       "path": "audiosig/silence.py",
       "qualname": "power_to_db",
       "signature": "power_to_db(power: np.ndarray, *, ref: Reference=1.0, amin: float=1e-10, top_db: float | None=None) -> np.ndarray",
@@ -1079,7 +1228,7 @@
         "signature_hash": "4d837e97d7bea81fe8b299555a4f3c3821c5d4b4c10cb7483da3d3c888056595"
       },
       "kind": "function",
-      "line_span": [517, 553],
+      "line_span": [571, 607],
       "path": "audiosig/silence.py",
       "qualname": "relative_db_vad",
       "signature": "relative_db_vad(audio: np.ndarray, *, frame_length: int=2048, hop_length: int=512, threshold_db: float=40.0, top_db: float | None=None, axis: int=-1, pad_end: bool=False) -> np.ndarray",
@@ -1095,7 +1244,7 @@
         "signature_hash": "ecfb3b0b1e1b94ae71dc6c08a43edc9831564f4f23880a566bd918039aaea6f6"
       },
       "kind": "function",
-      "line_span": [116, 126],
+      "line_span": [117, 127],
       "path": "audiosig/silence.py",
       "qualname": "rms",
       "signature": "rms(audio: np.ndarray, *, axis: int=-1) -> np.ndarray",
@@ -1103,34 +1252,34 @@
     },
     "py:function:audiosig/silence.py::short_time_energy": {
       "hashes": {
-        "body_hash": "09400c13d29f87c09aa1d3474015a42f8950a076e842b70a1d382482750528ae",
-        "content_hash": "0791ccca62148b5ec07ffd1fa19db14592e803a2317eaf80a7495d6a99d0e548",
+        "body_hash": "e0cb8ccc41821130fcd8a63942f20aaad4e85e95feb49443d942d840fb456360",
+        "content_hash": "9baf4130080a9073872d2476cf01abab8753225b9cb2c6dd3612cc2cfa828e98",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "928837832cfb1d2529d83cd6914fd67ce05e3da0aad1c337125cb216863f3fea",
-        "public_contract_hash": "d92fa19a179515db8231ad1b27cc418817584142de81bb174c15288fed2671a6",
-        "signature_hash": "a82013be29a38ffb415652090dfcfd53a8983e9d82a6686da95275c690849ddc"
+        "public_contract_hash": "0162e00df78b003ac8504d9cab6b9d956a4709ac898736f07e25cede45f8ee71",
+        "signature_hash": "e8df9a365770f8f3f934c0188b71b6737c9be0a6a3f1e81d8a64ce7899ac7847"
       },
       "kind": "function",
-      "line_span": [254, 270],
+      "line_span": [259, 277],
       "path": "audiosig/silence.py",
       "qualname": "short_time_energy",
-      "signature": "short_time_energy(audio: np.ndarray, *, frame_length: int=2048, hop_length: int=512, axis: int=-1, center: bool=False) -> np.ndarray",
+      "signature": "short_time_energy(audio: np.ndarray, *, frame_length: int=2048, hop_length: int=512, axis: int=-1, center: bool=False, pad_end: bool=False) -> np.ndarray",
       "source_id": "py:function:audiosig/silence.py::short_time_energy"
     },
     "py:function:audiosig/silence.py::spectral_flux": {
       "hashes": {
-        "body_hash": "e16b97de023fef287bfbc581e268a08442457b428c4bd3e122963020fa8e72b2",
-        "content_hash": "9984bd46a219d32dddf1a5317beef602e693968656875c932bda84588ad403cd",
+        "body_hash": "d613a05f2dec0855075e86acbd89530daf1aab1c391e3b4a35bd7d4fab79603d",
+        "content_hash": "6118d4b0ba1fa05edce1b03c07d508735bcf4d9b5a56b7e9fbffc70584487bf0",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "6ec9f182507422fadcc449c9785d3065d26ebf38db128e27bde921e4da6d100a",
-        "public_contract_hash": "d02bc4f064c452a862a31c8272dcb37b8a2ef4045a82201a89821dcfb107d613",
-        "signature_hash": "0aad26598d8b4e431ade1ede8e142a956d6cb404c32e2c423d263c71d01f2baa"
+        "public_contract_hash": "19449416b4ea64d95b92b1643cb4a074be1f7313ffc87287e735a7b518689766",
+        "signature_hash": "438ef7e1cc038b591056b05ac906925f341f11c230115d09aa9298064cbf3a4f"
       },
       "kind": "function",
-      "line_span": [298, 321],
+      "line_span": [307, 332],
       "path": "audiosig/silence.py",
       "qualname": "spectral_flux",
-      "signature": "spectral_flux(audio: np.ndarray, *, frame_length: int=2048, hop_length: int=512, axis: int=-1, center: bool=False, window: str='hann', normalize: bool=False) -> np.ndarray",
+      "signature": "spectral_flux(audio: np.ndarray, *, frame_length: int=2048, hop_length: int=512, axis: int=-1, center: bool=False, pad_end: bool=False, window: str='hann', normalize: bool=False) -> np.ndarray",
       "source_id": "py:function:audiosig/silence.py::spectral_flux"
     },
     "py:function:audiosig/silence.py::split": {
@@ -1143,7 +1292,7 @@
         "signature_hash": "72de4d7925dccea94aedf7f5aabb3384e3cb96f5fff1f7542b2cb7547f17a6fc"
       },
       "kind": "function",
-      "line_span": [437, 480],
+      "line_span": [489, 532],
       "path": "audiosig/silence.py",
       "qualname": "split",
       "signature": "split(audio: np.ndarray, *, top_db: float=60.0, ref: Reference=np.max, frame_length: int=2048, hop_length: int=512, aggregate: Aggregate=np.max, axis: int=-1, center: bool=True, pad_mode: str='constant') -> np.ndarray",
@@ -1159,7 +1308,7 @@
         "signature_hash": "befb20a5db057618b9daed32ceeb17cb34b5f2644dfb15741a2760aa5d45b815"
       },
       "kind": "function",
-      "line_span": [681, 732],
+      "line_span": [726, 777],
       "path": "audiosig/silence.py",
       "qualname": "trim",
       "signature": "trim(audio: np.ndarray, *, top_db: float=60.0, ref: Reference=np.max, frame_length: int=2048, hop_length: int=512, aggregate: Aggregate=np.max, axis: int=-1, center: bool=True, pad_mode: str='constant') -> tuple[np.ndarray, np.ndarray]",
@@ -1167,19 +1316,35 @@
     },
     "py:function:audiosig/silence.py::zero_crossing_rate": {
       "hashes": {
-        "body_hash": "449b9d547a4b3a53613c8b401277b51260bec6784837ec6d751ccf3244e3994a",
-        "content_hash": "d13da5d70c9db0b06c247324329c5bff3163cf7796c8752fc7df122a2bc58b2e",
+        "body_hash": "b5076f2daff7330acc82f83e8b4a8f1269c6728aa4c93cdc0f2ce4005228c57f",
+        "content_hash": "e039f881b8e39a1628e451c768cd918f69d41a5eb2dbc9feeea9d6e7689ac369",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "5635ff85bd7f6f4c637a664ec2b315c7b7442849547a5987703754937d7e6dd9",
-        "public_contract_hash": "38b2f7168e51e63434213cb48300dba1fcf8e74a1f33d5a48c9e99e332764448",
-        "signature_hash": "f004159c47ee8586e96a6aa0d1a5a7dd57ab2a012aa0ca98826ae7a1376c50b5"
+        "public_contract_hash": "30e916a7db950db258302dbec81aca51c006ee36c67b558bddbd04c850143a8d",
+        "signature_hash": "c5edaf607c4bd3916b79d229d505d83cdfdf4e09ccd6686ed0c94fac6425383b"
       },
       "kind": "function",
-      "line_span": [273, 295],
+      "line_span": [280, 304],
       "path": "audiosig/silence.py",
       "qualname": "zero_crossing_rate",
-      "signature": "zero_crossing_rate(audio: np.ndarray, *, frame_length: int=2048, hop_length: int=512, axis: int=-1, center: bool=False, normalize: bool=False) -> np.ndarray",
+      "signature": "zero_crossing_rate(audio: np.ndarray, *, frame_length: int=2048, hop_length: int=512, axis: int=-1, center: bool=False, pad_end: bool=False, normalize: bool=False) -> np.ndarray",
       "source_id": "py:function:audiosig/silence.py::zero_crossing_rate"
+    },
+    "py:function:audiosig/speech.py::apply_speech_effects": {
+      "hashes": {
+        "body_hash": "d2934a6f84c9fb737180ebae69abaa0c1d7a42b824a7410c38819dba52407653",
+        "content_hash": "85a90bf7fe776dc1d5521096b3b725469fd85d7ea1f75994d3ca459964d7d852",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "ced0bfdc171cf05416119fe3d178f2af95d8fdd0d1c8fd6842c7661204b29d56",
+        "public_contract_hash": "b59718d74a89e31a71cbe2b41cac33ba1f00c4cf2ac7e31a19091c8bbdc13caf",
+        "signature_hash": "f3e35b336233ec9a3c1812dd1dfe5e060ce4016e5fbb88567f59737cc03a2784"
+      },
+      "kind": "function",
+      "line_span": [21, 82],
+      "path": "audiosig/speech.py",
+      "qualname": "apply_speech_effects",
+      "signature": "apply_speech_effects(audio: np.ndarray, *, sample_rate: int, rate: float=1.0, semitones: float=0.0, gain_db: float=0.0, axis: int=-1, clip: bool=False, n_fft: int=2048, hop_length: int | None=None, filter_width: int=32, rolloff: float=0.945) -> np.ndarray",
+      "source_id": "py:function:audiosig/speech.py::apply_speech_effects"
     },
     "py:function:tests/_quality_helpers.py::dominant_frequency": {
       "hashes": {
@@ -1293,6 +1458,22 @@
       "signature": "sine_factory() -> Callable[..., np.ndarray]",
       "source_id": "py:function:tests/conftest.py::sine_factory"
     },
+    "py:function:tests/test_amplitude.py::test_amplitude_operations_accept_empty_arrays": {
+      "hashes": {
+        "body_hash": "62496224d97c6067f5a45a0e71061785fdb03a782f7b2a09b1f851e6217dc584",
+        "content_hash": "533899e76bcbfc0a2b108a161c765d048ac03ca2ec315b04fec76f58f908c995",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "bc376d029809edaf06fe2a3d450418dab7957db8fc7a1b34e3ad1077089bccbd",
+        "signature_hash": "173ff144b33f656e75dc3e6140a7653263c4ff1581f000421e49b33810e0e8a7"
+      },
+      "kind": "function",
+      "line_span": [37, 48],
+      "path": "tests/test_amplitude.py",
+      "qualname": "test_amplitude_operations_accept_empty_arrays",
+      "signature": "test_amplitude_operations_accept_empty_arrays() -> None",
+      "source_id": "py:function:tests/test_amplitude.py::test_amplitude_operations_accept_empty_arrays"
+    },
     "py:function:tests/test_amplitude.py::test_gain_and_clipping_preserve_dtype_and_input": {
       "hashes": {
         "body_hash": "e6a15c0d42e41db82b3ec354aa874ad85b60b95c4bcbd8dc3a7c3ea65ca2debb",
@@ -1309,6 +1490,22 @@
       "signature": "test_gain_and_clipping_preserve_dtype_and_input() -> None",
       "source_id": "py:function:tests/test_amplitude.py::test_gain_and_clipping_preserve_dtype_and_input"
     },
+    "py:function:tests/test_amplitude.py::test_gain_rejects_unrepresentable_finite_db": {
+      "hashes": {
+        "body_hash": "45a41a97e86bce490b4aba5fa0cd6021c85628d236b6657f12dd52337c4bdfae",
+        "content_hash": "033b94eb706f3cca65ae480a0fac3ff7139301f887123e79ec0ffba5448b75b9",
+        "decorator_hash": "967d983d7015cfb07103e27839b8015dc50fc5f25551fe7b06e33f1c8fb15db3",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "e4ba9a7e55c4307636be6ea71c006f900c3ba5e931d1ed06293eafe00910679d",
+        "signature_hash": "d95a7776ce1991c10f49fe59b78e764b3348d6d867ee404d976a2e750e423dc1"
+      },
+      "kind": "function",
+      "line_span": [52, 55],
+      "path": "tests/test_amplitude.py",
+      "qualname": "test_gain_rejects_unrepresentable_finite_db",
+      "signature": "test_gain_rejects_unrepresentable_finite_db(db: float) -> None",
+      "source_id": "py:function:tests/test_amplitude.py::test_gain_rejects_unrepresentable_finite_db"
+    },
     "py:function:tests/test_amplitude.py::test_peak_normalize_and_silence": {
       "hashes": {
         "body_hash": "316dc8b5e8cc527b4db2e70296e68130c800eb34aa97fe6c9ae723723cff059f",
@@ -1324,6 +1521,54 @@
       "qualname": "test_peak_normalize_and_silence",
       "signature": "test_peak_normalize_and_silence() -> None",
       "source_id": "py:function:tests/test_amplitude.py::test_peak_normalize_and_silence"
+    },
+    "py:function:tests/test_amplitude.py::test_peak_normalize_rejects_target_outside_dtype_range": {
+      "hashes": {
+        "body_hash": "d6ab335fd2231f379a8cf8e9ed4259f93156df83e1d40fc4b7d4331b1a6ea393",
+        "content_hash": "d3d7804edd9cf277d9c15859704e818fdda320421fcb459cb1df3a89ab5b8ef0",
+        "decorator_hash": "e5fcc989e002a3646b45822235a49d7a7a2d83fa734407833127ffecfc8a64d3",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "10d45f324ebfd93ef1b8fa472295e9df5ee9d3192b094ae127bb55830df19a5d",
+        "signature_hash": "08239d06056af3f5415c4ecfa2ff2c0a84d5bb7c105ebbc41e7c08ec7d9fbdf3"
+      },
+      "kind": "function",
+      "line_span": [59, 63],
+      "path": "tests/test_amplitude.py",
+      "qualname": "test_peak_normalize_rejects_target_outside_dtype_range",
+      "signature": "test_peak_normalize_rejects_target_outside_dtype_range(dtype: type[np.floating]) -> None",
+      "source_id": "py:function:tests/test_amplitude.py::test_peak_normalize_rejects_target_outside_dtype_range"
+    },
+    "py:function:tests/test_documentation_examples.py::test_advanced_empty_audio_documentation_contract": {
+      "hashes": {
+        "body_hash": "d1fb2f4578c5d864b8c73f3bc14b57b306059e040b167f0080849149b57b375e",
+        "content_hash": "840904cf756df5e9043e4df488730c38be34abde88c3967d8e178af97635160c",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "28b68957473bab5d00e702b52a50d0fc5ed9bb23197d0c21a59d25e7f6e831a2",
+        "signature_hash": "779fee32c37bc9cf9151bbed98928d9efed1947db5c678beaa37c57679bc2e0c"
+      },
+      "kind": "function",
+      "line_span": [9, 21],
+      "path": "tests/test_documentation_examples.py",
+      "qualname": "test_advanced_empty_audio_documentation_contract",
+      "signature": "test_advanced_empty_audio_documentation_contract() -> None",
+      "source_id": "py:function:tests/test_documentation_examples.py::test_advanced_empty_audio_documentation_contract"
+    },
+    "py:function:tests/test_documentation_examples.py::test_advanced_silent_audio_documentation_example": {
+      "hashes": {
+        "body_hash": "be5fcf41d158b921d16f8462a321dfd260b5bbb4f09933a2c3fe10153a5e90eb",
+        "content_hash": "d146f3939968cd6a01d5840f15a50583a69cfdac0e39aa984ddd6528bb1c343e",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "72817559263fef178da841f7007d581938024410bd8127a3902b7c3c042cee44",
+        "signature_hash": "bc53227f524895108afbd9fce6d5a17e1cd4250cfb07c0fbd47e210ea4563a0a"
+      },
+      "kind": "function",
+      "line_span": [24, 33],
+      "path": "tests/test_documentation_examples.py",
+      "qualname": "test_advanced_silent_audio_documentation_example",
+      "signature": "test_advanced_silent_audio_documentation_example() -> None",
+      "source_id": "py:function:tests/test_documentation_examples.py::test_advanced_silent_audio_documentation_example"
     },
     "py:function:tests/test_effects.py::dominant_frequency": {
       "hashes": {
@@ -1367,7 +1612,7 @@
         "signature_hash": "125a71e3d77d6fe165a1ab66967737d2f3cfa02716f1053490e79b4a9ae131f0"
       },
       "kind": "function",
-      "line_span": [48, 58],
+      "line_span": [72, 82],
       "path": "tests/test_effects.py",
       "qualname": "test_effect_parameter_edges",
       "signature": "test_effect_parameter_edges() -> None",
@@ -1383,11 +1628,27 @@
         "signature_hash": "1ece0e5040fe3589c3739bf20354c9e4ecd82f9d6c606333191df9bec1e8710f"
       },
       "kind": "function",
-      "line_span": [61, 72],
+      "line_span": [92, 103],
       "path": "tests/test_effects.py",
       "qualname": "test_effects_support_odd_fft_sizes_and_finite_batch_outputs",
       "signature": "test_effects_support_odd_fft_sizes_and_finite_batch_outputs() -> None",
       "source_id": "py:function:tests/test_effects.py::test_effects_support_odd_fft_sizes_and_finite_batch_outputs"
+    },
+    "py:function:tests/test_effects.py::test_empty_effects_preserve_shape_dtype_and_validate_parameters": {
+      "hashes": {
+        "body_hash": "1ba397c76b1029d06fbdef5ae72b93021ab9dc575abac58c630a94604314ac6b",
+        "content_hash": "7137af768f8324b354f99257d97e7a9ded4e64b998a7fd44019664e0d733003e",
+        "decorator_hash": "e5fcc989e002a3646b45822235a49d7a7a2d83fa734407833127ffecfc8a64d3",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "3fc4877dd39089781e4806d95fc4a3176269aac38b8bcb295c07b9f2e83d4329",
+        "signature_hash": "463766bf19b3b5cc9d572d26e3f80dead763e1fa6c3fa363f490d0b2f5c63ec8"
+      },
+      "kind": "function",
+      "line_span": [49, 69],
+      "path": "tests/test_effects.py",
+      "qualname": "test_empty_effects_preserve_shape_dtype_and_validate_parameters",
+      "signature": "test_empty_effects_preserve_shape_dtype_and_validate_parameters(dtype: type[np.floating]) -> None",
+      "source_id": "py:function:tests/test_effects.py::test_empty_effects_preserve_shape_dtype_and_validate_parameters"
     },
     "py:function:tests/test_effects.py::test_neutral_effects_return_copies": {
       "hashes": {
@@ -1420,6 +1681,22 @@
       "qualname": "test_pitch_shift_preserves_duration_and_moves_frequency",
       "signature": "test_pitch_shift_preserves_duration_and_moves_frequency() -> None",
       "source_id": "py:function:tests/test_effects.py::test_pitch_shift_preserves_duration_and_moves_frequency"
+    },
+    "py:function:tests/test_effects.py::test_pitch_shift_rejects_unrepresentable_finite_ratio": {
+      "hashes": {
+        "body_hash": "9952f8eff4efdd58d7cc68793779bbca7ffad8d337299e14c5a583afb8dc89b1",
+        "content_hash": "d9749dbcab5e9423d2f73bf1b1b08c29288ac127bc2960a53fe900447b8fdbe2",
+        "decorator_hash": "9c98a2b451f710284c6a62244a4448c998d5e8901454707082104b53cdeb38b3",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "4512ab0b9048e3bed57936734928da5f75034f4cd148f5e22084c7ab76d93d63",
+        "signature_hash": "580c812f72c07d94f9453f83ee58dc9719c147058354f0c8bf493af0bf0de541"
+      },
+      "kind": "function",
+      "line_span": [86, 89],
+      "path": "tests/test_effects.py",
+      "qualname": "test_pitch_shift_rejects_unrepresentable_finite_ratio",
+      "signature": "test_pitch_shift_rejects_unrepresentable_finite_ratio(semitones: float) -> None",
+      "source_id": "py:function:tests/test_effects.py::test_pitch_shift_rejects_unrepresentable_finite_ratio"
     },
     "py:function:tests/test_effects.py::test_time_stretch_duration_pitch_and_channels": {
       "hashes": {
@@ -1815,7 +2092,7 @@
         "signature_hash": "b09340d7cce118103953e81277fc688f698aed40472d3e5262b6b70b4f2fc40f"
       },
       "kind": "function",
-      "line_span": [121, 145],
+      "line_span": [126, 150],
       "path": "tests/test_packaging.py",
       "qualname": "test_distribution_metadata_has_no_librosa_dependency",
       "signature": "test_distribution_metadata_has_no_librosa_dependency(tmp_path: Path) -> None",
@@ -1831,7 +2108,7 @@
         "signature_hash": "502f991b345d6c48825318c2741f4a0714dfdad9a4873f0a2cbed6c2cb425f5c"
       },
       "kind": "function",
-      "line_span": [148, 151],
+      "line_span": [153, 156],
       "path": "tests/test_packaging.py",
       "qualname": "test_documentation_configuration_has_a_buildable_index",
       "signature": "test_documentation_configuration_has_a_buildable_index() -> None",
@@ -1863,7 +2140,7 @@
         "signature_hash": "95997c53d1a839c79762a65881f985360bc82a9b6650324a18d70244b53df4e6"
       },
       "kind": "function",
-      "line_span": [154, 166],
+      "line_span": [164, 176],
       "path": "tests/test_packaging.py",
       "qualname": "test_import_boundary",
       "signature": "test_import_boundary() -> None",
@@ -1871,31 +2148,47 @@
     },
     "py:function:tests/test_packaging.py::test_installed_wheel_imports_without_source_tree": {
       "hashes": {
-        "body_hash": "511e0be76f71e5aae0aff18ad7bd8aa4fe60483a131e5c04ebfe8e6838a6ff14",
-        "content_hash": "b5838ede921672e9472117ae59ef847b66a0fda78fca9c2dca5ebefa295ec1ae",
+        "body_hash": "85989cfbbf4364c936de91a9e37ec1585c4546e8e0f8e8670d1330937657bf36",
+        "content_hash": "0da06c42759563a8342e292363f195862f8c042c15d6eea7a09dc8f4af6060c8",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "public_contract_hash": "d7d8a1d8977be3de8f89fd2e2624254dca65e2a50af34fc2b5e763b5914ee64c",
+        "public_contract_hash": "fdaecc4887ad20d1f4a45ccf7cc639a282bab4e3e380c2b40df42042425a9e15",
         "signature_hash": "9c1506b23addd3f8c0a07c6308f729f258fd8acdd605e02e9941d18e773c8373"
       },
       "kind": "function",
-      "line_span": [86, 118],
+      "line_span": [87, 123],
       "path": "tests/test_packaging.py",
       "qualname": "test_installed_wheel_imports_without_source_tree",
       "signature": "test_installed_wheel_imports_without_source_tree(tmp_path: Path) -> None",
       "source_id": "py:function:tests/test_packaging.py::test_installed_wheel_imports_without_source_tree"
     },
-    "py:function:tests/test_packaging.py::test_wheel_contains_typing_marker_and_required_modules": {
+    "py:function:tests/test_packaging.py::test_release_files_exist": {
       "hashes": {
-        "body_hash": "123bd6f5c5ca602ca04d201c4467148817000e18e7ddb6ea426875653b4b0b5e",
-        "content_hash": "4f0f2fb61ab1dd461343499baf167bb878e0336e983acab700bf1fc96a0450f2",
+        "body_hash": "10f1e426ad4842e88583250d0f666d3bbc43bf181f8fc8639c9f65d139c91b79",
+        "content_hash": "4b7a256080490440fb320126147236a745eefeb87307a1cc2313ec7a9e0cc333",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "public_contract_hash": "a406c6e187fcc304af49579535b1dc41c247bf6ac9c0417a89604e9c4c207680",
+        "public_contract_hash": "5930e707bcb8cd54e6bfc54bdcdbccfeb07e9a33b31ccea8f3be7bf660577032",
+        "signature_hash": "81eb528580ca333741fd0780fc436e7f16fa591934c224050569362429f013e3"
+      },
+      "kind": "function",
+      "line_span": [159, 161],
+      "path": "tests/test_packaging.py",
+      "qualname": "test_release_files_exist",
+      "signature": "test_release_files_exist() -> None",
+      "source_id": "py:function:tests/test_packaging.py::test_release_files_exist"
+    },
+    "py:function:tests/test_packaging.py::test_wheel_contains_typing_marker_and_required_modules": {
+      "hashes": {
+        "body_hash": "22ee3577beaf930745e806260aabb08755c9e8ef47248074cbd185bd5a97d9ba",
+        "content_hash": "716d3ef4eb7b395135825a0cda6458a56864b3ffd947a68cc6fdb23dc1030689",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "2ef34124e8b4d4b93993ac0da341e623ec6480d1645b6b252079057c67668bea",
         "signature_hash": "9e6ea9e7ff3d6a1a3d6e4c4d0382923d4af169689e0737ff9fdc48450a30f155"
       },
       "kind": "function",
-      "line_span": [53, 69],
+      "line_span": [53, 70],
       "path": "tests/test_packaging.py",
       "qualname": "test_wheel_contains_typing_marker_and_required_modules",
       "signature": "test_wheel_contains_typing_marker_and_required_modules() -> None",
@@ -1911,11 +2204,155 @@
         "signature_hash": "fd3e06b14e11af52f966033bd47d2009e68c0a47468f34a88cd17977e083cf89"
       },
       "kind": "function",
-      "line_span": [72, 83],
+      "line_span": [73, 84],
       "path": "tests/test_packaging.py",
       "qualname": "test_wheel_record_has_no_absolute_paths",
       "signature": "test_wheel_record_has_no_absolute_paths() -> None",
       "source_id": "py:function:tests/test_packaging.py::test_wheel_record_has_no_absolute_paths"
+    },
+    "py:function:tests/test_pykokoro_contract.py::test_audio_annotation_numeric_sequence_has_expected_length": {
+      "hashes": {
+        "body_hash": "8df18709843481bd99373a55930731d08779ca2d7ab1ba5321df7279f6de83ca",
+        "content_hash": "870a7f70be97207f368e3eb69a9b7cd20e06163b88f5c30ea9bc803c6df6a4fa",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "915be5e1938f45f7fc22a2eddfbd90ecc1b3dfd5f615fb6a808c62e49d9446f9",
+        "signature_hash": "c337a55723962ad2e57081bb6ffdfc593fd70d91927386a87bf86342206a8748"
+      },
+      "kind": "function",
+      "line_span": [124, 134],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "test_audio_annotation_numeric_sequence_has_expected_length",
+      "signature": "test_audio_annotation_numeric_sequence_has_expected_length() -> None",
+      "source_id": "py:function:tests/test_pykokoro_contract.py::test_audio_annotation_numeric_sequence_has_expected_length"
+    },
+    "py:function:tests/test_pykokoro_contract.py::test_contract_does_not_import_forbidden_dsp_packages": {
+      "hashes": {
+        "body_hash": "142489d5a5db49671d518197746067c406b7a27ce5f65514b8196870c5ad8cae",
+        "content_hash": "a49f3b2aa47ce056791ea164ee3ce260c0d092cad892d8aa6f8b2d78b5bc3d77",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "53d0966b56e47dbcee9b87d3f82599a033d7d0f2079d597585da34b3612268fe",
+        "signature_hash": "8e6b52d8977370a1863ee62239287f9a92904135a37d1ba55419d708501385b4"
+      },
+      "kind": "function",
+      "line_span": [31, 45],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "test_contract_does_not_import_forbidden_dsp_packages",
+      "signature": "test_contract_does_not_import_forbidden_dsp_packages() -> None",
+      "source_id": "py:function:tests/test_pykokoro_contract.py::test_contract_does_not_import_forbidden_dsp_packages"
+    },
+    "py:function:tests/test_pykokoro_contract.py::test_energy_valley_feature_matches_manual_padded_rms": {
+      "hashes": {
+        "body_hash": "64df32bab87a53e81aa7502c4c665820efdf62c084f609e5320e1550c073a8d5",
+        "content_hash": "c31a3498e334723a35190eeed20061f159d59389a12b3b572ff79b6c86c18d6e",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "fccaa3f5683fa99afa4d9c318343f874a5e55ae7520b5673e6ce765eaa6402f3",
+        "signature_hash": "356ec8681a533d0d5c213e2ae6ec2957d73dac5b5f3ab885ba58ef294668f57d"
+      },
+      "kind": "function",
+      "line_span": [84, 99],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "test_energy_valley_feature_matches_manual_padded_rms",
+      "signature": "test_energy_valley_feature_matches_manual_padded_rms() -> None",
+      "source_id": "py:function:tests/test_pykokoro_contract.py::test_energy_valley_feature_matches_manual_padded_rms"
+    },
+    "py:function:tests/test_pykokoro_contract.py::test_normalized_vad_contract_for_short_inputs": {
+      "hashes": {
+        "body_hash": "923ad59676363c82310ecd5b9027d5e02e10f8516475e6da3f7d4381e0e724ec",
+        "content_hash": "04d8ab59cad1c907c6a2155fbb5b4da5847e7ca11aef479a0b23e650f2ef2220",
+        "decorator_hash": "25db62a3cabc4b5ddd8583595752ca9bc59c7b300913cd8cb7bd034fd8be4815",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "114abaa0474b847beb2e5a270ce514e7dfc38d8183e741a8d89b84b331222204",
+        "signature_hash": "a1f49fe41b1fc948613daabd84dd7f65de168880d2737b51e6a8a4eca3cf6773"
+      },
+      "kind": "function",
+      "line_span": [67, 81],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "test_normalized_vad_contract_for_short_inputs",
+      "signature": "test_normalized_vad_contract_for_short_inputs(length: int) -> None",
+      "source_id": "py:function:tests/test_pykokoro_contract.py::test_normalized_vad_contract_for_short_inputs"
+    },
+    "py:function:tests/test_pykokoro_contract.py::test_prosody_pitch_and_gain_contract": {
+      "hashes": {
+        "body_hash": "703ec4b295799e595da10422fb83e1ce10e355c75b2c7bd2e17ecaeab40886e5",
+        "content_hash": "dfc22e0985e463dcf630d6a8ff33cb1e9617ff9e095e74ebc1d08e42c25c4b2b",
+        "decorator_hash": "52d5b3d3506a9afb3d775fca93cc337c212234f5c827c8fda212ec4e58091355",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "2adf4f60a7da94b4b40f51a9dfc7e6d571e5e29aa6db085438e0f3cdf7c557a7",
+        "signature_hash": "a416dcbe8c5d31a94f0b927ee6d0c79dd7d5b5847dcc90f07785f3fa9eb53196"
+      },
+      "kind": "function",
+      "line_span": [114, 121],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "test_prosody_pitch_and_gain_contract",
+      "signature": "test_prosody_pitch_and_gain_contract(semitones: float) -> None",
+      "source_id": "py:function:tests/test_pykokoro_contract.py::test_prosody_pitch_and_gain_contract"
+    },
+    "py:function:tests/test_pykokoro_contract.py::test_prosody_rate_contract": {
+      "hashes": {
+        "body_hash": "b2457cd12cb746d54ced2b0f70f4c0218f3fa178aaf0d6c389cc5b8d3f76c2c1",
+        "content_hash": "c1b523ea3bde24f4b099266b8473b8eb92d09424c7c71ca0cca5db1b1f73bdbf",
+        "decorator_hash": "403a8467ce56a9d591f7e640fd8d951f7068abebc3255dac1c598208e592412e",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "3a116f21c58ab100a6814d5592d2e35bd79d52f724deb6f13ff91516870f0971",
+        "signature_hash": "2175a43d68598081d3fb1f803f1a7e56ca72f77e2e0b5d0c073f02042c257b7d"
+      },
+      "kind": "function",
+      "line_span": [103, 110],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "test_prosody_rate_contract",
+      "signature": "test_prosody_rate_contract(rate: float) -> None",
+      "source_id": "py:function:tests/test_pykokoro_contract.py::test_prosody_rate_contract"
+    },
+    "py:function:tests/test_pykokoro_contract.py::test_quiet_intervals_and_typed_exception_contract": {
+      "hashes": {
+        "body_hash": "21970046fe2db93eede383ab0efee655dc893d189e5e0939f57162fa1bf57ea0",
+        "content_hash": "42b3b67d4d14569b31d330e83fe9220452915cc09472616d09c54a4ac7ed2eec",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "44caef5a52559e644d032dfff4aecb4a88dd42dbe21617f912f97eee7bdda8bb",
+        "signature_hash": "342272777400e384e8b8412013bea933dddbbed292425df82119ac21e03a9cb8"
+      },
+      "kind": "function",
+      "line_span": [137, 152],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "test_quiet_intervals_and_typed_exception_contract",
+      "signature": "test_quiet_intervals_and_typed_exception_contract() -> None",
+      "source_id": "py:function:tests/test_pykokoro_contract.py::test_quiet_intervals_and_typed_exception_contract"
+    },
+    "py:function:tests/test_pykokoro_contract.py::test_trim_contract": {
+      "hashes": {
+        "body_hash": "14d6e1c2cf5a15c1069676cc2c8d4fa4a2dc22e2a222c7d1607c5a44572ecd7b",
+        "content_hash": "904a6a564d5270631102887e24f09cbfbb12a8c211c99f21d90ec0b8fd03518e",
+        "decorator_hash": "e5fcc989e002a3646b45822235a49d7a7a2d83fa734407833127ffecfc8a64d3",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "f127e9ef2418fcb8ad972608c0fa113d0149fc5aff23bd54bbeb4d735fd0183f",
+        "signature_hash": "1aa89910dbd44c7324e94636758e0c5d3ead26086f6c6aa363274b4e3c1ec33a"
+      },
+      "kind": "function",
+      "line_span": [49, 63],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "test_trim_contract",
+      "signature": "test_trim_contract(dtype: type[np.floating]) -> None",
+      "source_id": "py:function:tests/test_pykokoro_contract.py::test_trim_contract"
+    },
+    "py:function:tests/test_resampling.py::test_resample_empty_inputs_and_validation": {
+      "hashes": {
+        "body_hash": "1baa97e852de93bdfbdca8687f31d17b7ce5075d1592765046cdda77a31d5948",
+        "content_hash": "e19eeaf1a648625a3a9817c34139e3a36e090a276e06bfab3aee36ab14ab3f5f",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "c794988887ddd06d4882fe0c5ba8d55bcbe746d0781d8b37a2c7d52e35e86a65",
+        "signature_hash": "72b242e75e170cad630c485c24d2ef4f42696479a3e1edc0baec96cc68a32d88"
+      },
+      "kind": "function",
+      "line_span": [71, 82],
+      "path": "tests/test_resampling.py",
+      "qualname": "test_resample_empty_inputs_and_validation",
+      "signature": "test_resample_empty_inputs_and_validation() -> None",
+      "source_id": "py:function:tests/test_resampling.py::test_resample_empty_inputs_and_validation"
     },
     "py:function:tests/test_resampling.py::test_resample_length_identity_dc_and_batch": {
       "hashes": {
@@ -1927,7 +2364,7 @@
         "signature_hash": "71bd5dc0049edff1a9081195f5a76151cd0c808c58fbb79c25fb7b272a688d8c"
       },
       "kind": "function",
-      "line_span": [10, 18],
+      "line_span": [15, 23],
       "path": "tests/test_resampling.py",
       "qualname": "test_resample_length_identity_dc_and_batch",
       "signature": "test_resample_length_identity_dc_and_batch() -> None",
@@ -1943,7 +2380,7 @@
         "signature_hash": "1c5ec9b2f7555dd4c2a1e71d22e3e7b5c0e2a18d866370ab836f2d56bf284b10"
       },
       "kind": "function",
-      "line_span": [39, 61],
+      "line_span": [89, 111],
       "path": "tests/test_resampling.py",
       "qualname": "test_resample_length_modes_are_explicit",
       "signature": "test_resample_length_modes_are_explicit(input_length: int, source_rate: int, target_rate: int, round_length: int, ceil_length: int) -> None",
@@ -1959,7 +2396,7 @@
         "signature_hash": "0b4ba9c4ae5d5da5b5760e719f3a0236dd63546830e93d8b8a637d89513491bf"
       },
       "kind": "function",
-      "line_span": [64, 81],
+      "line_span": [114, 131],
       "path": "tests/test_resampling.py",
       "qualname": "test_resample_quality_and_axis_dtype_invariants",
       "signature": "test_resample_quality_and_axis_dtype_invariants() -> None",
@@ -1967,19 +2404,51 @@
     },
     "py:function:tests/test_resampling.py::test_resample_sine_frequency_and_exact_length": {
       "hashes": {
-        "body_hash": "9a961adb68ebb296d2db60a79a632bc269c53754e0b2cdf5c04107f0eb92211e",
-        "content_hash": "1959a3dd01e45fcfeb38169c761a7af6a6bdd27bb7878594b3647184adef8927",
+        "body_hash": "8aa6476759b5252dd90f69882dc0e65ebbe7e330b8d8fecdf80bc017be3275e9",
+        "content_hash": "bb7f41c39d1e4b0c0784d0bdf7745d4251f5ecd3ec812d28be18d9fcbce82481",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "public_contract_hash": "a046d32a47809517bfd1528a7ccd17ed81b872d8d78bb62a9e6b8ecd0d9da844",
+        "public_contract_hash": "264729775cf4126757eca9bf788dc184a9662d35cc5525bb1f6178d0a2e86823",
         "signature_hash": "03ce2ead17815f4a9ef8221732a002f7b0954b9229bcc0fd8eb8884fc17855a3"
       },
       "kind": "function",
-      "line_span": [21, 32],
+      "line_span": [26, 36],
       "path": "tests/test_resampling.py",
       "qualname": "test_resample_sine_frequency_and_exact_length",
       "signature": "test_resample_sine_frequency_and_exact_length() -> None",
       "source_id": "py:function:tests/test_resampling.py::test_resample_sine_frequency_and_exact_length"
+    },
+    "py:function:tests/test_resampling.py::test_resample_speed_exact_length_and_identity": {
+      "hashes": {
+        "body_hash": "f831d4d1b3dfbd54dc757b0fb1eb84ae2b069a24939a2eb3391d156a542137b5",
+        "content_hash": "bd33e0970e61bf9f94231b464951a82ff1f395a9c54771c8f7589005471afbd2",
+        "decorator_hash": "491534242de19d05e0f40fc71a862a9b8ee9899f9adb4ccb526b76929f50224d",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "a400e0b1ddd9540dd13fa29c468b3e329b5f890d3eea33ceffad5e366f1a1b12",
+        "signature_hash": "7ea9c27b8e6faf8759f9c6b7f7eab40220fedd2e3434663ed3455f201e3a2af8"
+      },
+      "kind": "function",
+      "line_span": [60, 68],
+      "path": "tests/test_resampling.py",
+      "qualname": "test_resample_speed_exact_length_and_identity",
+      "signature": "test_resample_speed_exact_length_and_identity(speed: float) -> None",
+      "source_id": "py:function:tests/test_resampling.py::test_resample_speed_exact_length_and_identity"
+    },
+    "py:function:tests/test_resampling.py::test_resample_to_length_public_empty_axes_and_identity": {
+      "hashes": {
+        "body_hash": "53db03420759684493450da28f8cb83e60eb3c51bc124a5b7d1bf333f736b505",
+        "content_hash": "6a42ff30cc129f5d7fcb99646a3a03ff371b634f7226578e8285772d48e6191a",
+        "decorator_hash": "e5fcc989e002a3646b45822235a49d7a7a2d83fa734407833127ffecfc8a64d3",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "31670f6f920a9463ccbd184c1c8d51db2646f2c4acca49ba58de826a5d00959b",
+        "signature_hash": "0c5868f6ec2642c6c1ff05216aa11dcc26efd3317d409bce4f3c75f5fb5c59f9"
+      },
+      "kind": "function",
+      "line_span": [40, 56],
+      "path": "tests/test_resampling.py",
+      "qualname": "test_resample_to_length_public_empty_axes_and_identity",
+      "signature": "test_resample_to_length_public_empty_axes_and_identity(dtype: type[np.floating]) -> None",
+      "source_id": "py:function:tests/test_resampling.py::test_resample_to_length_public_empty_axes_and_identity"
     },
     "py:function:tests/test_resampling_quality.py::test_downsample_rejects_above_nyquist_tones": {
       "hashes": {
@@ -2157,6 +2626,22 @@
       "signature": "test_resample_validation() -> None",
       "source_id": "py:function:tests/test_resampling_quality.py::test_resample_validation"
     },
+    "py:function:tests/test_silence.py::test_find_speech_start_evaluates_vad_once": {
+      "hashes": {
+        "body_hash": "0b78d0e1771865461292307bac4dcceeca0d47d9cb797b616f4de47add57ce81",
+        "content_hash": "4c68a389d18c27e67f712503a9b8250bcbf14a14e291a8e53463a991ff429a83",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "33f36e028f004035b655e09757feeda42bfeede9b8478b8364d8e1366e03de01",
+        "signature_hash": "4793c8fd562b7f4e3747878c08dd750c06da8bde650a9553dd3d91891d246546"
+      },
+      "kind": "function",
+      "line_span": [18, 33],
+      "path": "tests/test_silence.py",
+      "qualname": "test_find_speech_start_evaluates_vad_once",
+      "signature": "test_find_speech_start_evaluates_vad_once(monkeypatch: pytest.MonkeyPatch) -> None",
+      "source_id": "py:function:tests/test_silence.py::test_find_speech_start_evaluates_vad_once"
+    },
     "py:function:tests/test_silence.py::test_silence_analysis_helpers_and_validation": {
       "hashes": {
         "body_hash": "35dd1c3b4e2a552a98edb49bfbeaa26d6eb4924ffbb51deeec51796729f6802b",
@@ -2167,7 +2652,7 @@
         "signature_hash": "b6f480a906e98168a4ee0f8f62177431090fb734c7d8b48a154d1556c62cce6b"
       },
       "kind": "function",
-      "line_span": [39, 55],
+      "line_span": [58, 74],
       "path": "tests/test_silence.py",
       "qualname": "test_silence_analysis_helpers_and_validation",
       "signature": "test_silence_analysis_helpers_and_validation() -> None",
@@ -2183,7 +2668,7 @@
         "signature_hash": "b4c08533aa8cf95ae583d59f5c4af1dab439c45dc9e60b46bda26e6f75e185bd"
       },
       "kind": "function",
-      "line_span": [29, 36],
+      "line_span": [48, 55],
       "path": "tests/test_silence.py",
       "qualname": "test_silence_only_and_multichannel",
       "signature": "test_silence_only_and_multichannel() -> None",
@@ -2199,7 +2684,7 @@
         "signature_hash": "12a7d386fbd6c72f4576f0670e01e7c3473a2aaca33ae50f9a1ad2c7098e3b26"
       },
       "kind": "function",
-      "line_span": [17, 26],
+      "line_span": [36, 45],
       "path": "tests/test_silence.py",
       "qualname": "test_trim_and_vad_boundaries",
       "signature": "test_trim_and_vad_boundaries() -> None",
@@ -2380,6 +2865,102 @@
       "qualname": "test_stft_shape_and_finite_values",
       "signature": "test_stft_shape_and_finite_values(dtype: type[np.floating], center: bool, n_fft: int, hop_length: int, rng: np.random.Generator) -> None",
       "source_id": "py:function:tests/test_spectral_quality.py::test_stft_shape_and_finite_values"
+    },
+    "py:function:tests/test_speech.py::test_speech_effects_apply_all_effects_and_exact_length": {
+      "hashes": {
+        "body_hash": "1326c795ee7d7aceca60c9f376ad8643d5099407d109556cc9f57ecb17f199ac",
+        "content_hash": "76e4f4c33d5db5f7dafcb8f0a0ca5707809cc3c3c06e027dab66887f7051ec9c",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "f8bec9db6e3d313b83fc49c15ba3843ad385bdc76717a4e74d8d202d17a1d0ee",
+        "signature_hash": "e14c06a74247a23f56a97630799df63c3def9a8ff10545852600151c8429c50d"
+      },
+      "kind": "function",
+      "line_span": [35, 51],
+      "path": "tests/test_speech.py",
+      "qualname": "test_speech_effects_apply_all_effects_and_exact_length",
+      "signature": "test_speech_effects_apply_all_effects_and_exact_length() -> None",
+      "source_id": "py:function:tests/test_speech.py::test_speech_effects_apply_all_effects_and_exact_length"
+    },
+    "py:function:tests/test_speech.py::test_speech_effects_clipping_and_validation": {
+      "hashes": {
+        "body_hash": "be35fecc4f97ab250f97a8c41052b6d495dbfa5980af38acada41e27bbebdbad",
+        "content_hash": "ce828cf48a678f0ba06d59ec38f256cd24178c0a8278505fc1a3d383f9fe6bf8",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "ff05d5c672a4d585ded93b66ee2b93b93974300fa405c60a66854f016fae0386",
+        "signature_hash": "9c15882f799b63793055fa59b72a64b2203c4f605ee48fd099a04f6f3edd21bb"
+      },
+      "kind": "function",
+      "line_span": [85, 98],
+      "path": "tests/test_speech.py",
+      "qualname": "test_speech_effects_clipping_and_validation",
+      "signature": "test_speech_effects_clipping_and_validation() -> None",
+      "source_id": "py:function:tests/test_speech.py::test_speech_effects_clipping_and_validation"
+    },
+    "py:function:tests/test_speech.py::test_speech_effects_neutral_copy_and_empty_contract": {
+      "hashes": {
+        "body_hash": "92f1657eb37654d4bd4193e3806706ca5b08e1288713c105d30deed0817d921a",
+        "content_hash": "2ad29e3fe5ea9cdf0847a8365c93c6db046e2656a7981dca971cbca7340b22a0",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "9bd070cd7e033f0f6ba128c2779a1725a414a82825782fab3ed613b3e89410f0",
+        "signature_hash": "d3ad240cd0f37d1f528cb80681fc9f226c2dc133160e292a0d1dd6cbc9358222"
+      },
+      "kind": "function",
+      "line_span": [14, 32],
+      "path": "tests/test_speech.py",
+      "qualname": "test_speech_effects_neutral_copy_and_empty_contract",
+      "signature": "test_speech_effects_neutral_copy_and_empty_contract() -> None",
+      "source_id": "py:function:tests/test_speech.py::test_speech_effects_neutral_copy_and_empty_contract"
+    },
+    "py:function:tests/test_speech.py::test_speech_effects_operation_order": {
+      "hashes": {
+        "body_hash": "3c3bb1575a1ae35fbe7b052446973dc3ab302de462f23298b9dcc05e448247ab",
+        "content_hash": "f6e183a581574bebf2592d9731814f883e1b9d75afb4e2ce8c0fbfe7b0c700fb",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "ff29e83e8b35cf268556da61c41283de495993070b3439f1504723d3ed692c07",
+        "signature_hash": "935fbc72611eda41bac177ef318c56d87995ae6dd4360c59ce51e99545ea7fe2"
+      },
+      "kind": "function",
+      "line_span": [54, 82],
+      "path": "tests/test_speech.py",
+      "qualname": "test_speech_effects_operation_order",
+      "signature": "test_speech_effects_operation_order(monkeypatch: pytest.MonkeyPatch) -> None",
+      "source_id": "py:function:tests/test_speech.py::test_speech_effects_operation_order"
+    },
+    "py:function:tests/test_speech.py::tone": {
+      "hashes": {
+        "body_hash": "adad698d14d9eba021b64486a26ca24c1f9a89edc3e8c32aa31e1ce871f6bae0",
+        "content_hash": "d3297cb49934bd647695248fbdf6d045039a8fe36a653cad114414c9f8be1aed",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "de66ad8b810a630167b391cf141d05e6539bb78390d22c5ac82df64886d1c079",
+        "signature_hash": "c24594f9c249ed0609130828d9914a11aaaff8c4b4d90980c6e3eec569e4cb7b"
+      },
+      "kind": "function",
+      "line_span": [10, 11],
+      "path": "tests/test_speech.py",
+      "qualname": "tone",
+      "signature": "tone(length: int=2400, dtype: type=np.float32) -> np.ndarray",
+      "source_id": "py:function:tests/test_speech.py::tone"
+    },
+    "py:function:tests/test_speech_quality.py::test_short_speech_like_segments_remain_finite_and_sized": {
+      "hashes": {
+        "body_hash": "929c82756c1776500a548e405a7fc40bbbf9a510842cc460e007334863656d68",
+        "content_hash": "93f03c93d30c57ddee560dc9ed275288832a4c9e7e1841e6814fb31e666ddbdc",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "0aae4b83f41eafc6ffd305fa4854da93b250ce044d88fbb2dfa68dfe1c7273b8",
+        "signature_hash": "38453f3beb0d4850b1334490e8f9ad6f8446a3085feafe63c5ff029cdb8f9132"
+      },
+      "kind": "function",
+      "line_span": [8, 24],
+      "path": "tests/test_speech_quality.py",
+      "qualname": "test_short_speech_like_segments_remain_finite_and_sized",
+      "signature": "test_short_speech_like_segments_remain_finite_and_sized() -> None",
+      "source_id": "py:function:tests/test_speech_quality.py::test_short_speech_like_segments_remain_finite_and_sized"
     },
     "py:function:tests/test_trim_split_quality.py::test_activity_to_intervals_known_masks": {
       "hashes": {
@@ -2631,7 +3212,7 @@
         "signature_hash": "9f020b7142e2e6a17475b56fd0f752bbee6df2f0aeb7a04054764b88eb1ea42b"
       },
       "kind": "function",
-      "line_span": [97, 103],
+      "line_span": [98, 104],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_activity_to_intervals_clips_and_merges_active_runs",
       "signature": "test_activity_to_intervals_clips_and_merges_active_runs() -> None",
@@ -2647,11 +3228,27 @@
         "signature_hash": "593a90d2bebd4b063bb64874bef15d6d50aa3580c9f3d48f1ebacc104c254ca6"
       },
       "kind": "function",
-      "line_span": [107, 111],
+      "line_span": [123, 127],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_activity_to_intervals_empty_and_silent_masks",
       "signature": "test_activity_to_intervals_empty_and_silent_masks(activity: np.ndarray) -> None",
       "source_id": "py:function:tests/test_trim_vad_compat.py::test_activity_to_intervals_empty_and_silent_masks"
+    },
+    "py:function:tests/test_trim_vad_compat.py::test_activity_to_intervals_filters_short_runs": {
+      "hashes": {
+        "body_hash": "1914bc31eb2d91824d804d07b855a680781f089469583215b01610889db5933e",
+        "content_hash": "216a81b6a9168e8f7b05e4a54e75f6c11d1c5173b0636357512a4a11b416c79b",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "3a748b1287a0aa96f2453706deeaec6fdab4eb77693cbad08798fb9e9fdab7d0",
+        "signature_hash": "f60491bbd8e2d081912e534486c92fbcf8113c20fe96c0f089c0be9fc4ad71e6"
+      },
+      "kind": "function",
+      "line_span": [107, 119],
+      "path": "tests/test_trim_vad_compat.py",
+      "qualname": "test_activity_to_intervals_filters_short_runs",
+      "signature": "test_activity_to_intervals_filters_short_runs() -> None",
+      "source_id": "py:function:tests/test_trim_vad_compat.py::test_activity_to_intervals_filters_short_runs"
     },
     "py:function:tests/test_trim_vad_compat.py::test_db_vad_accepts_nonzero_signals_below_log_floor": {
       "hashes": {
@@ -2663,7 +3260,7 @@
         "signature_hash": "b740a0dfec42e2a59c550a2dd2a51c46f49e31bfd5b17b102b76eca8a071b83c"
       },
       "kind": "function",
-      "line_span": [367, 372],
+      "line_span": [429, 434],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_db_vad_accepts_nonzero_signals_below_log_floor",
       "signature": "test_db_vad_accepts_nonzero_signals_below_log_floor() -> None",
@@ -2679,7 +3276,7 @@
         "signature_hash": "b12b80d03d397700fbe2fa0adb41ba1663eb46bbb199972639414d9693cbd659"
       },
       "kind": "function",
-      "line_span": [354, 364],
+      "line_span": [416, 426],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_db_vad_rejects_silence_and_detects_burst",
       "signature": "test_db_vad_rejects_silence_and_detects_burst() -> None",
@@ -2695,7 +3292,7 @@
         "signature_hash": "9f0daab5663698fada3eebc3cf34bb09dc0104ae61201523444366863e3abe8a"
       },
       "kind": "function",
-      "line_span": [384, 397],
+      "line_span": [446, 459],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_decibel_helpers_abs2_and_frame_conversion",
       "signature": "test_decibel_helpers_abs2_and_frame_conversion() -> None",
@@ -2711,7 +3308,7 @@
         "signature_hash": "011f66bd2fa81942e235a2ac55f720b16396911c5e3ac015fae817fb6cc55c67"
       },
       "kind": "function",
-      "line_span": [328, 339],
+      "line_span": [390, 401],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_explicit_vad_entry_points_match_compatibility_dispatch",
       "signature": "test_explicit_vad_entry_points_match_compatibility_dispatch() -> None",
@@ -2727,11 +3324,27 @@
         "signature_hash": "1fab47eb6e015e3c61e4534e2e64afebb8f716946f29898d9dfd851d29ee1ba4"
       },
       "kind": "function",
-      "line_span": [400, 427],
+      "line_span": [462, 489],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_feature_normalization_and_median_modes",
       "signature": "test_feature_normalization_and_median_modes() -> None",
       "source_id": "py:function:tests/test_trim_vad_compat.py::test_feature_normalization_and_median_modes"
+    },
+    "py:function:tests/test_trim_vad_compat.py::test_frame_rms_can_pad_and_normalize_trailing_frame": {
+      "hashes": {
+        "body_hash": "98d1a43e7775b1ffe38767371c4452251a5317b67022de1a9237cef1ea945edb",
+        "content_hash": "1b39f76c27ffee79741ca12c8ec9de118700e84effc2cb53c0d27a0b3f824780",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "7fe5ca76e641e9da660a041956f4543c6d2a9fbff8e4131ae2eb6c961c53b7e4",
+        "signature_hash": "0f04a20b4079793e856bb650a0f531ba290dcecab4d2bcf03116cebfbe043c91"
+      },
+      "kind": "function",
+      "line_span": [219, 240],
+      "path": "tests/test_trim_vad_compat.py",
+      "qualname": "test_frame_rms_can_pad_and_normalize_trailing_frame",
+      "signature": "test_frame_rms_can_pad_and_normalize_trailing_frame() -> None",
+      "source_id": "py:function:tests/test_trim_vad_compat.py::test_frame_rms_can_pad_and_normalize_trailing_frame"
     },
     "py:function:tests/test_trim_vad_compat.py::test_frame_rms_honors_requested_dtype": {
       "hashes": {
@@ -2743,7 +3356,7 @@
         "signature_hash": "3ce6737c3c4055cc89e6e8a98db3c64a6893e65ba1091681fd8f6aaca0bcc8d1"
       },
       "kind": "function",
-      "line_span": [204, 215],
+      "line_span": [256, 267],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_frame_rms_honors_requested_dtype",
       "signature": "test_frame_rms_honors_requested_dtype(dtype: type[np.floating]) -> None",
@@ -2759,7 +3372,7 @@
         "signature_hash": "1455d91595876737d6036e5b9452932e294a383c16e0a1ede84a0291730b0331"
       },
       "kind": "function",
-      "line_span": [193, 200],
+      "line_span": [209, 216],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_frame_rms_returns_centered_frame_values",
       "signature": "test_frame_rms_returns_centered_frame_values() -> None",
@@ -2775,7 +3388,7 @@
         "signature_hash": "5651dd6467f697590c5b08a8c908c827000c7fbd0fc7848d979d994276f6fa55"
       },
       "kind": "function",
-      "line_span": [182, 190],
+      "line_span": [198, 206],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_frame_signal_center_and_pad_end",
       "signature": "test_frame_signal_center_and_pad_end() -> None",
@@ -2791,11 +3404,27 @@
         "signature_hash": "d04ae090a82faf73c9aaf6e97a2477eb95a8f635b11f07a42407f233965fc025"
       },
       "kind": "function",
-      "line_span": [167, 179],
+      "line_span": [183, 195],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_frame_signal_millisecond_compatibility",
       "signature": "test_frame_signal_millisecond_compatibility(length: int, expected_frames: int) -> None",
       "source_id": "py:function:tests/test_trim_vad_compat.py::test_frame_signal_millisecond_compatibility"
+    },
+    "py:function:tests/test_trim_vad_compat.py::test_minmax_normalize_contract": {
+      "hashes": {
+        "body_hash": "e5255d2493e685eef158d85f598a035adfa7df503505545ac516f3b0dd375ade",
+        "content_hash": "60499419ffe99d28c7b7f17e3041ce12067eadb839a8dd8dc46b881b355e14a1",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "960e801e4a58b45fec0ca2760ab57829307b16e28b044c5c9ad275a8b7690ebb",
+        "signature_hash": "59455ede64070972fbc3f32dd774f4728076db8a3072d3105d879136dffd21b4"
+      },
+      "kind": "function",
+      "line_span": [243, 252],
+      "path": "tests/test_trim_vad_compat.py",
+      "qualname": "test_minmax_normalize_contract",
+      "signature": "test_minmax_normalize_contract() -> None",
+      "source_id": "py:function:tests/test_trim_vad_compat.py::test_minmax_normalize_contract"
     },
     "py:function:tests/test_trim_vad_compat.py::test_non_silent_frames_at_exact_db_threshold_are_inactive": {
       "hashes": {
@@ -2807,7 +3436,7 @@
         "signature_hash": "fd0eca582f96dec43f9611e90ccfd538a00867e34ae91b21ff859074cb9fa786"
       },
       "kind": "function",
-      "line_span": [234, 246],
+      "line_span": [286, 298],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_non_silent_frames_at_exact_db_threshold_are_inactive",
       "signature": "test_non_silent_frames_at_exact_db_threshold_are_inactive(dtype: type[np.floating]) -> None",
@@ -2823,7 +3452,7 @@
         "signature_hash": "85d813add9c8d650a405d0d797aa92cb4c9d1d55cf5704eb340710f0d0a10620"
       },
       "kind": "function",
-      "line_span": [82, 94],
+      "line_span": [83, 95],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_non_silent_frames_supports_custom_aggregation",
       "signature": "test_non_silent_frames_supports_custom_aggregation() -> None",
@@ -2831,15 +3460,15 @@
     },
     "py:function:tests/test_trim_vad_compat.py::test_normalized_energy_vad_and_speech_start": {
       "hashes": {
-        "body_hash": "51626f95272e260f04a34c7f82302cf63a6dbc0184657f744f170fba3acdbd62",
-        "content_hash": "76305cf876014f2ed59ff7618918043295b99077b765fa62a2e6060b7467a0f5",
+        "body_hash": "970a1f7a067176e2bcb987c24938c026ca09826688d2837f803178e215836127",
+        "content_hash": "dac31d748509526109230a0575c248acf85f97527c4002086c9c6df90d259eb5",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "public_contract_hash": "fd456f8abdff4a7226c89af067804c7b9b23bd9acecfea2ce350d074ff7de8a9",
+        "public_contract_hash": "f45dfcc975cf33c5e2ed7d2a57066e8ea197fe6f271744fd8c29d271f3c75e66",
         "signature_hash": "e2a1e7fb32df1f12ae46241569484b6b259da80647970c914e24f6dc55c3c27b"
       },
       "kind": "function",
-      "line_span": [267, 292],
+      "line_span": [319, 354],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_normalized_energy_vad_and_speech_start",
       "signature": "test_normalized_energy_vad_and_speech_start() -> None",
@@ -2855,7 +3484,7 @@
         "signature_hash": "5f4ad76949a98ff784d29d828eebe1110b40e29088a7de42275abf8348dd7c18"
       },
       "kind": "function",
-      "line_span": [295, 325],
+      "line_span": [357, 387],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_normalized_energy_vad_can_pad_trailing_partial_speech",
       "signature": "test_normalized_energy_vad_can_pad_trailing_partial_speech() -> None",
@@ -2871,7 +3500,7 @@
         "signature_hash": "69fa6e15a1057c1f23552041a88d0e2df5dbcd56cc5a1f6e6214a018ed9972ef"
       },
       "kind": "function",
-      "line_span": [253, 264],
+      "line_span": [305, 316],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_normalized_energy_vad_short_inputs",
       "signature": "test_normalized_energy_vad_short_inputs(length: int, expected_frames: int) -> None",
@@ -2887,7 +3516,7 @@
         "signature_hash": "a7bfee655b775ea646ee25e8e0236bc5bf96052d74414bf56438bfdaff0a25e5"
       },
       "kind": "function",
-      "line_span": [342, 351],
+      "line_span": [404, 413],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_speech_bounds_distinguish_no_speech_from_sample_zero",
       "signature": "test_speech_bounds_distinguish_no_speech_from_sample_zero() -> None",
@@ -2903,7 +3532,7 @@
         "signature_hash": "7db6281616b5be798d444463d583b033a6c16791b768c04083ba361bd1deeb07"
       },
       "kind": "function",
-      "line_span": [114, 131],
+      "line_span": [130, 147],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_split_finds_multiple_bursts_on_arbitrary_sample_axis",
       "signature": "test_split_finds_multiple_bursts_on_arbitrary_sample_axis() -> None",
@@ -2919,7 +3548,7 @@
         "signature_hash": "ac2ae7dbb35ee29aeb62499bf3078309f5101c7ddf34a8609428e6339f1465a9"
       },
       "kind": "function",
-      "line_span": [134, 144],
+      "line_span": [150, 160],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_split_handles_fully_active_and_empty_input",
       "signature": "test_split_handles_fully_active_and_empty_input() -> None",
@@ -2935,7 +3564,7 @@
         "signature_hash": "22c1d9cc137744c12cb71f885e6e1b0b41f1707781125ea7b0e1f94ddfb8f786"
       },
       "kind": "function",
-      "line_span": [147, 160],
+      "line_span": [163, 176],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_split_noncentered_intervals_include_active_frame_tail",
       "signature": "test_split_noncentered_intervals_include_active_frame_tail() -> None",
@@ -2951,7 +3580,7 @@
         "signature_hash": "a0045723b4ebc1c9d0c1c02bc4b0493772a4f16bdd96eb99a84c1c035dbbd70f"
       },
       "kind": "function",
-      "line_span": [49, 62],
+      "line_span": [50, 63],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_trim_empty_and_uniform_silence_reference_policies",
       "signature": "test_trim_empty_and_uniform_silence_reference_policies() -> None",
@@ -2967,7 +3596,7 @@
         "signature_hash": "341eedfeae3a4f54e6f7cf2424c432b344ba79d4bc451b467dd75d3390dadcdc"
       },
       "kind": "function",
-      "line_span": [218, 230],
+      "line_span": [270, 282],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_trim_float32_threshold_boundary_does_not_activate_zero_frames",
       "signature": "test_trim_float32_threshold_boundary_does_not_activate_zero_frames() -> None",
@@ -2983,7 +3612,7 @@
         "signature_hash": "605383418e674318b2410ece9cecafa000582a2656f437f455d2ecd9c9e7b1b4"
       },
       "kind": "function",
-      "line_span": [29, 36],
+      "line_span": [30, 37],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_trim_matches_centered_reference_boundaries",
       "signature": "test_trim_matches_centered_reference_boundaries() -> None",
@@ -2999,7 +3628,7 @@
         "signature_hash": "175385448b9fc29faccc8dadf5c9ccb9e36dac2d687f33dcce736878c4c6674c"
       },
       "kind": "function",
-      "line_span": [39, 46],
+      "line_span": [40, 47],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_trim_preserves_fully_active_tail",
       "signature": "test_trim_preserves_fully_active_tail() -> None",
@@ -3015,7 +3644,7 @@
         "signature_hash": "9c6d06f1415d9cfdfa55c2f1574ece34cb8933f97156922ef35083de0a5edce8"
       },
       "kind": "function",
-      "line_span": [65, 79],
+      "line_span": [66, 80],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_trim_supports_multichannel_and_nonfinal_sample_axis",
       "signature": "test_trim_supports_multichannel_and_nonfinal_sample_axis() -> None",
@@ -3031,7 +3660,7 @@
         "signature_hash": "65cfe789713b3e0935f5f70c06d08318b5f9201eae8c6c89cf66899fe010a089"
       },
       "kind": "function",
-      "line_span": [430, 446],
+      "line_span": [492, 508],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_trim_vad_parameter_validation",
       "signature": "test_trim_vad_parameter_validation() -> None",
@@ -3047,7 +3676,7 @@
         "signature_hash": "3e9dbaa1dca0d30daffd64a484e69a1f603017fc871030ae02e1acda74806b70"
       },
       "kind": "function",
-      "line_span": [375, 381],
+      "line_span": [437, 443],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "test_trim_validates_parameters_for_empty_input",
       "signature": "test_trim_validates_parameters_for_empty_input() -> None",
@@ -3229,6 +3858,22 @@
       "signature": "test_vad_validation_for_tail_policy_and_thresholds() -> None",
       "source_id": "py:function:tests/test_vad_quality.py::test_vad_validation_for_tail_policy_and_thresholds"
     },
+    "py:function:tests/test_validation.py::test_empty_effects_are_valid_after_parameter_validation": {
+      "hashes": {
+        "body_hash": "175c67d1b2f9c524815d38d8ac5ae6ab4747387efec651be87d6e8375f841f6b",
+        "content_hash": "eed601d092271027a85c3b779874b3ba0293dade436ad99bc49eea58eefcc615",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "public_contract_hash": "4ba1d5519e081dddaf8343ed3f2d5cf98dc2ea0e2dd7ce057775fe2ca11dea4d",
+        "signature_hash": "a7afe4484035dc099d7f82cf7c43ebf0597b3aa426d1e760bd2aeaf090787d8b"
+      },
+      "kind": "function",
+      "line_span": [16, 20],
+      "path": "tests/test_validation.py",
+      "qualname": "test_empty_effects_are_valid_after_parameter_validation",
+      "signature": "test_empty_effects_are_valid_after_parameter_validation() -> None",
+      "source_id": "py:function:tests/test_validation.py::test_empty_effects_are_valid_after_parameter_validation"
+    },
     "py:function:tests/test_validation.py::test_rejects_invalid_parameters": {
       "hashes": {
         "body_hash": "ba5e42c870aea6f333b002f9f5a202202783a04967a1b7af3e302414303dd6db",
@@ -3239,7 +3884,7 @@
         "signature_hash": "1cb2a9c58618f9283aa9f4613fc9ec2084dbb8382e874efa84fe438ebce4c022"
       },
       "kind": "function",
-      "line_span": [24, 51],
+      "line_span": [29, 56],
       "path": "tests/test_validation.py",
       "qualname": "test_rejects_invalid_parameters",
       "signature": "test_rejects_invalid_parameters() -> None",
@@ -3249,13 +3894,13 @@
       "hashes": {
         "body_hash": "a8a479e15c8d81cd80e11a3bca864e7d19486d49f07a299c36d920678bfb5355",
         "content_hash": "2ae5e06eb15903d0bf01fbd2f8e60d5f78e97c43c4cb2bb0818ae38e3024e317",
-        "decorator_hash": "ae59a28f30fb94f28e5d24c2c1f470aad3d25d789cef30e5ebee48e35b747fa5",
+        "decorator_hash": "42701f8ffb310542ab2d836873b50f1206f89bcb86dd1620ceb5d45fa2de6e7d",
         "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "public_contract_hash": "75c1b944df3e6953645800e99f3693cc25c514e887020f65ab56b58ef9e92cc3",
+        "public_contract_hash": "e2615df7cfd99935a5d4413854e4a0ae976562d614e6b23ee6777c8009a70001",
         "signature_hash": "d013f913c37368358fba775c72f5bf2f1dbcd4fc8577028736ac1b5b957c9dd9"
       },
       "kind": "function",
-      "line_span": [13, 15],
+      "line_span": [11, 13],
       "path": "tests/test_validation.py",
       "qualname": "test_rejects_invalid_shapes_and_dtypes",
       "signature": "test_rejects_invalid_shapes_and_dtypes(value: np.ndarray) -> None",
@@ -3271,7 +3916,7 @@
         "signature_hash": "b41733520f1e8b4287feb1eac5fc2df3dfdc8a032f498a37b0b109d1d1c112ae"
       },
       "kind": "function",
-      "line_span": [19, 21],
+      "line_span": [24, 26],
       "path": "tests/test_validation.py",
       "qualname": "test_rejects_nonfinite_audio",
       "signature": "test_rejects_nonfinite_audio(value: float) -> None",
@@ -3279,15 +3924,15 @@
     },
     "py:module:audiosig/__init__.py": {
       "hashes": {
-        "body_hash": "30b297d45be2ff15387049e204c0cee9140d821e77d519e0bcefed5e3069e97d",
-        "content_hash": "5802077e442b232b8d910a6b32e05059d6c60b49828df7a6656d3fad43945f98",
+        "body_hash": "5954e93cacd6a94c5f2eac2790132196276f511711dd6abadf2dba03fc586ddd",
+        "content_hash": "8609d20b8420bcbce0b09fa097228ee4da28c7a2d3e17ad44fddb1785bf3889a",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "2e3e8731c38a39c03b924c7a61af8b5954c538216a47f41ea1275df973458d89",
-        "public_contract_hash": "8cc5628a82ced84046712c0b9cf90fa2714d3e0ab25a14ebec386ab651c7c0f3",
+        "public_contract_hash": "8c61efdac548d6ec152379afbe7cdc3f4e33650836f32f4253cb2ad8df77ae50",
         "signature_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       "kind": "module",
-      "line_span": [1, 72],
+      "line_span": [1, 78],
       "path": "audiosig/__init__.py",
       "qualname": "audiosig/__init__.py",
       "signature": "audiosig/__init__.py",
@@ -3311,15 +3956,15 @@
     },
     "py:module:audiosig/_resampling.py": {
       "hashes": {
-        "body_hash": "b90ee128ecdad96b9717d1639bdbdc7fe95e3aeb61ac8f22910475b6e712941c",
-        "content_hash": "dab8790ce9496b65484391c57fb690c0fa22128a245decd4542a51e5a91c5d10",
+        "body_hash": "f357b64b6fbaec850038c6bcfb9e942161eab82978cff017fccb90c98fbc252b",
+        "content_hash": "f63340d026788d8067a9c8b250f8118c81562cee4151f26333bc1ed366615eb4",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "755a5a50bff3f43cfc3fa12d62b68e7d7e8e9816910477dda44e07490d9ff99f",
-        "public_contract_hash": "de7ad80fd07ef9d6b36fbb9b0e1ec15600a53a40cdb32b1c6af30c5ca93cfe18",
-        "signature_hash": "399f6abd1a199ee96792c40fe67f71c44d95be1efb4e0ec2d2886c038cdfb997"
+        "docstring_hash": "6a8ae42f3ee3c9e4f0b5b032d739b0db807137dcecad7a1b5ca0fbeef5417b1a",
+        "public_contract_hash": "4b289bd2f98ac06819ecd639e82f4d4839d1d34789cee9ad85a7a6eff37bea94",
+        "signature_hash": "0e49c3b8077c8ae6ebecb6951386ab1a4792bfc7661ce441037d69cccc681cac"
       },
       "kind": "module",
-      "line_span": [1, 89],
+      "line_span": [1, 132],
       "path": "audiosig/_resampling.py",
       "qualname": "audiosig/_resampling.py",
       "signature": "audiosig/_resampling.py",
@@ -3343,15 +3988,15 @@
     },
     "py:module:audiosig/_validation.py": {
       "hashes": {
-        "body_hash": "e03b9c18329b8da28dad85129f762c589761d9b10b236c7b216eca1efb78ac3e",
-        "content_hash": "049bac7592e7f1c7ff6d927519933300b3e1894da3afd08b8cb8a776dd2be77d",
+        "body_hash": "586248f0a11ed3a0797160b83fb6e02fc7479629eaf7173b0855986cea019c70",
+        "content_hash": "7f875636cd5e52ac1dd879b259d176ab996504ef86329e4ac4fa9f379ca2f703",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "c0b00f620704801d44b1fbd731070e927fff697f0ba225e0c73718765c63c5de",
-        "public_contract_hash": "25b83f7e963c204971ddaa56a4d8d636c4c7668a0a0ff1342abfdbe23ea05992",
-        "signature_hash": "11213c8da557bca689eb65fc57c24a5266546bb82538a5b822f15b1fac192bb9"
+        "docstring_hash": "a7339a569b6eb76ccedbf2fcd2317e4589fdc8e7d8c69b501fc2c88a7e9609c9",
+        "public_contract_hash": "fef4d60651b22f57d4453de6bc2a60d7200b57446a9b8e740ea1ff1395a76c09",
+        "signature_hash": "c957290717e8f53bfaa5f5f817bf74ccd679ba1b50913da0d2c47411447fa315"
       },
       "kind": "module",
-      "line_span": [1, 80],
+      "line_span": [1, 107],
       "path": "audiosig/_validation.py",
       "qualname": "audiosig/_validation.py",
       "signature": "audiosig/_validation.py",
@@ -3359,12 +4004,12 @@
     },
     "py:module:audiosig/_version.py": {
       "hashes": {
-        "body_hash": "b24d199837c85dc9bcca18f4b49856ecdcc71f7f3529deac15a71a347b28ba3c",
-        "content_hash": "a0257cb06c60391b5b33210253d78b581aa65cd40630182ebf765fab6bd9be2e",
+        "body_hash": "166b5ed8d3a385d54104d260f9664b0603b7432f50ce55429111906b973c18db",
+        "content_hash": "202cba7b92d4f7099fe288a535d4dfc286817c2cb9a2f251ed97aad8ebfdb979",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "public_contract_hash": "df4f55aac9c7b52cec3afc915d707e4b4865e3ade8733eece26359c8ca7d6d34",
-        "signature_hash": "24a3d2d0af82aadf4af0420b42ab32455ae2e2f91c80849c82d7833573530c98"
+        "public_contract_hash": "a1fb659dc3c09346c0e5d6ab48fe0da59e1e2f322fbbd56a8d564f4b4c7f32ac",
+        "signature_hash": "349146c56f8b8a68bf878c23a73e576ea8cc2428edb06b9118a667285edd52d5"
       },
       "kind": "module",
       "line_span": [1, 24],
@@ -3375,15 +4020,15 @@
     },
     "py:module:audiosig/amplitude.py": {
       "hashes": {
-        "body_hash": "c025f5f959931341bc824af5c041db77bcb622a99aa9538c7c4f4466d6890709",
-        "content_hash": "2fc495abc98d4444dd94d314188a7356ceff089778930f56e2bcd0590dae2bbf",
+        "body_hash": "47d01a03d1b71cac461563f865f9ab6cb69f999b8c5d7e49e47d26e09d08acf6",
+        "content_hash": "3d1b2ca97546bf5a35a7c5d7bbdb1bd9726ef97f42b50a1a2605da6eba4191d5",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "3d827830012964ca593c316f92a6636a8325b6b43b73b9a94c568fe246bcc161",
-        "public_contract_hash": "19b2643559260632d2992e9be06eb40efcc5425256b08e383fd9ba68d980eec6",
+        "public_contract_hash": "effa2ad754d61ea27baf8128fc480bb107829d145d6c6b3cc7fa23936a083f7e",
         "signature_hash": "d78bd6be1f8b1a267083ebc4f5c391e84ed16573ae5adb1d950cffb1447c7a20"
       },
       "kind": "module",
-      "line_span": [1, 41],
+      "line_span": [1, 55],
       "path": "audiosig/amplitude.py",
       "qualname": "audiosig/amplitude.py",
       "signature": "audiosig/amplitude.py",
@@ -3391,15 +4036,15 @@
     },
     "py:module:audiosig/effects.py": {
       "hashes": {
-        "body_hash": "61d6cdf1ed1210e1dd679f935ef7ed6f9d775ca4b27290a6a8a7a7f32bc2c8a7",
-        "content_hash": "ffa0ed2464ca39833681f30e70ccf8e59730a346cd3fad107fcaa7b2995324a3",
+        "body_hash": "8abde7dfa3428c4227d81bb378b545886fc5dfd23589273f707706aea27c7030",
+        "content_hash": "934742db5b669fd14161cc8ea02a4226b77fb8cd8b7d5fb1fd0fe815831f9716",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "docstring_hash": "e5335dfde6d47d2a1ed14d6fc20ec883ef85e693c989814c7beee895df6d177d",
-        "public_contract_hash": "cb3bba73f3075d05ea15f93223f69a38abb9aa40cd3680cca5b1eb337a90c020",
+        "public_contract_hash": "86e459c93e8f87f557fd022ca4d80a74767a646dfc73adc79b06eac6c2cff9c0",
         "signature_hash": "4fe36be7565c01621f4bfe23cc4c88ec9e65707f7eedb844aab9b4444b9992c2"
       },
       "kind": "module",
-      "line_span": [1, 90],
+      "line_span": [1, 113],
       "path": "audiosig/effects.py",
       "qualname": "audiosig/effects.py",
       "signature": "audiosig/effects.py",
@@ -3423,19 +4068,35 @@
     },
     "py:module:audiosig/silence.py": {
       "hashes": {
-        "body_hash": "b2ee94ef1088d38fedafe17f409e3c3ceeba0e629ead7f47435ff897332a1d17",
-        "content_hash": "c3bd5bda779792107083712b50bb30b83adfd9f041a6217c110836a3ff254956",
+        "body_hash": "5e7ba93bfe9e2be62aa1d75b201fadedf061bf23b54944b813a5bd3c0f0bf9ce",
+        "content_hash": "8a8f73009753d6f25dc2f03e8cfcaa2d1f5cb0476c57671796457a935d00766d",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "db0a2037b14dd9d92e672606f7b9817e04422bc55f6bd5c27322cdebe34fa64d",
-        "public_contract_hash": "4fc1aea0545a0417605aad617d0d4587117abb24dc2a7eb665b01b9df6f84c36",
-        "signature_hash": "b9e9551075486b8116425eeffcda2bb1b37c95ffb881c13475fdd45c517ab9b4"
+        "docstring_hash": "ea3b0e9abf7a6233b8f0845bcd811ae5a0f5ffbf971a028c3be17b18d27dedfc",
+        "public_contract_hash": "84ee5c33da62d258bf2e89d3b7dbf5c11d84a3d64d591e163fedb3534bf9ef25",
+        "signature_hash": "26617eb1f83043838bbb55bbcaaba33845e002bae54f091859991feeda2ecb51"
       },
       "kind": "module",
-      "line_span": [1, 732],
+      "line_span": [1, 777],
       "path": "audiosig/silence.py",
       "qualname": "audiosig/silence.py",
       "signature": "audiosig/silence.py",
       "source_id": "py:module:audiosig/silence.py"
+    },
+    "py:module:audiosig/speech.py": {
+      "hashes": {
+        "body_hash": "b5eb19e2956f8b266624c35efb6efa4d949e3af67c1467e6ae2902ce6ebe03cb",
+        "content_hash": "41fc98d79ee39652e3d1072723fec0b378ed06d5cf1aca85d3e4f38d8cb4ba77",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "3b21b65152237e0244edb14891c6055e589f9988a7abd6c3995de60ebdb5350a",
+        "public_contract_hash": "d6f4afadd32e7d4e85e46da40a46faa843989cde1511358ca70757fde8fac099",
+        "signature_hash": "ce077d62cc29192a180d58e3b68d8b5826a460e226afce4868c0bd3b427e311e"
+      },
+      "kind": "module",
+      "line_span": [1, 82],
+      "path": "audiosig/speech.py",
+      "qualname": "audiosig/speech.py",
+      "signature": "audiosig/speech.py",
+      "source_id": "py:module:audiosig/speech.py"
     },
     "py:module:tests/__init__.py": {
       "hashes": {
@@ -3487,31 +4148,47 @@
     },
     "py:module:tests/test_amplitude.py": {
       "hashes": {
-        "body_hash": "48ee661a30d6c4b5e6a040ff5f897a87baf7d44629c4ad44216da58715188447",
-        "content_hash": "0e087e71e71520899405d681b02a78e63fd36e07b34012dca4bce54149c64655",
+        "body_hash": "619781e080dbdd0fb9ee76e0c022c62a2c01a43ab7f711f037435a87a949056b",
+        "content_hash": "588bdb561acf05645f8975f801f73968387b87a181cfd80f423109912e33f4aa",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070",
-        "public_contract_hash": "16c881d085097b488880c0ecc5ce3a7365f76f007860908f71408eb9e639b052",
-        "signature_hash": "b63f309b41abcc95b81fc1d3d4f38840127f7df3d0ce86e273b295a4e1d880b4"
+        "docstring_hash": "7c370d9536d7d0d6a0f7cd7f9826692acd93e4fb05ba46f7b630b879740343d3",
+        "public_contract_hash": "daf9ce5cef43c8c2cc090572fb9aece6bd37864f64d83451fa7bcd76053a3ca8",
+        "signature_hash": "eba2d2a71c994d20e0713507923be0a70251c434ed0d3f5e20f0fa7c11922cb2"
       },
       "kind": "module",
-      "line_span": [1, 34],
+      "line_span": [1, 63],
       "path": "tests/test_amplitude.py",
       "qualname": "tests/test_amplitude.py",
       "signature": "tests/test_amplitude.py",
       "source_id": "py:module:tests/test_amplitude.py"
     },
-    "py:module:tests/test_effects.py": {
+    "py:module:tests/test_documentation_examples.py": {
       "hashes": {
-        "body_hash": "1dffef252ce18da541cf7cef314b95e4236639315604c04ee76fcd9783234b25",
-        "content_hash": "16cf5cd8c3803ea8b026bcbf2fa9d4cadcfd57b90ccaebf35ca6396c96cccf2b",
+        "body_hash": "196620916be08aabd35412e0cb51e6bde25f735bc61550241b7d50f79731fb37",
+        "content_hash": "ea31f204acfe8d50ce2f26b27eb8739d5731834f6683798cbd92e2126551b5ed",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "538d6440534fa5f615e8a26932792a82a2e4a33a97886e2d815eab8fc216d415",
-        "public_contract_hash": "83c9d0772b2794a74cda5aa1fb9d100fc6844baff6eb2acf11b0728f52ae9de9",
-        "signature_hash": "e6df7ab154ac89488a473932980cbc760c1c55285dbf4c1967e92bad1e7bcb3a"
+        "docstring_hash": "75a11da44c802486bc6f65640aa48a730f0f684c5c07a42ba3cd1735eb3fb070",
+        "public_contract_hash": "17ea733b42240cb5deb15f00e3ba10c4a3e75ee9399d6d1c9604e2b0d1c1e67d",
+        "signature_hash": "a9be985d09a212ea6549fa51ad922d488a9db320ad29a15bc2044243c19e15bb"
       },
       "kind": "module",
-      "line_span": [1, 72],
+      "line_span": [1, 33],
+      "path": "tests/test_documentation_examples.py",
+      "qualname": "tests/test_documentation_examples.py",
+      "signature": "tests/test_documentation_examples.py",
+      "source_id": "py:module:tests/test_documentation_examples.py"
+    },
+    "py:module:tests/test_effects.py": {
+      "hashes": {
+        "body_hash": "d1dd2ce4f1ecad501015091b77b96c73263114dac3a87f48d72206945b59981d",
+        "content_hash": "aebca691050e7adb3183960925e646449717a43057ac106b5b4a8ff754b79445",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "1e135afb54bf948ed616b7e518ea9f59c8edad95a2d1dfbae8adc60b167c5f6c",
+        "public_contract_hash": "42f3ccbf7f642be63e314e2e3500f71416a4afa5ab365ae713bd42a65812b34d",
+        "signature_hash": "d52c1a60b474cfd41696df2cea76cbec3bcfd5d54c9f063c2e26ecdca4f9106a"
+      },
+      "kind": "module",
+      "line_span": [1, 103],
       "path": "tests/test_effects.py",
       "qualname": "tests/test_effects.py",
       "signature": "tests/test_effects.py",
@@ -3567,31 +4244,47 @@
     },
     "py:module:tests/test_packaging.py": {
       "hashes": {
-        "body_hash": "a36f02d990c41ad3b9451bed71ff5dce5c90e2264b881f3aa0025cafbdad5fc5",
-        "content_hash": "17489aa2464af61a6ef345dee57ce2f1980e34d48a319897713e642946fac36a",
+        "body_hash": "6e98c7e7631354a9978bbff74ca33028894bb015c7759ea59027c5295f420bf3",
+        "content_hash": "16fe59ce5bfc4cd90dea5e2a9a95939b490608e2e276abb767568d815a12213c",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "1e135afb54bf948ed616b7e518ea9f59c8edad95a2d1dfbae8adc60b167c5f6c",
-        "public_contract_hash": "e321b90f28ba55d6555b680a8cb5bd2543896303e4ee447cdbaf56e5cb71060e",
-        "signature_hash": "aa5eca985a02f2e6d917568217e87f9fbfca3124a4418441c13b2134671fe4a7"
+        "docstring_hash": "5c210454b1facc1e317a759f6059324f793841eb23d1f549179b64d1584c55f8",
+        "public_contract_hash": "af4e276d3642b32126158142221217244d75e3294c25b481437eabf519724cfb",
+        "signature_hash": "982c490b55144c01e45251c998cbf41c5960b7fdcce5e1fefbec10fe2173fd4a"
       },
       "kind": "module",
-      "line_span": [1, 166],
+      "line_span": [1, 176],
       "path": "tests/test_packaging.py",
       "qualname": "tests/test_packaging.py",
       "signature": "tests/test_packaging.py",
       "source_id": "py:module:tests/test_packaging.py"
     },
-    "py:module:tests/test_resampling.py": {
+    "py:module:tests/test_pykokoro_contract.py": {
       "hashes": {
-        "body_hash": "98b41a56e8f7a76835ad31177078ee728bd5964523f7679fdaa2fa9f2fbfe78f",
-        "content_hash": "fee5c86d3e48ed6cc57aedc8927e355277d7fb40713ac7612bd3a5367c4b4306",
+        "body_hash": "4fcf57f36d9322c2de853997b1c07f95bc7aa63de292e97deecc6d1746ab09a9",
+        "content_hash": "dbbeed85dae1a802c863f81a577a295f7625f5605f949d16aa55f2ae2d1ea5ad",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "545c38b0922de19734fbffde62792c37c2aef6a3216cfa472449173165220f7d",
-        "public_contract_hash": "9e8fb62d5524407a53b016982a63f7d995dd95ff4b156297a7ebebfed4f5b119",
-        "signature_hash": "025872de4ceae8bf41c13efd35cf8004ee2d518f84fc007030babd5c9bf8f348"
+        "docstring_hash": "2ae77f637ccc849e74e79ab05757c0f6c1b8c7506d274b2f0126666704ae56d5",
+        "public_contract_hash": "05fed863aea56d20be1d8b5334be94c8e7288a4a791c45323ac3e4e4b90f65b0",
+        "signature_hash": "c5c44135a26a9ff0d6f40baa2675e51013def986ea2b62c38c228b5dddc26530"
       },
       "kind": "module",
-      "line_span": [1, 81],
+      "line_span": [1, 152],
+      "path": "tests/test_pykokoro_contract.py",
+      "qualname": "tests/test_pykokoro_contract.py",
+      "signature": "tests/test_pykokoro_contract.py",
+      "source_id": "py:module:tests/test_pykokoro_contract.py"
+    },
+    "py:module:tests/test_resampling.py": {
+      "hashes": {
+        "body_hash": "e64ca6ee5742833596d2abb8c4018ba6060cc482c3576fd08e97535b481f61e7",
+        "content_hash": "4579da1c982b5afbd7361ba021db8aab95bd4f1648812a007857404794a8a444",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "538d6440534fa5f615e8a26932792a82a2e4a33a97886e2d815eab8fc216d415",
+        "public_contract_hash": "0684e01f939e2ec35c75fdb1d6aee157120c7b5bf5c3175df060b0c300d4f5de",
+        "signature_hash": "6752be02d7d86ec09a115f2900cf150c413fafc5745a7cac80423d0a80cc333a"
+      },
+      "kind": "module",
+      "line_span": [1, 131],
       "path": "tests/test_resampling.py",
       "qualname": "tests/test_resampling.py",
       "signature": "tests/test_resampling.py",
@@ -3615,15 +4308,15 @@
     },
     "py:module:tests/test_silence.py": {
       "hashes": {
-        "body_hash": "5d2da5a379db78f868713d191fe032dace0a4b5072f692249c4e7ccd4ee6673e",
-        "content_hash": "d8fb9da5be41aa07709e1bba654b6c5d4908633bb6928a21bb53a2e2041878f9",
+        "body_hash": "c9818c4f8894d0338cf370880847682b7c565205eec35837f8bf7db2482f2e71",
+        "content_hash": "284e300a65c8395569caaf854b6d59a8d043430463f9786f17fe02142e825795",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "6a3cf5192354f71615ac51034b3e97c20eda99643fcaf5bbe6d41ad59bd12167",
-        "public_contract_hash": "48adeffd0ce742ffe0cc0765c56a62570e84ae122a66068787357d65b71f6c9e",
-        "signature_hash": "98a2eeeea4cca1261b1b3c8f8826573806a386dd02d199063663456d2065df68"
+        "docstring_hash": "545c38b0922de19734fbffde62792c37c2aef6a3216cfa472449173165220f7d",
+        "public_contract_hash": "0dd02c3552708c19e60326dce3fe27c2af432452710939438cfd1e223aa7b0d7",
+        "signature_hash": "868721cdc09f42ed60bc1ae9b5526ee13b5dd59200a6beec8b658c8b1298749b"
       },
       "kind": "module",
-      "line_span": [1, 55],
+      "line_span": [1, 74],
       "path": "tests/test_silence.py",
       "qualname": "tests/test_silence.py",
       "signature": "tests/test_silence.py",
@@ -3661,6 +4354,38 @@
       "signature": "tests/test_spectral_quality.py",
       "source_id": "py:module:tests/test_spectral_quality.py"
     },
+    "py:module:tests/test_speech.py": {
+      "hashes": {
+        "body_hash": "fdc014f51a2069f41af8941ad8372c7f761f25ad7c908ae5e558e8ca2140c267",
+        "content_hash": "977f05f0ee022682260f4b8b56dd9a25d6a3504ec2c7bf3c902f129024b7bdd7",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "7c370d9536d7d0d6a0f7cd7f9826692acd93e4fb05ba46f7b630b879740343d3",
+        "public_contract_hash": "dac7f58ed978491f1569495d4096a98671a99480ef77b8c6a6ca6e78c97fc339",
+        "signature_hash": "dd706e63c6af3e109b46d02df84b86379d4904b6d58f639854f9b152a25391db"
+      },
+      "kind": "module",
+      "line_span": [1, 98],
+      "path": "tests/test_speech.py",
+      "qualname": "tests/test_speech.py",
+      "signature": "tests/test_speech.py",
+      "source_id": "py:module:tests/test_speech.py"
+    },
+    "py:module:tests/test_speech_quality.py": {
+      "hashes": {
+        "body_hash": "3bd3065665479f17a71efb66c72b824d3b793e56b7fd406f70c44a702be5d592",
+        "content_hash": "0851d039f72b8fa2d831869856cdca614b36ef05404cd03a1a9d47445f3dec79",
+        "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "docstring_hash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "public_contract_hash": "7ef383efcb65ec956bda2e45c50dd2a94ee100764f86e8d912808c978317e70a",
+        "signature_hash": "76c9a42b9104a0ba1f9345c44b6ee142f4e0d1bfcb7aa31e28b4fc50b582447b"
+      },
+      "kind": "module",
+      "line_span": [1, 24],
+      "path": "tests/test_speech_quality.py",
+      "qualname": "tests/test_speech_quality.py",
+      "signature": "tests/test_speech_quality.py",
+      "source_id": "py:module:tests/test_speech_quality.py"
+    },
     "py:module:tests/test_trim_split_quality.py": {
       "hashes": {
         "body_hash": "6bae20989689aec7f7b1722d22470bde4ca29df5327b3971622d7d125cba2c02",
@@ -3679,15 +4404,15 @@
     },
     "py:module:tests/test_trim_vad_compat.py": {
       "hashes": {
-        "body_hash": "d51f8f476cbe592498843856031f2fef0381ff650ab8aa102f609ed899ec6b36",
-        "content_hash": "bb98005fa92d31f56aa1ae25bb85738db38038f234adbaf5e3bcbf922972680e",
+        "body_hash": "5c090ed73581bb69863e9a969d996ae6caf38a60cf14bb3b63b818af4cee035f",
+        "content_hash": "b3e3f7d50d99843eebc195f5a0e423980025f0e75f4d4e8215cd5f97ccf79293",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "a66b8b29b6eb6d8d6ac137234cb5d8f49f9bb4507a678c7f3ff97659a36ae3b0",
-        "public_contract_hash": "ce61f567032a5b95a44def567628098d1c4c32699c170e4e6569841b5ddc19bc",
-        "signature_hash": "9e58001c44f552b1d292de046776bf2ad8b73a57e07bdfbf4465ccefc9fc1038"
+        "docstring_hash": "1374c0ecff9f5520ea4a144c5754ae434cfea5ca52ec9af6e9916f20bd9275ed",
+        "public_contract_hash": "c10f428f35d59dc4bd8967a84677f53fa35d5e9ca2e53b1bd989b5cb49443582",
+        "signature_hash": "750453713662ce25d90a84ea0969472cc1b7bb0de1392fee944e10065c746b00"
       },
       "kind": "module",
-      "line_span": [1, 446],
+      "line_span": [1, 508],
       "path": "tests/test_trim_vad_compat.py",
       "qualname": "tests/test_trim_vad_compat.py",
       "signature": "tests/test_trim_vad_compat.py",
@@ -3711,15 +4436,15 @@
     },
     "py:module:tests/test_validation.py": {
       "hashes": {
-        "body_hash": "c79c6c2ecd37125ddd35074a53eeee0c9168988a30833e02cefe96da3b9e0331",
-        "content_hash": "27fde39c1539c4862fc4f0262acc0a3647ffc4b70c49ce12e29678bba0e341f0",
+        "body_hash": "073a13e6907ac78f6456f8bdac80975336f232c40c0152135a99b223550a154c",
+        "content_hash": "83c86674755a2bb3c07b1f5bb41baba410434b383d7cc4064ccb240e3fa91d14",
         "decorator_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "docstring_hash": "6a3cf5192354f71615ac51034b3e97c20eda99643fcaf5bbe6d41ad59bd12167",
-        "public_contract_hash": "11bb68f3ec659f63de35a38f705187025ef2e407be88f45c03758221736cf2d5",
-        "signature_hash": "1cca3733a3c6b918807ae1de9e81c52c6faf638d57f856bd869676a7083294e8"
+        "docstring_hash": "545c38b0922de19734fbffde62792c37c2aef6a3216cfa472449173165220f7d",
+        "public_contract_hash": "28a561b3a0abb8c2e166223a2a43d590a518b9ab3a2f4eb7ab0adc9332a8eb6b",
+        "signature_hash": "e02a0af12b24cb5db2367c5e45bd4d034857bd22f5e51cbf51635c767bb497be"
       },
       "kind": "module",
-      "line_span": [1, 51],
+      "line_span": [1, 56],
       "path": "tests/test_validation.py",
       "qualname": "tests/test_validation.py",
       "signature": "tests/test_validation.py",

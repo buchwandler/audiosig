@@ -16,7 +16,6 @@ from ._resampling import resample, resample_speed, resample_to_length
 from .amplitude import apply_gain_db, peak_normalize
 from .effects import pitch_shift, time_stretch
 from .exceptions import AudioShapeError, AudioSignalError, InvalidParameterError
-from .speech import apply_speech_effects
 from .silence import (
     abs2,
     activity_to_intervals,
@@ -40,6 +39,7 @@ from .silence import (
     trim,
     zero_crossing_rate,
 )
+from .speech import apply_speech_effects
 
 __all__ = [
     "AudioShapeError",
@@ -47,10 +47,10 @@ __all__ = [
     "InvalidParameterError",
     "__version__",
     "abs2",
-    "apply_speech_effects",
     "activity_to_intervals",
     "amplitude_to_db",
     "apply_gain_db",
+    "apply_speech_effects",
     "energy_based_vad",
     "find_speech_bounds",
     "find_speech_start",

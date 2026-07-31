@@ -1,53 +1,439 @@
 schema: documentledger.scan.v5
-version: 2
+version: 4
 source_index_file: source-index.json
-source_index_hash: 59453721256fe808727b41e9b9ac6693434f72757d9634b1771279bffab8c39c
-source_file_count: 28
-source_unit_count: 231
-doc_file_count: 7
+source_index_hash: 6477cbc9e4c9ac2f08e539c554ce4f081ef32080a52f70077a18f51512b05039
+source_file_count: 33
+source_unit_count: 276
+doc_file_count: 8
 source_hashes:
-  audiosig/__init__.py: dea9666cb547614c7eb4cfc573facdbce8bfa9dd8d630f50529dd5f9d91e1c05
+  audiosig/__init__.py: b2b980028deffc46f2798a91c0199aac5fc2f370242ab0dd37c49ee0c5c26f6a
   audiosig/_framing.py: 1eaa63c96a083d0cf372a159f051b4f162d84689c64de793aa590d723d3af80f
-  audiosig/_resampling.py: d7c9ffd4634e2953d9796eafd0a5ad9f22832198ecfcf5b5ee2f228c711ec3cf
+  audiosig/_resampling.py: a237f6bc81607d0178fe3897d00003c962d8cad6530bf696b4f2e4f1bf69e987
   audiosig/_spectral.py: ee44c88e16a6c7519c2f12d0690e67628b1d996bb9f8c590973467e23ecaab15
-  audiosig/_validation.py: 6e00f9c7e84b356425bff67526136b60be95a4264431c13e7c8446cb10e17418
-  audiosig/_version.py: b407b234e5a0f69928b448bfe56800c1871736f6c317e0b11463b3e657a8cbc7
-  audiosig/amplitude.py: 67f93b1e3aa8bc4bf68b6342d8425c20be2e46bc58a2211ac0ec3d8c4aa57d7b
-  audiosig/effects.py: 93b219acf0ef2cafc3de5dfaa4953619b98c10b878e64b02561681481e082517
+  audiosig/_validation.py: 980e15ff06bc522ae59aeb6d2cf70477a041d625ff10e037f3e8c911018a6c22
+  audiosig/_version.py: 9ffe6f749b0f36eef0679ecb1ae44be7ce6ebe597e862baf654056cdd1b44505
+  audiosig/amplitude.py: dca92242bc2fabaeca6b504909d3dc280cfdf4af86e4cd43ea7037cf88f2c4c6
+  audiosig/effects.py: 95200d581b772e47593f2415d56b45ed36b276df750b418e8d138f048decb61f
   audiosig/exceptions.py: 2dade4ed3dd95e1ee641b9e7f662342af9af2d6c39ed62a6d9f6dad9250853f6
-  audiosig/silence.py: 63d288bbc290cc5eea1aff91362d7cb3a1bfe892aec39607caa8f3461e42e296
+  audiosig/silence.py: 936db74acdf62e968adb770e3591f65b841030999e4b77892a23ee11499ef198
+  audiosig/speech.py: 2218c56e38e089892a476f2d5f77dfb738d3a05562fc911c9717d54fefe34f24
   tests/__init__.py: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
   tests/_quality_helpers.py: 439bac99d0354aec77c1a2e0e8f84b026fa14d7d8fb545afedbd0f22c8c12ee6
   tests/conftest.py: e22388161809058ae9c71ad3d19b60c0db1a602698a3e1260166abc376298541
-  tests/test_amplitude.py: d4b47ab4505281144482df4aa6beeaba56d5f34240073c4af449fe764977f3da
-  tests/test_effects.py: 881e30698b624c068ad9ab5bcb333415bcc3cf3c8581fe82ee0953081a5b046b
+  tests/test_amplitude.py: a1efc840e0f0459a2465645cbade4c98985e2b254d9ad89b48000a57508e25b2
+  tests/test_documentation_examples.py: 514b4568c040043f373b4e1b0845de8f377a0ceb1a8f5ec964bed033e967aa9d
+  tests/test_effects.py: b95f38c8629bf9cb6b25024e13866130fd611f2f28bb35f4cc955cefc280a611
   tests/test_effects_quality.py: 10f310bb122c3cce68f0924c929b452d8fc99dfdc343013f0bbcde053c84f054
   tests/test_framing.py: dee77756cc46fb900ea6918a73bb37061ce934e1362f5ff471c7094556e7b01e
   tests/test_librosa_compat.py: ab6834454164be3cca49ad9627a09cb3c39fd76008ed57c129134cf22932946a
-  tests/test_packaging.py: 8455a949316b2e86f765489142878f2f8dff69ba92a73586143dd15a4fd2b5e8
-  tests/test_resampling.py: 4b5b53305addc3cd6cd3062a0f559e12dac3607987a9f62256d184b3d4323fe3
+  tests/test_packaging.py: 201743ac34f7b4f4e31e208f7d153100e7ff6b98dfda5c796095abe692f8ac90
+  tests/test_pykokoro_contract.py: 1c1f04d9d0a6cd0de3277760cc5958cde1853fd9f05e8cd7b838c60d63593bc1
+  tests/test_resampling.py: ba08d178d3f1fb9423e2af27769e215c7f829eeb7a8c6495879803c591ab6060
   tests/test_resampling_quality.py: 6f2b82584878e0dcb14321ef6ccb421557ee16a178823d04b48fb0dedd416aaf
-  tests/test_silence.py: 25677103537d4d33d500341c872be8b5483d9c6052b998c609a220dd8677f12b
+  tests/test_silence.py: 422994dcac7599d7adf5fb2d97582acc39dfa2135ed93e719ec5707176b35289
   tests/test_spectral.py: 722f205431e5a32cab569ab71c652e2dd203d2aaa3e157922b23fbe5dd1251ea
   tests/test_spectral_quality.py: 7b50de231215f6c075659263cac7f3660d45e7efbab615e7a8f69dbe5c935fbb
+  tests/test_speech.py: 2ace51078baeb49ed5bd04c679d82019116edd303ac07e07cb5dc9292e8cc640
+  tests/test_speech_quality.py: 29e1e9f4d98dc12b2422503ef81a3f9a9d940be0dbdec221d5f7b2cde3ce4974
   tests/test_trim_split_quality.py: 7d346ac1e633bd48c78669752078fdff1ae9f7f18b74d196c36041071712fc90
-  tests/test_trim_vad_compat.py: c7305a6b49f3553195b0188caba6b3e4cca14b9052e7e98b777f0646ba5c5366
+  tests/test_trim_vad_compat.py: 050fc878fff00ca59244e6233daec6c42d9651e0358ef495283b05fa96a0a284
   tests/test_vad_quality.py: 010a43bd9bd8364e0569c85acf64ead491ba291ed4226713fe29f446484f8fcc
-  tests/test_validation.py: 4bd2810831d22d66f6d5871bcb2dc4b4ddf22de7bc53ca6d989d69cf8d8c313d
+  tests/test_validation.py: 4f4e9258bab22b8693073a53e97a7b62838659d327e001400570a35390baca76
 doc_hashes:
-  README.md: 95017d141881deacbd01137d6d7b99753c0de08231c68f8be921ef555b808202
-  docs/advanced.md: e3f2a58fb6f75df846f636d8909703efd42a980fd484d937b9a643e2382d763d
-  docs/api-reference.md: 08e954d0086d7d32268592920e8bc98f97935deed4668fbfaab9e3961abf6608
-  docs/context.md: c5b19d273905f72c3af3fe8e9a4b1f4fe22d9284963445f1b1a101d41eeac146
-  docs/examples.md: c512d21b74c1432b6b47c0c7a1e437220ec984e7f22604fdb6052f8f281326d0
-  docs/getting-started.md: e7b1738e63df573b2d501796f6167242651f623e6886b55a7858f72efbdd4165
-  docs/index.rst: f3c3ca2ed123a3abf6e1c1f86b1d25cecaad255ae30e157fc3693eecf147e1af
-changed_sources: []
+  README.md: 76e587970cb59d32bbbc6c309dd35a9396ff13710a0c20e566a90e5bf47931ec
+  docs/advanced.md: 0aaa11c9630736e05760159f0d230879f30a18ce9c5eb970d564bd9baddb18a7
+  docs/api-reference.md: 2c9a0b6be8b5b1d854421fdc7a4279d40a8f7ecb5a37094537b4c58e4e2d61e9
+  docs/changelog.md: 7241567a215200ea1ad28f515dfed22b47dbabfa24d7c11b365245ffc468fb35
+  docs/context.md: ff3e571effd0ec0e24fc4a79597c7b6455d134ed6200f6cd67e2cd4c347f85dc
+  docs/examples.md: 951b385835f0256d732ef68a0808ca84625129ae0295e43aeb87a3b9121081a2
+  docs/getting-started.md: 39721381ca1f4bc944712906a66e081381e9f24a3cdbb77903f6c1f06a93be00
+  docs/index.rst: 423dbef38926cb813fc67bc883a900b887c71df36377d18c30f06e148c1faf81
+changed_sources:
+  - audiosig/_version.py
+  - audiosig/amplitude.py
+  - audiosig/effects.py
+  - tests/test_amplitude.py
+  - tests/test_effects.py
+  - tests/test_packaging.py
 deleted_sources: []
-changed_units: []
-added_units: []
+changed_units:
+  - source_id: py:module:audiosig/_version.py
+    path: audiosig/_version.py
+    kind: module
+    qualname: audiosig/_version.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 1
+      - 24
+    new_line_span:
+      - 1
+      - 24
+  - source_id: py:function:audiosig/amplitude.py::apply_gain_db
+    path: audiosig/amplitude.py
+    kind: function
+    qualname: apply_gain_db
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 11
+      - 23
+    new_line_span:
+      - 11
+      - 32
+  - source_id: py:function:audiosig/amplitude.py::peak_normalize
+    path: audiosig/amplitude.py
+    kind: function
+    qualname: peak_normalize
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 26
+      - 40
+    new_line_span:
+      - 35
+      - 55
+  - source_id: py:function:audiosig/effects.py::pitch_shift
+    path: audiosig/effects.py
+    kind: function
+    qualname: pitch_shift
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 65
+      - 103
+    new_line_span:
+      - 65
+      - 113
+  - source_id: py:module:tests/test_amplitude.py
+    path: tests/test_amplitude.py
+    kind: module
+    qualname: tests/test_amplitude.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 1
+      - 48
+    new_line_span:
+      - 1
+      - 63
+  - source_id: py:module:tests/test_effects.py
+    path: tests/test_effects.py
+    kind: module
+    qualname: tests/test_effects.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 1
+      - 96
+    new_line_span:
+      - 1
+      - 103
+  - source_id: py:module:tests/test_packaging.py
+    path: tests/test_packaging.py
+    kind: module
+    qualname: tests/test_packaging.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 1
+      - 171
+    new_line_span:
+      - 1
+      - 176
+added_units:
+  - source_id: py:function:tests/test_amplitude.py::test_gain_rejects_unrepresentable_finite_db
+    path: tests/test_amplitude.py
+    kind: function
+    qualname: test_gain_rejects_unrepresentable_finite_db
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 52
+      - 55
+  - source_id: py:function:tests/test_amplitude.py::test_peak_normalize_rejects_target_outside_dtype_range
+    path: tests/test_amplitude.py
+    kind: function
+    qualname: test_peak_normalize_rejects_target_outside_dtype_range
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 59
+      - 63
+  - source_id: py:function:tests/test_effects.py::test_pitch_shift_rejects_unrepresentable_finite_ratio
+    path: tests/test_effects.py
+    kind: function
+    qualname: test_pitch_shift_rejects_unrepresentable_finite_ratio
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 86
+      - 89
+  - source_id: py:function:tests/test_packaging.py::test_release_files_exist
+    path: tests/test_packaging.py
+    kind: function
+    qualname: test_release_files_exist
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 159
+      - 161
 deleted_units: []
 affected_sections: []
 stale_docs: []
-unlinked_changed_sources: []
-unmapped_changed_units: []
+unlinked_changed_sources:
+  - audiosig/_version.py
+  - audiosig/amplitude.py
+  - audiosig/effects.py
+  - tests/test_amplitude.py
+  - tests/test_effects.py
+  - tests/test_packaging.py
+unmapped_changed_units:
+  - source_id: py:module:audiosig/_version.py
+    path: audiosig/_version.py
+    kind: module
+    qualname: audiosig/_version.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 1
+      - 24
+    new_line_span:
+      - 1
+      - 24
+  - source_id: py:function:audiosig/amplitude.py::apply_gain_db
+    path: audiosig/amplitude.py
+    kind: function
+    qualname: apply_gain_db
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 11
+      - 23
+    new_line_span:
+      - 11
+      - 32
+  - source_id: py:function:audiosig/amplitude.py::peak_normalize
+    path: audiosig/amplitude.py
+    kind: function
+    qualname: peak_normalize
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 26
+      - 40
+    new_line_span:
+      - 35
+      - 55
+  - source_id: py:function:audiosig/effects.py::pitch_shift
+    path: audiosig/effects.py
+    kind: function
+    qualname: pitch_shift
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 65
+      - 103
+    new_line_span:
+      - 65
+      - 113
+  - source_id: py:module:tests/test_amplitude.py
+    path: tests/test_amplitude.py
+    kind: module
+    qualname: tests/test_amplitude.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 1
+      - 48
+    new_line_span:
+      - 1
+      - 63
+  - source_id: py:module:tests/test_effects.py
+    path: tests/test_effects.py
+    kind: module
+    qualname: tests/test_effects.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 1
+      - 96
+    new_line_span:
+      - 1
+      - 103
+  - source_id: py:module:tests/test_packaging.py
+    path: tests/test_packaging.py
+    kind: module
+    qualname: tests/test_packaging.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 1
+      - 171
+    new_line_span:
+      - 1
+      - 176
+  - source_id: py:function:tests/test_amplitude.py::test_gain_rejects_unrepresentable_finite_db
+    path: tests/test_amplitude.py
+    kind: function
+    qualname: test_gain_rejects_unrepresentable_finite_db
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 52
+      - 55
+  - source_id: py:function:tests/test_amplitude.py::test_peak_normalize_rejects_target_outside_dtype_range
+    path: tests/test_amplitude.py
+    kind: function
+    qualname: test_peak_normalize_rejects_target_outside_dtype_range
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 59
+      - 63
+  - source_id: py:function:tests/test_effects.py::test_pitch_shift_rejects_unrepresentable_finite_ratio
+    path: tests/test_effects.py
+    kind: function
+    qualname: test_pitch_shift_rejects_unrepresentable_finite_ratio
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 86
+      - 89
+  - source_id: py:function:tests/test_packaging.py::test_release_files_exist
+    path: tests/test_packaging.py
+    kind: function
+    qualname: test_release_files_exist
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 159
+      - 161
