@@ -1,3 +1,7 @@
+[![PyPI - Version](https://img.shields.io/pypi/v/audiosig)](https://pypi.org/project/audiosig/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/audiosig)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/audiosig)
+
 # AudioSig
 
 Portable, dependency-light audio signal processing for NumPy arrays.
