@@ -63,13 +63,18 @@ result = time_stretch(
   It is speech-specific and remains experimental until real-speech listening
   results establish a stable benefit over WSOLA.
 
-The compositor plans pitch and rate together using `tsm_rate = rate / pitch_ratio`, then resamples once when necessary. If `rate == pitch_ratio`,
-the time-scale pass is skipped. `rolloff` is passed to the pitch resampler.
-All backends preserve exact output-length and dtype contracts. ESOLA rejects
-computed backend rates outside `0.5 <= rate <= 2.0`; choose WSOLA or the phase
-vocoder for those values. Pitch shifting
-changes the spectral envelope with F0, so native pitch shifting does not
-preserve vocal formants; larger shifts are more artifact-prone.
+The standard compositor plans pitch and rate together using
+`tsm_rate = rate / pitch_ratio`, then resamples once when necessary. Selecting
+`method="td_psola"` uses a separate direct pitch/prosody path instead: it tracks
+voicing and pulses, changes synthesis-pulse spacing for voiced speech, and uses
+WSOLA for unvoiced duration fallback. Its conservative limits are
+`-6..+6` semitones and `0.75..1.5` rate. All paths preserve exact
+output-length and dtype contracts, but TD-PSOLA does not guarantee formant
+preservation and should not be treated as a general music or polyphonic
+pitch-shifting backend.
+
+TD-PSOLA remains experimental until objective, runtime, and real-speech
+listening gates pass. See the [evaluation protocol](td-psola-listening-evaluation-2026-07-31.md).
 
 ## Resampling Internals
 

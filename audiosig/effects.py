@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, cast
 
 import numpy as np
 
@@ -19,6 +19,7 @@ from ._validation import (
 from .exceptions import InvalidParameterError
 
 TimeStretchMethod = Literal["phase_vocoder", "wsola", "esola"]
+PitchShiftMethod = Literal["phase_vocoder", "wsola", "esola", "td_psola"]
 
 
 def time_stretch(
@@ -100,7 +101,7 @@ def pitch_shift(
     sample_rate: int,
     semitones: float,
     bins_per_octave: int = 12,
-    method: TimeStretchMethod = "phase_vocoder",
+    method: PitchShiftMethod = "phase_vocoder",
     axis: int = -1,
     n_fft: int = 2048,
     hop_length: int | None = None,
@@ -121,6 +122,11 @@ def pitch_shift(
     if hop > fft_size:
         raise InvalidParameterError("hop_length must not exceed n_fft")
     width, cutoff = validate_filter(filter_width, rolloff)
+    selected_method = validate_choices(
+        method,
+        ("phase_vocoder", "wsola", "esola", "td_psola"),
+        "method",
+    )
     if source.shape[normalized_axis] == 0:
         return np.array(source, dtype=source.dtype, copy=True)
     if shift == 0.0:
@@ -136,11 +142,21 @@ def pitch_shift(
     rate = 1.0 / ratio
     if not np.isfinite(rate) or rate <= 0.0:
         raise InvalidParameterError("semitones produces an invalid pitch rate")
+    if selected_method == "td_psola":
+        from ._td_psola import td_psola_prosody
+
+        return td_psola_prosody(
+            source,
+            sample_rate=int(sample_rate),
+            rate=1.0,
+            semitones=shift * 12.0 / bins,
+            axis=normalized_axis,
+        )
     stretched = time_stretch(
         source,
         rate=rate,
         sample_rate=sample_rate,
-        method=method,
+        method=cast(TimeStretchMethod, selected_method),
         axis=normalized_axis,
         n_fft=n_fft,
         hop_length=hop_length,

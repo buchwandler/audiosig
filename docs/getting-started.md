@@ -127,6 +127,27 @@ higher = pitch_shift(audio, sample_rate=24000, semitones=3.0)
 lower = pitch_shift(audio, sample_rate=24000, semitones=-5.0)
 ```
 
+For experimental speech-only direct pitch/prosody processing, opt in with
+`method="td_psola"`. Moderate changes only are supported; unvoiced regions are
+duration-scaled without pitch synthesis and formant preservation is not
+guaranteed:
+
+```python
+from audiosig import apply_speech_effects, pitch_shift
+
+voice_up = pitch_shift(audio, sample_rate=24_000, semitones=4.0, method="td_psola")
+slower_voice = apply_speech_effects(
+    audio,
+    sample_rate=24_000,
+    rate=0.85,
+    semitones=-3.0,
+    method="td_psola",
+)
+```
+
+TD-PSOLA is experimental and intended for clean or mildly noisy speech, not
+music, polyphony, strong noise, reverb, creaky voice, or extreme shifts.
+
 ### Resampling
 
 `resample(audio, source_rate, target_rate)` changes sample rate:

@@ -13,7 +13,7 @@ Change audio duration while approximately preserving pitch.
 - `audio` (np.ndarray): Input audio array
 - `rate` (float): Stretch factor. Values > 1.0 make audio faster/shorter, < 1.0 slower/longer
 - `sample_rate` (int, optional): Required when `method='wsola'` or `method='esola'`; used for speech-time geometry
-- `method` (`'phase_vocoder'`, `'wsola'`, or `'esola'`): Select the generic or speech-oriented backend
+- `method` (`'phase_vocoder'`, `'wsola'`, or `'esola'`): Select the generic or speech-oriented backend. `'td_psola'` is intentionally not a `time_stretch` method.
 - `axis` (int): Sample axis (default: -1)
 - `n_fft` (int): FFT window size (default: 2048)
 - `hop_length` (int, optional): Hop size. Defaults to n_fft // 4
@@ -56,7 +56,7 @@ Shift pitch by semitones while preserving exact input duration.
 - `n_fft` (int): FFT window size (default: 2048)
 - `hop_length` (int, optional): Hop size
 - `filter_width` (int): Resampling filter width (default: 32)
-- `method` (`'phase_vocoder'`, `'wsola'`, or `'esola'`): Time-scale backend used before resampling
+- `method` (`'phase_vocoder'`, `'wsola'`, `'esola'`, or `'td_psola'`): Pitch method. `td_psola` directly synthesizes voiced speech and does not resample the complete waveform.
 - `rolloff` (float): Pitch-resampler rolloff (default: 0.945)
 
 **Returns:** np.ndarray - Pitch-shifted audio with exact same length as input
@@ -77,11 +77,12 @@ lower = pitch_shift(audio, sample_rate=24000, semitones=-5.0)
 
 Apply numeric speech effects using one planned pitch/rate time-scale pass,
 optional resampling, and gain. WSOLA is the default speech backend;
-`method='phase_vocoder'` selects the generic reference path and
-`method='esola'` selects the experimental epoch-synchronous path. The output length
-is exactly `round(input_samples / rate)` for non-empty input, and `rolloff`
-controls the pitch resampler. Native pitch shifting does not preserve vocal
-formants. This compositor does not parse SSMD strings and raises typed
+`method='phase_vocoder'` selects the generic reference path,
+`method='esola'` selects the experimental epoch-synchronous path, and
+`method='td_psola'` selects the experimental direct speech pitch/prosody path.
+The output length is exactly `round(input_samples / rate)` for non-empty input.
+TD-PSOLA supports `0.75 <= rate <= 1.5` and `-6 <= semitones <= 6`; it does not
+guarantee vocal-formant preservation. This compositor does not parse SSMD strings and raises typed
 AudioSig exceptions for invalid input or parameters.
 
 ---

@@ -70,6 +70,23 @@ def transpose(audio, semitones, sample_rate=24000):
 c5 = transpose(audio, semitones=3.0)
 ```
 
+For a speech-only experimental direct pitch path, keep changes moderate and
+opt in explicitly:
+
+```python
+from audiosig import apply_speech_effects
+
+speech_up = apply_speech_effects(
+    audio,
+    sample_rate=24_000,
+    semitones=4.0,
+    method="td_psola",
+)
+```
+
+TD-PSOLA does not guarantee formant preservation, does not pitch unvoiced
+regions, and is not intended for music or polyphonic material.
+
 ### Resampling Examples
 
 ```python

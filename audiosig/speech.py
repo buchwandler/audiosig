@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 import numpy as np
 
 from ._resampling import resample_to_length
@@ -15,8 +17,10 @@ from ._validation import (
     validate_positive,
 )
 from .amplitude import apply_gain_db
-from .effects import TimeStretchMethod, time_stretch
+from .effects import time_stretch
 from .exceptions import InvalidParameterError
+
+SpeechEffectsMethod = Literal["phase_vocoder", "wsola", "esola", "td_psola"]
 
 
 def apply_speech_effects(
@@ -28,7 +32,7 @@ def apply_speech_effects(
     gain_db: float = 0.0,
     axis: int = -1,
     clip: bool = False,
-    method: TimeStretchMethod = "wsola",
+    method: SpeechEffectsMethod = "wsola",
     n_fft: int = 2048,
     hop_length: int | None = None,
     filter_width: int = 32,
@@ -58,12 +62,30 @@ def apply_speech_effects(
     if hop > fft_size:
         raise InvalidParameterError("hop_length must not exceed n_fft")
     width, _ = validate_filter(filter_width, rolloff)
-    if method not in ("wsola", "phase_vocoder", "esola"):
-        raise InvalidParameterError("method must be one of ('wsola', 'phase_vocoder', 'esola')")
+    if method not in ("wsola", "phase_vocoder", "esola", "td_psola"):
+        raise InvalidParameterError(
+            "method must be one of ('wsola', 'phase_vocoder', 'esola', 'td_psola')"
+        )
 
     result = np.array(source, dtype=source.dtype, copy=True)
     if result.shape[normalized_axis] == 0:
         return result
+
+    if method == "td_psola":
+        from ._td_psola import td_psola_prosody
+
+        result = td_psola_prosody(
+            result,
+            sample_rate=int(sample_rate),
+            rate=stretch,
+            semitones=shift,
+            axis=normalized_axis,
+        )
+        if gain != 0.0 or gain == -np.inf:
+            result = apply_gain_db(result, gain, clip=clip_value)
+        elif clip_value:
+            result = np.clip(result, -1.0, 1.0).astype(source.dtype, copy=False)
+        return np.array(result, dtype=source.dtype, copy=True)
 
     octaves = shift / 12.0
     max_octaves = np.log2(np.finfo(np.float64).max)

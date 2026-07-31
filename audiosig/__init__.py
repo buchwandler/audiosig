@@ -14,7 +14,7 @@ except ImportError:  # pragma: no cover - only used in an unbuilt source checkou
 
 from ._resampling import resample, resample_speed, resample_to_length
 from .amplitude import apply_gain_db, peak_normalize
-from .effects import pitch_shift, time_stretch
+from .effects import PitchShiftMethod, TimeStretchMethod, pitch_shift, time_stretch
 from .exceptions import AudioShapeError, AudioSignalError, InvalidParameterError
 from .silence import (
     abs2,
@@ -39,12 +39,15 @@ from .silence import (
     trim,
     zero_crossing_rate,
 )
-from .speech import apply_speech_effects
+from .speech import SpeechEffectsMethod, apply_speech_effects
 
 __all__ = [
     "AudioShapeError",
     "AudioSignalError",
     "InvalidParameterError",
+    "PitchShiftMethod",
+    "SpeechEffectsMethod",
+    "TimeStretchMethod",
     "__version__",
     "abs2",
     "activity_to_intervals",

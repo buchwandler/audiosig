@@ -12,7 +12,8 @@ from time import perf_counter
 
 import numpy as np
 
-from audiosig import apply_speech_effects, time_stretch
+from audiosig import apply_speech_effects, pitch_shift, time_stretch
+from audiosig._pitch import estimate_pitch_track
 
 DEFAULT_RATES = (0.75, 0.85, 1.15, 1.30, 1.50)
 DEFAULT_SEMITONES = (-5.0, -3.0, -2.0, 2.0, 3.0, 5.0)
@@ -73,6 +74,7 @@ def _metric(
     semitones: float,
     requested_length: int | None = None,
     runtime_seconds: float | None = None,
+    tracker_stats: dict[str, object] | None = None,
 ) -> dict[str, object]:
     values = np.asarray(audio, dtype=np.float64)
     samples = values.shape[-1]
@@ -100,11 +102,30 @@ def _metric(
         record["real_time_factor"] = (
             samples / sample_rate / runtime_seconds if runtime_seconds > 0 else float("inf")
         )
+    if tracker_stats:
+        record.update(tracker_stats)
     return record
 
 
 def _number(value: float) -> str:
     return f"{value:g}".replace("-", "m").replace(".", "p")
+
+
+def _tracker_stats(audio: np.ndarray, sample_rate: int) -> dict[str, object]:
+    tracks = estimate_pitch_track(audio, sample_rate=sample_rate)
+    if not tracks:
+        return {"voiced_ratio": 0.0, "mean_confidence": 0.0, "fallback_ratio": 1.0}
+    voiced = np.concatenate([track.voiced for track in tracks])
+    confidence = np.concatenate([track.confidence for track in tracks])
+    voiced_ratio = float(np.mean(voiced)) if voiced.size else 0.0
+    return {
+        "voiced_ratio": voiced_ratio,
+        "mean_confidence": float(np.mean(confidence)) if confidence.size else 0.0,
+        # The comparison harness reports the conservative unvoiced fraction as
+        # the expected WSOLA fallback ratio; synthesis never forces those spans
+        # through pitched grains.
+        "fallback_ratio": 1.0 - voiced_ratio,
+    }
 
 
 def compare(
@@ -115,6 +136,7 @@ def compare(
 ) -> list[dict[str, object]]:
     audio, sample_rate = _read_pcm(input_path)
     records: list[dict[str, object]] = []
+    tracker_stats = _tracker_stats(audio, sample_rate)
     for rate in rates:
         target_length = max(1, round(audio.shape[-1] / rate))
         rendered_methods = []
@@ -142,10 +164,33 @@ def compare(
                 )
             )
         for pitch in semitones:
+            started = perf_counter()
+            rendered = pitch_shift(
+                audio,
+                sample_rate=sample_rate,
+                semitones=pitch,
+                method="td_psola",
+            )
+            elapsed = perf_counter() - started
+            filename = f"td_psola_pitch-{_number(pitch)}st.wav"
+            _write_pcm(output_dir / filename, rendered, sample_rate)
+            records.append(
+                _metric(
+                    rendered,
+                    sample_rate,
+                    method="td_psola_pitch",
+                    rate=1.0,
+                    semitones=pitch,
+                    requested_length=audio.shape[-1],
+                    runtime_seconds=elapsed,
+                    tracker_stats=tracker_stats,
+                )
+            )
             pitch_ratio = float(np.exp2(pitch / 12.0))
             backend_rate = rate / pitch_ratio
             combined_methods = [("wsola", True)]
             combined_methods.append(("esola", 0.5 <= backend_rate <= 2.0))
+            combined_methods.append(("td_psola", True))
             for method, supported in combined_methods:
                 if not supported:
                     continue
@@ -169,6 +214,7 @@ def compare(
                         semitones=pitch,
                         requested_length=target_length,
                         runtime_seconds=elapsed,
+                        tracker_stats=tracker_stats if method == "td_psola" else None,
                     )
                 )
     return records
@@ -187,7 +233,8 @@ def main() -> int:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     json_path.write_text(json.dumps(records, indent=2) + "\n", encoding="utf-8")
     with csv_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(records[0]))
+        fieldnames = list(dict.fromkeys(key for record in records for key in record))
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(records)
     print(f"wrote {len(records)} renders to {args.output_dir}")

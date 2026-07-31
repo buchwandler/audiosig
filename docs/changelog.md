@@ -10,6 +10,8 @@
 - NumPy-only WSOLA speech backend with explicit backend selection
 - Experimental NumPy-only ESOLA speech backend with exact-length synthesis,
   epoch alignment, and explicit moderate-rate validation
+- Experimental NumPy-only direct TD-PSOLA speech pitch/prosody backend with
+  bounded pitch tracking, voiced-grain synthesis, and WSOLA unvoiced fallback
 - Single-pass pitch/rate compositor planner and deterministic quality harness
 - Windowed-sinc resampler with rounded output sizing and an optional librosa-compatible ceiling mode
 - Pitch shifting via resample-then-stretch that preserves exact input length
@@ -25,6 +27,8 @@
 - README overview plus detailed API, getting-started, advanced, and examples documentation
 - Backend trade-offs, exact-length semantics, rolloff propagation, and native formant limitations
 - ESOLA speech-only scope, rate limits, independent-lane behavior, and listening-evaluation gate
+- TD-PSOLA experimental scope, conservative limits, fallback behavior, and
+  real-speech listening-evaluation gate
 
 ### Quality
 

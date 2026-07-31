@@ -97,6 +97,13 @@ generic numerical use. Select ESOLA with `method="esola"` and provide
 speech-effects compositor uses WSOLA by default and combines pitch and rate in
 one time-scale pass. ESOLA is not a general music stretcher, does not claim
 formant preservation, and has not been validated as an extreme-speed solution.
+The experimental `method="td_psola"` option is available only through
+`pitch_shift` and `apply_speech_effects`: it directly modifies voiced speech
+pulses and uses WSOLA for unvoiced duration changes. It is limited to
+`-6 <= semitones <= 6` and `0.75 <= rate <= 1.5`, is not a music or polyphonic
+pitch shifter, and does not guarantee formant preservation. It is not a
+default; see the [TD-PSOLA listening protocol](docs/td-psola-listening-evaluation-2026-07-31.md)
+before considering any promotion.
 All public effects preserve exact output-length, dtype, axis, copy, and finite
 input contracts. Invalid arrays and parameters raise typed `AudioSig`
 exceptions so applications can choose their own fail-open or fail-fast policy.
