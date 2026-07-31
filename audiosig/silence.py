@@ -612,17 +612,6 @@ def find_speech_start(
     pad_end: bool = False,
 ) -> int:
     """Return the first active sample index, or zero when no activity exists."""
-    energy_based_vad(
-        audio,
-        sample_rate,
-        frame_duration_ms=frame_duration_ms,
-        energy_threshold=energy_threshold,
-        frame_length=frame_length,
-        hop_length=hop_length,
-        threshold_db=threshold_db,
-        axis=axis,
-        pad_end=pad_end,
-    )
     bounds = find_speech_bounds(
         audio,
         sample_rate,

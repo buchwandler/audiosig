@@ -48,6 +48,7 @@ def resample(
     ratio = target_hz / source_hz
     effective_cutoff = cutoff * min(1.0, ratio)
     offsets = np.arange(-width, width + 1, dtype=np.int64)
+    window = np.kaiser(offsets.size, beta=14.0)[None, :]
     output = np.empty((moved.size // input_length, output_length), dtype=source.dtype)
     chunk_size = 1024
     for start in range(0, output_length, chunk_size):
@@ -57,7 +58,6 @@ def resample(
         indices = centers[:, None] + offsets[None, :]
         clipped = np.clip(indices, 0, input_length - 1)
         distance = indices.astype(np.float64) - positions[:, None]
-        window = np.kaiser(offsets.size, beta=14.0)[None, :]
         weights = np.sinc(distance * effective_cutoff) * effective_cutoff * window
         weights /= np.maximum(np.sum(weights, axis=1, keepdims=True), np.finfo(np.float64).eps)
         samples = flat[:, clipped]

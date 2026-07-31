@@ -81,11 +81,15 @@ AudioSig accepts arrays in these shapes:
 
 The sample axis defaults to the last dimension (`axis=-1`).
 
-### Data Types
+### Data types
 
-- Input: `float32` or `float64` NumPy arrays
-- Output: Same dtype as input (preserved)
-- All functions return new arrays (inputs are never mutated)
+- Audio inputs must be `float32` or `float64` NumPy arrays.
+- Audio transforms such as gain, resampling, time stretching, pitch shifting,
+  and trimming preserve the audio dtype.
+- Feature and decibel functions may return `float32` or `float64` as documented.
+- VAD functions return boolean masks.
+- Interval and frame-index conversion functions return integer values.
+- Public operations do not mutate the input audio.
 
 ### Time Stretching
 

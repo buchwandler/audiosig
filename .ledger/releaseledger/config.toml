@@ -10,7 +10,7 @@ code = "rl"
 # Release defaults.
 
 [release]
-default_changelog = "CHANGELOG.md"
+default_changelog = "docs/changelog.md"
 default_status = "planned"
 allow_dirty_worktree = true
 # Changelog build defaults.

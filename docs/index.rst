@@ -16,8 +16,8 @@ historical non-padded default; pass ``pad_end=True`` when trailing partial
 speech must be analyzed. ``find_speech_bounds`` returns ``[0, 0]`` when no
 speech is found.
 
-See the repository README and ``AUDIOSIG_TRIM_VAD_BRIEF.md`` for the detailed
-replacement boundary and downstream audit status.
+See the repository README for the detailed replacement boundary and downstream
+audit status.
 
 Documentation
 -------------

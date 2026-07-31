@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from audiosig import InvalidParameterError, energy_based_vad, find_speech_start, trim
+from audiosig import silence as silence_module
 from audiosig.silence import (
     amplitude_to_db,
     median_filter_numpy,
@@ -12,6 +13,24 @@ from audiosig.silence import (
     spectral_flux,
     zero_crossing_rate,
 )
+
+
+def test_find_speech_start_evaluates_vad_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    source = np.zeros(5000, dtype=np.float32)
+    source[1500:3500] = 0.5
+    original_vad = silence_module.energy_based_vad
+    call_count = 0
+
+    def counting_vad(*args: object, **kwargs: object) -> np.ndarray:
+        nonlocal call_count
+        call_count += 1
+        return original_vad(*args, **kwargs)
+
+    monkeypatch.setattr(silence_module, "energy_based_vad", counting_vad)
+
+    find_speech_start(source, frame_length=256, hop_length=64)
+
+    assert call_count == 1
 
 
 def test_trim_and_vad_boundaries() -> None:

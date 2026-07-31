@@ -34,7 +34,7 @@ dependencies = ["numpy>=1.24"]
 Homepage = "https://github.com/buchwandler/audiosig"
 Repository = "https://github.com/buchwandler/audiosig"
 Issues = "https://github.com/buchwandler/audiosig/issues"
-Changelog = "https://github.com/buchwandler/audiosig/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/buchwandler/audiosig/blob/main/docs/changelog.md"
 
 [project.optional-dependencies]
 test = [

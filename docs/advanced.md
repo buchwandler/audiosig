@@ -112,7 +112,7 @@ activity = relative_db_vad(
 
 ```python
 import numpy as np
-from audiosig import trim, split, time_stretch
+from audiosig import trim, split
 
 # Empty arrays are handled gracefully
 empty = np.array([], dtype=np.float32)
@@ -125,11 +125,11 @@ assert np.array_equal(interval, [0, 0])
 # split returns empty intervals
 intervals = split(empty)
 assert len(intervals) == 0
-
-# time_stretch with rate=1.0 returns copy
-result = time_stretch(empty, rate=1.0)
-assert len(result) == 0
 ```
+
+`trim`, `split`, and selected analysis helpers accept empty arrays. Audio
+effects such as `time_stretch` and `pitch_shift` require a non-empty sample
+axis and raise `AudioShapeError` for empty audio.
 
 ### Silent Audio
 
@@ -140,13 +140,15 @@ from audiosig import trim, peak_normalize
 # All-zeros audio
 silence = np.zeros(24000, dtype=np.float32)
 
-# With peak reference, silence is trimmed to nothing
+# With the default peak-relative reference, uniform silence remains unchanged.
 trimmed, interval = trim(silence, top_db=40.0, ref=np.max)
-assert len(trimmed) == 0
-
-# With fixed reference, silence is preserved
-trimmed, interval = trim(silence, top_db=40.0, ref=1.0)
 assert len(trimmed) == 24000
+assert np.array_equal(interval, [0, 24000])
+
+# A fixed nonzero reference classifies the all-zero signal as silence.
+trimmed, interval = trim(silence, top_db=40.0, ref=1.0)
+assert len(trimmed) == 0
+assert np.array_equal(interval, [0, 0])
 
 # Normalization preserves silence
 normalized = peak_normalize(silence)

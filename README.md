@@ -73,8 +73,7 @@ sample zero.
 
 Synthetic examples are available under [`examples/`](examples/README.md). They
 use sine waves and seeded noise, so no input recordings or optional packages
-are required. The full implementation and downstream replacement map are in
-[`AUDIOSIG_TRIM_VAD_BRIEF.md`](AUDIOSIG_TRIM_VAD_BRIEF.md).
+are required.
 
 The phase vocoder and resampler are optimized for speech, TTS, and moderate
 prosody changes. They are portable numerical building blocks, not a claim of
