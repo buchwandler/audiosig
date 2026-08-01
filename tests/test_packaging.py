@@ -59,6 +59,8 @@ def test_wheel_contains_typing_marker_and_required_modules() -> None:
     required = {
         "audiosig/__init__.py",
         "audiosig/py.typed",
+        "audiosig/channels.py",
+        "audiosig/generation.py",
         "audiosig/silence.py",
         "audiosig/effects.py",
         "audiosig/speech.py",
@@ -116,6 +118,8 @@ assert callable(audiosig.resample_to_length)
 assert callable(audiosig.resample_speed)
 assert callable(audiosig.minmax_normalize)
 assert callable(audiosig.apply_speech_effects)
+assert callable(audiosig.downmix_to_mono)
+assert callable(audiosig.generate_silence)
 """
     subprocess.run(
         [sys.executable, "-I", "-c", code, str(target)],

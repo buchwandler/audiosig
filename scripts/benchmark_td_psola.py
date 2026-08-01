@@ -78,7 +78,9 @@ def benchmark(sample_rate: int, seconds: float, lanes: int) -> list[dict[str, ob
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sample-rate", type=int, nargs="+", default=(8_000, 16_000, 24_000, 48_000))
+    parser.add_argument(
+        "--sample-rate", type=int, nargs="+", default=(8_000, 16_000, 24_000, 48_000)
+    )
     parser.add_argument("--seconds", type=float, nargs="+", default=(1.0, 10.0))
     parser.add_argument("--lanes", type=int, nargs="+", default=(1, 2))
     parser.add_argument("--output", type=str)

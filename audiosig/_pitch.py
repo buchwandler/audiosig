@@ -269,7 +269,11 @@ def _refine_pitch_marks_lane(
         frame_positions = frame_times[frame_indices] * sample_rate
         frame_frequencies = frequencies[frame_indices]
 
-        def local_period(position: float) -> float:
+        def local_period(
+            position: float,
+            frame_positions: np.ndarray = frame_positions,
+            frame_frequencies: np.ndarray = frame_frequencies,
+        ) -> float:
             frequency = float(np.interp(position, frame_positions, frame_frequencies))
             return float(np.clip(sample_rate / frequency, minimum_period, maximum_period))
 

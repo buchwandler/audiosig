@@ -20,6 +20,33 @@ def create_chirp(f_start=220, f_end=880, duration=1.0, sample_rate=24000):
     return np.sin(phase).astype(np.float32)
 ```
 
+### Silence and Channel Layouts
+
+```python
+import numpy as np
+from audiosig import downmix_to_mono, generate_silence
+
+silence = generate_silence(0.5, 24_000)
+assert silence.shape == (12_000,)
+
+left = np.ones(8, dtype=np.float32)
+right = np.zeros(8, dtype=np.float32)
+frames_first = np.column_stack([left, right])
+mono_frames = downmix_to_mono(frames_first, channel_axis=1)
+
+channels_first = np.stack([left, right])
+mono_channels = downmix_to_mono(channels_first)
+np.testing.assert_array_equal(mono_frames, 0.5)
+np.testing.assert_array_equal(mono_channels, 0.5)
+```
+
+Silence length uses `int(duration * sample_rate)` truncation. Both APIs accept
+only finite float32/float64 NumPy audio, preserve the source dtype where
+applicable, return independent storage, and do not clip or normalize. For a
+long file, produce bounded silence chunks in the application rather than
+requesting one unbounded array; AudioSig deliberately does not provide file
+I/O or streaming wrappers.
+
 ### Time Stretching Examples
 
 ```python

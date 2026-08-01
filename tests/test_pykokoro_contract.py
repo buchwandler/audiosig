@@ -17,8 +17,10 @@ from audiosig import (
     InvalidParameterError,
     activity_to_intervals,
     apply_gain_db,
+    downmix_to_mono,
     energy_based_vad,
     frame_rms,
+    generate_silence,
     pitch_shift,
     resample,
     resample_speed,
@@ -133,6 +135,16 @@ def test_audio_annotation_numeric_sequence_has_expected_length() -> None:
     assert output.dtype == np.float32
     assert output.shape == (80,)
     assert np.isfinite(output).all()
+
+
+def test_ttsforge_audio_primitives_contract() -> None:
+    silence = generate_silence(0.5, 24_000)
+    assert silence.shape == (12_000,)
+    assert silence.dtype == np.float32
+
+    stereo = np.column_stack([np.ones(8, dtype=np.float32), np.zeros(8, dtype=np.float32)])
+    mono = downmix_to_mono(stereo, channel_axis=1)
+    np.testing.assert_allclose(mono, 0.5)
 
 
 def test_quiet_intervals_and_typed_exception_contract() -> None:

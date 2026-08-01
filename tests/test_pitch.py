@@ -66,9 +66,7 @@ def test_pitch_marks_follow_local_f0_contours(start: float, end: float) -> None:
     length = 2 * sample_rate
     time = np.arange(length, dtype=np.float64) / sample_rate
     frequency = start + (end - start) * time / time[-1]
-    phase = 2.0 * np.pi * (
-        start * time + (end - start) * time**2 / (2.0 * time[-1])
-    )
+    phase = 2.0 * np.pi * (start * time + (end - start) * time**2 / (2.0 * time[-1]))
     track = estimate_pitch_track_lane(np.sin(phase), sample_rate=sample_rate)
     marks = track.pitch_marks
     middle = (marks[1:] + marks[:-1]) / 2.0

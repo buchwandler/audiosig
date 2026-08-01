@@ -2,6 +2,36 @@
 
 ## Core Functions
 
+### Waveform Construction and Channels
+
+#### `generate_silence(duration, sample_rate, *, dtype=np.float32)`
+
+Return a newly allocated one-dimensional mono NumPy buffer filled with zeros.
+The sample count is exactly `int(duration * sample_rate)`, so fractional
+sample counts are truncated. `dtype` must be `np.float32` or `np.float64`;
+the default is float32. Duration must be finite and non-negative, and the
+sample rate must be a positive integer. Long silence creation should use
+bounded application-level chunks rather than one arbitrarily large array.
+
+#### `downmix_to_mono(audio, *, channel_axis=0)`
+
+Return a caller-owned mono array by taking the arithmetic mean over the
+explicit channel axis. Input must be a finite float32 or float64 NumPy array;
+the source dtype and every non-channel axis are preserved. One-dimensional
+input is already mono and is copied. The operation does not clip or normalize
+amplitude and does not infer a channel axis.
+
+```python
+from audiosig import downmix_to_mono, generate_silence
+
+silence = generate_silence(0.5, 24_000)
+mono_soundfile = downmix_to_mono(frames_first, channel_axis=1)
+mono_audiosig = downmix_to_mono(channels_first)
+```
+
+These functions do not perform file decoding/encoding, URL handling, playback,
+streaming, or audiobook composition.
+
 ### Time and Pitch Effects
 
 #### `time_stretch(audio, rate, *, sample_rate=None, method='phase_vocoder', axis=-1, n_fft=2048, hop_length=None)`

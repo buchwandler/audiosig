@@ -49,11 +49,11 @@ def _choose_candidate(
     indices = candidates[:, None] + offsets[None, :]
     overlaps = np.asarray(source[indices], dtype=np.float64)
     centered = overlaps - np.mean(overlaps, axis=1, keepdims=True, dtype=np.float64)
-    energies = np.sum(centered * centered, axis=1, dtype=np.float64)
+    energies = np.asarray(np.sum(centered * centered, axis=1, dtype=np.float64))
     scores = np.full(candidates.size, -np.inf, dtype=np.float64)
     valid = energies > _ENERGY_FLOOR
-    scores[valid] = centered[valid] @ reference_centered / np.sqrt(
-        reference_energy * energies[valid]
+    scores[valid] = (
+        centered[valid] @ reference_centered / np.sqrt(reference_energy * energies[valid])
     )
 
     # lexsort's last key is primary: highest score, then nearest expected,

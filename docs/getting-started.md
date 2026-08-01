@@ -37,6 +37,37 @@ higher = pitch_shift(audio, sample_rate=sample_rate, semitones=2.0)
 resampled = resample(audio, source_rate=24_000, target_rate=16_000)
 ```
 
+### Constructing Silence and Downmixing Channels
+
+Use `generate_silence` for deterministic mono silence. Its sample count uses
+the existing TTS/PyKokoro-compatible floor rule,
+`int(duration * sample_rate)`, and output is float32 unless float64 is
+requested:
+
+```python
+from audiosig import generate_silence
+
+pause = generate_silence(0.5, 24_000)
+precise_pause = generate_silence(0.5, 24_000, dtype=np.float64)
+```
+
+Use `downmix_to_mono` when the decoder has already produced a NumPy array.
+Declare the channel axis explicitly: SoundFile-style `(frames, channels)`
+data uses `channel_axis=1`, while AudioSig-style `(channels, samples)` data
+uses the default `channel_axis=0`.
+
+```python
+from audiosig import downmix_to_mono
+
+mono = downmix_to_mono(frames_first, channel_axis=1)
+mono = downmix_to_mono(channels_first)
+```
+
+Downmixing is an arithmetic mean in the source dtype with no clipping or
+normalization, and both functions return caller-owned arrays. AudioSig does
+not decode files or stream long silence buffers; applications creating long
+files should write bounded silence chunks through their file layer.
+
 ### Silence Detection and Trimming
 
 ```python

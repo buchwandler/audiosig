@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
 
 from ._pitch import PitchTrack, estimate_pitch_track_lane
@@ -206,13 +208,13 @@ def _duration_fallback(
     from ._wsola import wsola_time_stretch
 
     if rate == 1.0:
-        return np.asarray(signal, dtype=np.float64).copy()
-    fallback = np.asarray(
-        wsola_time_stretch(signal[None, :], rate=rate, sample_rate=sample_rate, axis=-1)[0],
-        dtype=np.float64,
-    )
+        return np.array(signal, dtype=np.float64, copy=True)
+    stretched = wsola_time_stretch(signal[None, :], rate=rate, sample_rate=sample_rate, axis=-1)
+    fallback = cast(np.ndarray, np.asarray(stretched, dtype=np.float64)[0])
     if fallback.size != target_length:
-        fallback = np.asarray(resample_to_length(fallback, target_length), dtype=np.float64)
+        fallback = np.array(
+            resample_to_length(fallback, target_length), dtype=np.float64, copy=True
+        )
     return fallback
 
 

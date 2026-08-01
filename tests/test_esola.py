@@ -122,7 +122,9 @@ def test_esola_mixed_voiced_unvoiced_boundary_has_no_endpoint_hold() -> None:
     sample_rate = 16_000
     time = np.arange(sample_rate, dtype=np.float64) / sample_rate
     source = np.zeros_like(time)
-    source[: int(0.35 * sample_rate)] = np.sin(2.0 * np.pi * 180.0 * time[: int(0.35 * sample_rate)])
+    source[: int(0.35 * sample_rate)] = np.sin(
+        2.0 * np.pi * 180.0 * time[: int(0.35 * sample_rate)]
+    )
     source[int(0.35 * sample_rate) : int(0.65 * sample_rate)] = np.random.default_rng(7).normal(
         0.0, 0.08, int(0.3 * sample_rate)
     )

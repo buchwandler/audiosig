@@ -22,6 +22,7 @@ pip install audiosig
 import numpy as np
 from audiosig import (
     apply_speech_effects,
+    generate_silence,
     pitch_shift,
     resample_speed,
     resample_to_length,
@@ -36,6 +37,7 @@ higher = pitch_shift(audio, sample_rate=sample_rate, semitones=2.0)
 exact = resample_to_length(audio, 12_000)
 faster_playback = resample_speed(audio, speed=1.25)
 speech_effects = apply_speech_effects(audio, sample_rate=sample_rate, rate=1.1)
+pause = generate_silence(0.25, sample_rate)
 ```
 
 AudioSig accepts `float32` and `float64` NumPy arrays shaped as `(samples,)`,
@@ -49,6 +51,33 @@ the exact input length. `resample_speed` changes both duration and pitch,
 while `resample_to_length` targets an exact sample count. Regular resampling
 uses a finite windowed-sinc low-pass filter and produces
 `round(input_length * target_rate / source_rate)` samples.
+
+## Waveform construction and channel downmixing
+
+`generate_silence(duration, sample_rate)` returns a newly allocated,
+one-dimensional mono buffer of zeros. Its length is exactly
+`int(duration * sample_rate)`, using truncation/floor semantics, and its dtype
+is float32 by default or float64 when requested. Only float32 and float64 are
+accepted. For long silence files, generate bounded chunks in the application
+and stream those chunks to the file layer; AudioSig does not provide file I/O
+or a streaming API.
+
+`downmix_to_mono(audio, channel_axis=0)` averages the explicitly selected
+channel axis in the input dtype. It preserves all other axes, performs no
+clipping or normalization, and returns caller-owned storage. One-dimensional
+audio is treated as already mono and copied. SoundFile-style frames-first data
+uses `channel_axis=1`; AudioSig's channels-first layout uses the default:
+
+```python
+from audiosig import downmix_to_mono
+
+silence = generate_silence(0.5, 24_000)  # (12_000,), float32
+mono_frames = downmix_to_mono(frames, channel_axis=1)
+mono_channels = downmix_to_mono(channels)
+```
+
+Both operations are NumPy-array primitives only. They do not decode or encode
+WAV/FLAC/MP3 files, resolve URLs, play audio, or compose audiobook chapters.
 
 ## Silence trimming and VAD
 

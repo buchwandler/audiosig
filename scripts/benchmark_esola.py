@@ -94,9 +94,7 @@ def benchmark_synthetic_epochs(
                     "trend_window_ms": trend_window_ms,
                     "detrend_passes": detrend_passes,
                     "epoch_count": int(epochs.size),
-                    "median_period_samples": (
-                        float(np.median(spacing)) if spacing.size else None
-                    ),
+                    "median_period_samples": (float(np.median(spacing)) if spacing.size else None),
                     "expected_period_samples": sample_rate / frequency,
                     "runtime_seconds": elapsed,
                     "finite": bool(np.isfinite(epochs).all()),

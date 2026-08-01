@@ -28,3 +28,6 @@
 {"data":{"kind":"docs","status":"accepted"},"entry_id":"entry-0009","event":"entry.added","event_id":"event-0028","record_revisions":{"entry:0.1.0/entry-0009":1,"release:0.1.0":10},"release_version":"0.1.0","schema_version":2}
 {"data":{"kind":"added","status":"accepted"},"entry_id":"entry-0010","event":"entry.added","event_id":"event-0029","record_revisions":{"entry:0.1.0/entry-0010":1,"release:0.1.0":11},"release_version":"0.1.0","schema_version":2}
 {"data":{"kind":"quality","status":"accepted"},"entry_id":"entry-0011","event":"entry.added","event_id":"event-0030","record_revisions":{"entry:0.1.0/entry-0011":1,"release:0.1.0":12},"release_version":"0.1.0","schema_version":2}
+{"data":{"status":"planned"},"event":"release.created","event_id":"event-0031","record_revisions":{"release:0.1.1":1},"release_version":"0.1.1","schema_version":2}
+{"data":{"kind":"added","status":"accepted"},"entry_id":"entry-0001","event":"entry.added","event_id":"event-0032","record_revisions":{"entry:0.1.1/entry-0001":1,"release:0.1.1":2},"release_version":"0.1.1","schema_version":2}
+{"data":{"fields":["summary"]},"entry_id":"entry-0001","event":"entry.updated","event_id":"event-0033","record_revisions":{"entry:0.1.1/entry-0001":2},"release_version":"0.1.1","schema_version":2}

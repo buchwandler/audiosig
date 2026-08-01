@@ -131,9 +131,7 @@ def _estimate_trend_window_ms(source: np.ndarray, sample_rate: int) -> float:
     fft_length = 1 << (2 * segment.size - 1).bit_length()
     spectrum = np.fft.rfft(segment, n=fft_length)
     autocorrelation = np.fft.irfft(spectrum * np.conj(spectrum), n=fft_length)[: segment.size]
-    lag = minimum_period + int(
-        np.argmax(autocorrelation[minimum_period : maximum_period + 1])
-    )
+    lag = minimum_period + int(np.argmax(autocorrelation[minimum_period : maximum_period + 1]))
     period_ms = 1000.0 * lag / sample_rate
     return float(
         np.clip(
@@ -201,7 +199,9 @@ def _esola_lane(
         synthesis_start = frame_index * synthesis_hop
         if synthesis_start >= target_length:
             break
-        nominal_analysis_start = int(np.clip(round(frame_index * analysis_hop), 0, max_analysis_start))
+        nominal_analysis_start = int(
+            np.clip(round(frame_index * analysis_hop), 0, max_analysis_start)
+        )
         if frame_index == 0:
             shift = 0
         else:
@@ -260,9 +260,7 @@ def esola_time_stretch(
     source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
     multiplier = validate_positive(rate, "rate")
     sample_hz = validate_positive(sample_rate, "sample_rate")
-    if trend_window_ms is not None and (
-        not np.isfinite(trend_window_ms) or trend_window_ms <= 0.0
-    ):
+    if trend_window_ms is not None and (not np.isfinite(trend_window_ms) or trend_window_ms <= 0.0):
         raise InvalidParameterError("trend_window_ms must be finite and positive")
     if detrend_passes < 1:
         raise InvalidParameterError("detrend_passes must be positive")

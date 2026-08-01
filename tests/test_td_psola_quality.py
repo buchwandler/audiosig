@@ -132,7 +132,9 @@ def test_td_psola_reverberant_voiced_material_remains_finite() -> None:
     delay = round(0.035 * sample_rate)
     reverberant = source.copy()
     reverberant[delay:] += 0.35 * source[:-delay]
-    result = td_psola_prosody(reverberant.astype(np.float32), sample_rate=sample_rate, semitones=-4.0)
+    result = td_psola_prosody(
+        reverberant.astype(np.float32), sample_rate=sample_rate, semitones=-4.0
+    )
 
     assert np.isfinite(result).all()
     assert result.size == source.size
