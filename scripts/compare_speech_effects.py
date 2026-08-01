@@ -117,10 +117,12 @@ def _tracker_stats(audio: np.ndarray, sample_rate: int) -> dict[str, object]:
         return {"voiced_ratio": 0.0, "mean_confidence": 0.0, "fallback_ratio": 1.0}
     voiced = np.concatenate([track.voiced for track in tracks])
     confidence = np.concatenate([track.confidence for track in tracks])
+    voiced_interval_count = sum(len(track.voiced_intervals) for track in tracks)
     voiced_ratio = float(np.mean(voiced)) if voiced.size else 0.0
     return {
         "voiced_ratio": voiced_ratio,
         "mean_confidence": float(np.mean(confidence)) if confidence.size else 0.0,
+        "voiced_interval_count": voiced_interval_count,
         # The comparison harness reports the conservative unvoiced fraction as
         # the expected WSOLA fallback ratio; synthesis never forces those spans
         # through pitched grains.

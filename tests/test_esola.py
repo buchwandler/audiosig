@@ -7,6 +7,7 @@ from audiosig import InvalidParameterError, time_stretch
 from audiosig._esola import (
     _analysis_shift,
     _centered_moving_average,
+    _estimate_trend_window_ms,
     _extract_epochs_lane,
     _positive_zero_crossings,
     _zero_frequency_signal,
@@ -77,6 +78,62 @@ def test_epoch_extraction_is_finite_deterministic_and_sample_rate_aware() -> Non
     assert np.all(np.diff(first) > 0)
     np.testing.assert_array_equal(first, second)
     assert np.isfinite(_zero_frequency_signal(source, 120)).all()
+
+
+@pytest.mark.parametrize("frequency", [60.0, 180.0, 400.0])
+def test_adaptive_trend_window_tracks_known_pitch_period(frequency: float) -> None:
+    sample_rate = 16_000
+    source = np.sin(2.0 * np.pi * frequency * np.arange(sample_rate) / sample_rate)
+    trend_window_ms = _estimate_trend_window_ms(source, sample_rate)
+    expected = 1.5 * 1000.0 / frequency
+
+    assert 4.0 <= trend_window_ms <= 40.0
+    assert abs(trend_window_ms - np.clip(expected, 4.0, 40.0)) <= 1.5
+
+
+def test_two_pass_zfr_is_the_selected_stable_epoch_variant() -> None:
+    sample_rate = 16_000
+    frequency = 180.0
+    source = np.sin(2.0 * np.pi * frequency * np.arange(sample_rate) / sample_rate)
+    one_pass = _extract_epochs_lane(source, sample_rate, detrend_passes=1)
+    two_pass = _extract_epochs_lane(source, sample_rate, detrend_passes=2)
+
+    assert two_pass.size > 10 * max(1, one_pass.size)
+    assert abs(np.median(np.diff(two_pass)) - sample_rate / frequency) <= 2.0
+
+
+def test_epoch_timing_follows_a_slow_f0_sweep() -> None:
+    sample_rate = 16_000
+    length = 2 * sample_rate
+    time = np.arange(length, dtype=np.float64) / sample_rate
+    start_hz, end_hz = 80.0, 300.0
+    frequency = start_hz + (end_hz - start_hz) * time / time[-1]
+    phase = 2.0 * np.pi * (start_hz * time + (end_hz - start_hz) * time**2 / (2.0 * time[-1]))
+    epochs = _extract_epochs_lane(np.sin(phase), sample_rate)
+    middle = (epochs[1:] + epochs[:-1]) / 2.0
+    expected_period = sample_rate / np.interp(middle, np.arange(length), frequency)
+    relative_error = np.abs(np.diff(epochs) - expected_period) / expected_period
+
+    assert epochs.size > 100
+    assert np.quantile(relative_error, 0.9) < 0.05
+
+
+def test_esola_mixed_voiced_unvoiced_boundary_has_no_endpoint_hold() -> None:
+    sample_rate = 16_000
+    time = np.arange(sample_rate, dtype=np.float64) / sample_rate
+    source = np.zeros_like(time)
+    source[: int(0.35 * sample_rate)] = np.sin(2.0 * np.pi * 180.0 * time[: int(0.35 * sample_rate)])
+    source[int(0.35 * sample_rate) : int(0.65 * sample_rate)] = np.random.default_rng(7).normal(
+        0.0, 0.08, int(0.3 * sample_rate)
+    )
+    source[int(0.65 * sample_rate) :] = np.sin(
+        2.0 * np.pi * 220.0 * time[int(0.65 * sample_rate) :]
+    )
+    source[-80:] = np.linspace(0.0, 1.0, 80)
+    stretched = time_stretch(source, 0.75, sample_rate=sample_rate, method="esola")
+
+    assert np.isfinite(stretched).all()
+    assert np.unique(stretched[-160:]).size > 8
 
 
 @pytest.mark.slow

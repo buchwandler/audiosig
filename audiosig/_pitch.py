@@ -24,12 +24,14 @@ class PitchTrack:
     voiced: np.ndarray
     confidence: np.ndarray
     pitch_marks: np.ndarray
+    voiced_intervals: tuple[tuple[int, int], ...] = ()
 
 
 @dataclass(frozen=True)
 class _Candidate:
     frequency: float
-    confidence: float
+    periodicity: float
+    emission_cost: float = 0.0
 
 
 def _validate_pitch_parameters(
@@ -157,16 +159,16 @@ def _track_pitch_candidates(
         # A silence candidate is cheap for quiet frames and deliberately
         # somewhat expensive for energetic frames.
         silence_cost = 0.20 if energy < 0.01 else 0.78
-        states.append([_Candidate(0.0, silence_cost), *frame_candidates])
+        states.append([_Candidate(0.0, 0.0, silence_cost), *frame_candidates])
     costs = np.full((count, max(map(len, states))), np.inf, dtype=np.float64)
     back = np.zeros_like(costs, dtype=np.int64)
 
     def emission(candidate: _Candidate) -> float:
         if candidate.frequency == 0.0:
-            return 0.0
+            return candidate.emission_cost
         # Reward coherent periodicity enough to retain low-pitched voices,
         # while weak noise correlations remain more expensive than silence.
-        return 0.55 * (1.0 - candidate.confidence) - 0.18
+        return 0.55 * (1.0 - candidate.periodicity) - 0.18
 
     first = states[0]
     for index, candidate in enumerate(first):
@@ -194,7 +196,7 @@ def _track_pitch_candidates(
     )
     confidence = np.array(
         [
-            states[frame_index][selected[frame_index]].confidence
+            states[frame_index][selected[frame_index]].periodicity
             if frequencies[frame_index] > 0.0
             else 0.0
             for frame_index in range(count)
@@ -264,24 +266,31 @@ def _refine_pitch_marks_lane(
         )
         if frame_indices.size == 0:
             continue
-        median_frequency = float(np.median(frequencies[frame_indices]))
-        period = float(sample_rate / median_frequency)
-        seed_left = max(left, round((left + right) / 2.0 - period))
-        seed_right = min(right, round((left + right) / 2.0 + period))
+        frame_positions = frame_times[frame_indices] * sample_rate
+        frame_frequencies = frequencies[frame_indices]
+
+        def local_period(position: float) -> float:
+            frequency = float(np.interp(position, frame_positions, frame_frequencies))
+            return float(np.clip(sample_rate / frequency, minimum_period, maximum_period))
+
+        seed_period = local_period((left + right) / 2.0)
+        seed_left = max(left, round((left + right) / 2.0 - seed_period))
+        seed_right = min(right, round((left + right) / 2.0 + seed_period))
         if seed_right <= seed_left:
             continue
         center = seed_left + int(np.argmax(np.abs(signal_values[seed_left:seed_right])))
         local: list[int] = [center]
-        width = max(3, round(0.35 * period))
         for direction in (-1, 1):
             current = center
             propagated: list[int] = []
             while True:
+                period = local_period(current)
                 position = current + direction * period
                 candidate_left = max(left, int(np.floor(position - 0.22 * period)))
                 candidate_right = min(right - 1, int(np.ceil(position + 0.22 * period)))
                 if candidate_right <= candidate_left:
                     break
+                width = max(3, round(0.35 * period))
                 candidates = np.arange(candidate_left, candidate_right + 1, dtype=np.int64)
                 scores = np.array(
                     [
@@ -332,6 +341,7 @@ def estimate_pitch_track_lane(
             np.empty(0, dtype=bool),
             empty_float,
             np.empty(0, dtype=np.int64),
+            (),
         )
     candidates: list[list[_Candidate]] = []
     energies = np.empty(starts.size, dtype=np.float64)
@@ -362,6 +372,7 @@ def estimate_pitch_track_lane(
         np.asarray(voiced, dtype=bool),
         np.asarray(confidence, dtype=np.float64),
         np.asarray(pitch_marks, dtype=np.int64),
+        tuple(intervals),
     )
 
 

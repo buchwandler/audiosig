@@ -8,9 +8,11 @@ sound phasey around transients. WSOLA is the speech-oriented default for
 `apply_speech_effects` and searches for waveform-similar splice points in the
 time domain. ESOLA is an experimental speech backend that aligns fixed
 waveform frames using detected epochs; it supports `0.5 <= rate <= 2.0` and
-requires `sample_rate`. Both waveform-similarity methods process every
-non-sample dimension as an independent lane, so they do not guarantee a
-stereo image.
+requires `sample_rate`. WSOLA, ESOLA, and TD-PSOLA process every non-sample
+dimension as an independent lane, so they do not guarantee a stereo image or
+shared pitch/epoch decisions. For stereo speech where image coherence matters,
+provide a shared analysis signal and apply its decisions in an application-level
+channel wrapper; ordinary batch and arbitrary-axis processing remains supported.
 
 Use WSOLA when processing speech:
 
@@ -68,10 +70,14 @@ The standard compositor plans pitch and rate together using
 `method="td_psola"` uses a separate direct pitch/prosody path instead: it tracks
 voicing and pulses, changes synthesis-pulse spacing for voiced speech, and uses
 WSOLA for unvoiced duration fallback. Its conservative limits are
-`-6..+6` semitones and `0.75..1.5` rate. All paths preserve exact
-output-length and dtype contracts, but TD-PSOLA does not guarantee formant
-preservation and should not be treated as a general music or polyphonic
-pitch-shifting backend.
+`-6..+6` semitones and `0.75..1.5` rate. If too few pitch marks are available,
+the direct path explicitly falls back. Pure pitch requests use WSOLA plus
+resampling for the requested ratio; duration-modification requests preserve
+unvoiced material with duration-only WSOLA rather than globally tonalizing it.
+The backend does not silently return unchanged audio.
+All paths preserve exact output-length and dtype contracts, but TD-PSOLA does
+not guarantee formant preservation and should not be treated as a general music
+or polyphonic pitch-shifting backend.
 
 TD-PSOLA remains experimental until objective, runtime, and real-speech
 listening gates pass. See the [evaluation protocol](td-psola-listening-evaluation-2026-07-31.md).

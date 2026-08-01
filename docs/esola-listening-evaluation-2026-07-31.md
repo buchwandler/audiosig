@@ -7,6 +7,12 @@ and no listener responses. Consequently, this report records the required
 evaluation protocol and an honest `not run` result; it does not claim that
 ESOLA is ready to replace WSOLA or become the default speech backend.
 
+Since this record was created, the implementation has added complete-frame
+endpoint extraction, a bounded adaptive 1.5-period trend-window estimate, and
+configurable one- versus two-pass ZFR detrending. Known-tone and synthetic-F0
+sweep checks are automated, but they are objective fixtures rather than
+labelled natural-speech GCI evidence.
+
 ## Planned utterance coverage
 
 The next evaluation should use at least one utterance in each category below,

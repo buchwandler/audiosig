@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from ._pitch import PitchTrack, estimate_pitch_track_lane
+from ._resampling import resample_to_length
 from ._validation import validate_audio, validate_finite, validate_positive
 from .exceptions import InvalidParameterError
 
@@ -92,8 +93,11 @@ def _extract_pitch_grain(
     )
     previous_period = max(2, int(previous_period))
     next_period = max(2, int(next_period))
-    left = max(1, previous_period // 2)
-    right = max(1, next_period // 2)
+    # Short TD-PSOLA windows need support from both neighboring periods.  A
+    # half-period on either side produces only one period total and leaves
+    # deterministic gaps when synthesis marks are spread for pitch lowering.
+    left = previous_period
+    right = next_period
     grain_length = left + right + 1
     return _padded_slice(signal, mark - left, grain_length), left
 
@@ -109,8 +113,13 @@ def _overlap_add_grains(
     normalization = np.zeros(target_length, dtype=np.float64)
     if source_marks.size == 0:
         return output, normalization
+    source_index = 0
     for target, source_mark in zip(target_marks, mapped_source_marks, strict=True):
-        index = int(np.argmin(np.abs(source_marks - source_mark)))
+        while source_index + 1 < source_marks.size and abs(
+            source_marks[source_index + 1] - source_mark
+        ) <= abs(source_marks[source_index] - source_mark):
+            source_index += 1
+        index = source_index
         grain, center = _extract_pitch_grain(signal, source_marks, index)
         window = np.hanning(grain.size)
         start = int(target) - center
@@ -136,16 +145,12 @@ def _voiced_output_mask(
     mask = np.zeros(target_length, dtype=np.float64)
     if track.voiced.size == 0:
         return mask
-    frame_duration = 0.02
-    for frame_time, is_voiced in zip(track.frame_times, track.voiced, strict=True):
-        if not is_voiced:
-            continue
-        start = max(0, round((frame_time - frame_duration / 2.0) * sample_rate / rate))
-        end = min(target_length, round((frame_time + frame_duration / 2.0) * sample_rate / rate))
+    for source_start, source_end in track.voiced_intervals:
+        start = max(0, round(source_start / rate))
+        end = min(target_length, round(source_end / rate))
         mask[start:end] = 1.0
-    # Hann tails can leave tiny nonzero weights in uncovered pulse gaps.  Do
-    # not treat those numerical tails as reliable voiced synthesis; the WSOLA
-    # fallback should fill them instead.
+    # Normalization is only a numerical support check.  Voicing itself comes
+    # from the track's actual sample intervals above.
     mask *= normalization > 0.25
     fade = max(1, round(sample_rate * 0.004))
     if fade > 1 and np.any(mask):
@@ -190,6 +195,49 @@ def _voiced_td_psola_lane(
     return output, mask
 
 
+def _duration_fallback(
+    signal: np.ndarray,
+    *,
+    sample_rate: int,
+    rate: float,
+    target_length: int,
+) -> np.ndarray:
+    """Apply duration-only WSOLA fallback with exact target length."""
+    from ._wsola import wsola_time_stretch
+
+    if rate == 1.0:
+        return np.asarray(signal, dtype=np.float64).copy()
+    fallback = np.asarray(
+        wsola_time_stretch(signal[None, :], rate=rate, sample_rate=sample_rate, axis=-1)[0],
+        dtype=np.float64,
+    )
+    if fallback.size != target_length:
+        fallback = np.asarray(resample_to_length(fallback, target_length), dtype=np.float64)
+    return fallback
+
+
+def _pitch_duration_fallback(
+    signal: np.ndarray,
+    *,
+    sample_rate: int,
+    rate: float,
+    pitch_ratio: float,
+    target_length: int,
+) -> np.ndarray:
+    """Best-effort TSM plus resampling fallback when direct marks are absent."""
+    from ._wsola import wsola_time_stretch
+
+    tsm_rate = rate / pitch_ratio
+    if tsm_rate == 1.0:
+        stretched = np.asarray(signal, dtype=np.float64).copy()
+    else:
+        stretched = np.asarray(
+            wsola_time_stretch(signal[None, :], rate=tsm_rate, sample_rate=sample_rate, axis=-1)[0],
+            dtype=np.float64,
+        )
+    return np.asarray(resample_to_length(stretched, target_length), dtype=np.float64)
+
+
 def _validate_limits(rate: float, semitones: float) -> tuple[float, float]:
     stretch = validate_positive(rate, "rate")
     shift = validate_finite(semitones, "semitones")
@@ -214,23 +262,31 @@ def _td_psola_lane(
     pitch_floor: float,
     pitch_ceiling: float,
 ) -> np.ndarray:
-    from ._wsola import wsola_time_stretch
-
     track = estimate_pitch_track_lane(
         signal,
         sample_rate=sample_rate,
         pitch_floor=pitch_floor,
         pitch_ceiling=pitch_ceiling,
     )
-    if track.pitch_marks.size < 3:
-        if rate == 1.0:
-            return np.array(signal, dtype=signal.dtype, copy=True)
-        fallback = np.asarray(
-            wsola_time_stretch(signal[None, :], rate=rate, sample_rate=sample_rate, axis=-1)[0],
-            dtype=np.float64,
-        )
-        return fallback
     pitch_ratio = float(np.exp2(semitones / 12.0))
+    if track.pitch_marks.size < 3:
+        # With duration modification, preserve unvoiced material rather than
+        # applying a global resampling pitch shift to noise.  A pure pitch
+        # request still receives the explicit best-effort pitch fallback.
+        if rate != 1.0:
+            return _duration_fallback(
+                signal,
+                sample_rate=sample_rate,
+                rate=rate,
+                target_length=target_length,
+            )
+        return _pitch_duration_fallback(
+            signal,
+            sample_rate=sample_rate,
+            rate=rate,
+            pitch_ratio=pitch_ratio,
+            target_length=target_length,
+        )
     direct, mask = _voiced_td_psola_lane(
         signal,
         track,
@@ -239,17 +295,12 @@ def _td_psola_lane(
         rate=rate,
         pitch_ratio=pitch_ratio,
     )
-    if rate == 1.0:
-        fallback = np.asarray(signal, dtype=np.float64).copy()
-    else:
-        fallback = np.asarray(
-            wsola_time_stretch(signal[None, :], rate=rate, sample_rate=sample_rate, axis=-1)[0],
-            dtype=np.float64,
-        )
-    if fallback.size != target_length:
-        corrected = np.zeros(target_length, dtype=np.float64)
-        corrected[: min(target_length, fallback.size)] = fallback[:target_length]
-        fallback = corrected
+    fallback = _duration_fallback(
+        signal,
+        sample_rate=sample_rate,
+        rate=rate,
+        target_length=target_length,
+    )
     return np.asarray(direct * mask + fallback * (1.0 - mask), dtype=np.float64)
 
 

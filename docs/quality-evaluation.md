@@ -21,14 +21,25 @@ runtime, real-time factor, peak, RMS, exact-length error, and continuity
 diagnostics. Use `--rates` and `--semitones` to narrow a run. The harness does not install,
 invoke, or require Rubber Band, SoundTouch, WORLD, or another external backend.
 
-The required performance matrix is reproducible with:
+The required performance and robustness matrix is reproducible with:
 
 ```bash
 python scripts/benchmark_td_psola.py --output td-psola-benchmark.json
 ```
 
-The TD-PSOLA benchmark covers deterministic 1 and 10 second fixtures at 24 kHz
-with mono and two-lane inputs, rates 0.8, 1.0, and 1.25, and shifts -4 and +4.
+The TD-PSOLA benchmark covers deterministic 1 and 10 second fixtures at 8, 16,
+24, and 48 kHz with mono and two-lane inputs, clean/noisy/reverberant material,
+rates 0.8, 1.0, and 1.25, shifts -4 and +4, runtime, and peak memory. ESOLA's
+known-tone ZFR comparison is available with:
+
+```bash
+python scripts/benchmark_esola.py --synthetic --output esola-benchmark.json
+```
+
+These objective checks cover complete-frame endpoint handling, adaptive
+trend-window behavior, approximately-two-period TD-PSOLA grains, local-F0
+pitch marks, fallback behavior, and exact output contracts. They do not replace
+the real-speech listening protocol below.
 
 ## Listening protocol
 

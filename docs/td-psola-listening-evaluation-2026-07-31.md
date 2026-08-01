@@ -8,6 +8,12 @@ work. Listener results remain **pending** until a licensed corpus and at least
 two development listeners are available; this file deliberately does not invent
 ratings.
 
+The implementation now uses approximately-two-period centered grains, local-F0
+pitch-mark propagation, tracker voiced intervals for synthesis masking, and an
+explicit insufficient-mark fallback. Synthetic leakage, normalization, sample-
+rate, noise, and reverberation checks are automated; they do not constitute the
+real-speech listening gate below.
+
 ## Corpus and reproducibility
 
 Use licensed or consented 16/24/48 kHz mono or stereo WAV material and record,

@@ -102,6 +102,18 @@ def test_td_psola_private_empty_and_fallback_helpers() -> None:
     ).shape == (4,)
 
 
+def test_td_psola_interior_grains_span_adjacent_periods() -> None:
+    source = _speech_fixture().astype(np.float64)
+    track = estimate_pitch_track_lane(source, sample_rate=16_000)
+    index = track.pitch_marks.size // 2
+    previous_period = int(track.pitch_marks[index] - track.pitch_marks[index - 1])
+    next_period = int(track.pitch_marks[index + 1] - track.pitch_marks[index])
+    grain, center = td._extract_pitch_grain(source, track.pitch_marks, index)
+
+    assert center == previous_period
+    assert grain.size == previous_period + next_period + 1
+
+
 def test_td_psola_rejects_invalid_pitch_ceiling() -> None:
     with pytest.raises(InvalidParameterError):
         td_psola_prosody(
@@ -121,6 +133,17 @@ def test_td_psola_handles_unvoiced_and_mixed_input() -> None:
     result = td_psola_prosody(mixed, sample_rate=16_000, rate=0.8, semitones=4.0)
     assert result.shape == (round(mixed.size / 0.8),)
     assert np.isfinite(result).all()
+
+
+def test_td_psola_short_pitch_request_uses_explicit_pitch_fallback() -> None:
+    sample_rate = 16_000
+    time = np.arange(120, dtype=np.float64) / sample_rate
+    source = np.sin(2.0 * np.pi * 180.0 * time)
+    result = td_psola_prosody(source, sample_rate=sample_rate, semitones=4.0)
+
+    assert result.shape == source.shape
+    assert np.isfinite(result).all()
+    assert not np.allclose(result, source)
 
 
 def test_public_direct_methods_preserve_gain_and_duration() -> None:

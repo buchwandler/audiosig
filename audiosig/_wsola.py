@@ -11,14 +11,26 @@ _MAX_SEARCH_CANDIDATES = 4097
 _ENERGY_FLOOR = 1e-12
 
 
-def _padded_slice(source: np.ndarray, start: int, length: int) -> np.ndarray:
-    """Return a one-dimensional source slice, padding only at the right edge."""
-    result = np.zeros(length, dtype=np.float64)
-    clipped_start = max(0, min(start, source.size))
-    available = min(length, source.size - clipped_start)
-    if available > 0:
-        result[:available] = source[clipped_start : clipped_start + available]
-    return result
+def _analysis_source(source: np.ndarray, frame_length: int) -> np.ndarray:
+    """Return a frame-addressable source, padding only truly short inputs.
+
+    Normal signals are returned unchanged, so every frame addressed by the
+    caller is complete and comes from the input.  A signal shorter than one
+    frame is the one explicit exception: edge padding gives the single frame
+    enough support without manufacturing a zero or constant tail on a normal
+    speech signal.
+    """
+    if source.size >= frame_length:
+        return source
+    return np.pad(source, (0, frame_length - source.size), mode="edge")
+
+
+def _complete_slice(source: np.ndarray, start: int, length: int) -> np.ndarray:
+    """Return a complete source slice from a frame-addressable signal."""
+    stop = start + length
+    if start < 0 or stop > source.size:
+        raise ValueError("WSOLA source slice is outside the analysis buffer")
+    return np.asarray(source[start:stop], dtype=np.float64)
 
 
 def _choose_candidate(
@@ -33,15 +45,16 @@ def _choose_candidate(
     if reference_energy <= _ENERGY_FLOOR:
         return int(min(candidates, key=lambda value: (abs(int(value) - expected), int(value))))
 
+    offsets = np.arange(reference.size, dtype=np.int64)
+    indices = candidates[:, None] + offsets[None, :]
+    overlaps = np.asarray(source[indices], dtype=np.float64)
+    centered = overlaps - np.mean(overlaps, axis=1, keepdims=True, dtype=np.float64)
+    energies = np.sum(centered * centered, axis=1, dtype=np.float64)
     scores = np.full(candidates.size, -np.inf, dtype=np.float64)
-    for index, candidate in enumerate(candidates):
-        overlap = _padded_slice(source, int(candidate), reference.size)
-        centered = overlap - np.mean(overlap, dtype=np.float64)
-        energy = float(np.dot(centered, centered))
-        if energy > _ENERGY_FLOOR:
-            scores[index] = float(np.dot(reference_centered, centered)) / np.sqrt(
-                reference_energy * energy
-            )
+    valid = energies > _ENERGY_FLOOR
+    scores[valid] = centered[valid] @ reference_centered / np.sqrt(
+        reference_energy * energies[valid]
+    )
 
     # lexsort's last key is primary: highest score, then nearest expected,
     # then the earlier source position for a deterministic final tie-break.
@@ -114,6 +127,8 @@ def wsola_time_stretch(
     window = np.sin(np.pi * (np.arange(frame_length, dtype=np.float64) + 0.5) / frame_length)
 
     for lane_index, lane in enumerate(flat):
+        analysis_source = _analysis_source(lane, frame_length)
+        max_start = analysis_source.size - frame_length
         lane_output = output[lane_index]
         for frame_index in range(frame_count):
             synthesis_start = frame_index * synthesis_hop
@@ -121,18 +136,19 @@ def wsola_time_stretch(
                 break
             expected_start = round(frame_index * analysis_hop)
             if frame_index == 0:
-                chosen_start = max(0, min(expected_start, input_length - 1))
+                chosen_start = int(np.clip(expected_start, 0, max_start))
             else:
+                expected_start = int(np.clip(expected_start, 0, max_start))
                 search_start = max(0, expected_start - search_radius)
-                search_stop = min(input_length - 1, expected_start + search_radius)
+                search_stop = min(max_start, expected_start + search_radius)
                 candidates = np.arange(search_start, search_stop + 1, dtype=np.int64)
                 reference_end = min(target_length, synthesis_start + overlap_length)
                 reference = lane_output[synthesis_start:reference_end]
-                if reference.size < overlap_length:
-                    reference = np.pad(reference, (0, overlap_length - reference.size))
-                chosen_start = _choose_candidate(lane, reference, candidates, expected_start)
+                chosen_start = _choose_candidate(
+                    analysis_source, reference, candidates, expected_start
+                )
 
-            frame = _padded_slice(lane, chosen_start, frame_length)
+            frame = _complete_slice(analysis_source, chosen_start, frame_length)
             output_end = min(target_length, synthesis_start + frame_length)
             frame_size = output_end - synthesis_start
             lane_output[synthesis_start:output_end] += frame[:frame_size] * window[:frame_size]

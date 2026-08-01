@@ -39,6 +39,34 @@ def test_wsola_constant_and_silence_are_finite(value: np.ndarray) -> None:
         np.testing.assert_allclose(result, 0.0)
 
 
+@pytest.mark.parametrize("rate", [0.5, 0.6, 0.75, 0.8, 1.2, 1.25, 1.5, 2.0])
+def test_wsola_constant_input_has_no_fabricated_zero_tail(rate: float) -> None:
+    audio = np.ones(16_000, dtype=np.float64)
+    result = wsola_time_stretch(audio, rate=rate, sample_rate=16_000)
+
+    assert result.shape == (round(audio.size / rate),)
+    assert np.isfinite(result).all()
+    np.testing.assert_allclose(result, 1.0, atol=1e-10)
+    assert result[-1] != 0.0
+
+
+@pytest.mark.parametrize("length", [1, 239, 480, 481])
+def test_wsola_boundary_policy_handles_short_and_exact_frame_inputs(length: int) -> None:
+    audio = np.ones(length, dtype=np.float64)
+    result = wsola_time_stretch(audio, rate=0.75, sample_rate=16_000)
+
+    assert result.size == max(1, round(length / 0.75))
+    np.testing.assert_allclose(result, 1.0, atol=1e-10)
+
+
+def test_wsola_preserves_a_final_transient_without_a_synthetic_silence_suffix() -> None:
+    audio = np.zeros(16_000, dtype=np.float64)
+    audio[-80:] = 1.0
+    result = wsola_time_stretch(audio, rate=0.75, sample_rate=16_000)
+
+    assert result[-round(80 / 0.75) :].max() > 0.2
+
+
 @pytest.mark.parametrize("length", [1, 3, 17, 239])
 def test_wsola_short_inputs_and_final_partial_frame(length: int) -> None:
     audio = source(length)

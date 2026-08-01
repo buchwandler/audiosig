@@ -49,6 +49,39 @@ def test_pitch_tracker_is_amplitude_invariant_and_deterministic() -> None:
     np.testing.assert_array_equal(first.frequencies, third.frequencies)
 
 
+def test_pitch_tracker_uses_an_energetic_frame_silence_cost() -> None:
+    candidates = [[pitch._Candidate(200.0, 0.4)] for _ in range(4)]
+    frequencies, voiced, confidence = pitch._track_pitch_candidates(
+        candidates, np.ones(4, dtype=np.float64)
+    )
+
+    np.testing.assert_allclose(frequencies, 200.0)
+    assert np.all(voiced)
+    np.testing.assert_allclose(confidence, 0.4)
+
+
+@pytest.mark.parametrize(("start", "end"), [(100.0, 220.0), (80.0, 300.0)])
+def test_pitch_marks_follow_local_f0_contours(start: float, end: float) -> None:
+    sample_rate = 16_000
+    length = 2 * sample_rate
+    time = np.arange(length, dtype=np.float64) / sample_rate
+    frequency = start + (end - start) * time / time[-1]
+    phase = 2.0 * np.pi * (
+        start * time + (end - start) * time**2 / (2.0 * time[-1])
+    )
+    track = estimate_pitch_track_lane(np.sin(phase), sample_rate=sample_rate)
+    marks = track.pitch_marks
+    middle = (marks[1:] + marks[:-1]) / 2.0
+    expected_period = sample_rate / np.interp(middle, np.arange(length), frequency)
+    relative_error = np.abs(np.diff(marks) - expected_period) / expected_period
+
+    assert track.voiced_intervals == ((0, length),)
+    assert marks[0] < round(0.02 * sample_rate)
+    assert marks[-1] > round(0.98 * sample_rate * 2.0)
+    assert np.all(np.diff(marks) > 0)
+    assert np.quantile(relative_error, 0.9) < 0.05
+
+
 @pytest.mark.parametrize(
     ("sample_rate", "pitch_floor", "pitch_ceiling"),
     ((0, 60.0, 500.0), (16_000, 0.0, 500.0), (16_000, 500.0, 500.0), (16_000, 60.0, 8_000.0)),
