@@ -52,21 +52,23 @@ precise_pause = generate_silence(0.5, 24_000, dtype=np.float64)
 ```
 
 Use `downmix_to_mono` when the decoder has already produced a NumPy array.
-Declare the channel axis explicitly: SoundFile-style `(frames, channels)`
-data uses `channel_axis=1`, while AudioSig-style `(channels, samples)` data
-uses the default `channel_axis=0`.
+The basic API accepts finite real floating arrays shaped `(frames,)`,
+`(frames, channels)`, or `(channels, frames)` and returns contiguous,
+caller-owned results. SoundFile-style `(frames, channels)` data uses the
+default `channel_axis=-1`, while channels-first data uses `channel_axis=0`.
 
 ```python
 from audiosig import downmix_to_mono
 
-mono = downmix_to_mono(frames_first, channel_axis=1)
-mono = downmix_to_mono(channels_first)
+mono = downmix_to_mono(frames_first)
+mono = downmix_to_mono(channels_first, channel_axis=0)
 ```
 
 Downmixing is an arithmetic mean in the source dtype with no clipping or
-normalization, and both functions return caller-owned arrays. AudioSig does
-not decode files or stream long silence buffers; applications creating long
-files should write bounded silence chunks through their file layer.
+normalization. Both functions return caller-owned arrays and raise typed
+`AudioSig` exceptions for invalid inputs. AudioSig does not decode files or
+stream long silence buffers; applications creating long files should write
+bounded silence chunks through their file layer.
 
 ### Silence Detection and Trimming
 

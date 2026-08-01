@@ -71,7 +71,7 @@ def test_overflow_is_rejected_before_allocation(monkeypatch: pytest.MonkeyPatch)
         allocated = True
         raise AssertionError("overflowing silence must not allocate")
 
-    monkeypatch.setattr("audiosig.generation.np.zeros", fail_if_allocated)
+    monkeypatch.setattr("audiosig.basic.np.zeros", fail_if_allocated)
     duration = float(np.iinfo(np.intp).max)
 
     with pytest.raises(InvalidParameterError):

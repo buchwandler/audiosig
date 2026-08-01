@@ -10,7 +10,7 @@ from audiosig import AudioShapeError, downmix_to_mono
 def test_one_dimensional_audio_is_copied_with_dtype(dtype: type[np.floating]) -> None:
     source = np.arange(8, dtype=dtype)
 
-    result = downmix_to_mono(source)
+    result = downmix_to_mono(source, channel_axis=0)
 
     np.testing.assert_array_equal(result, source)
     assert result.dtype == source.dtype
@@ -22,7 +22,7 @@ def test_one_dimensional_audio_is_copied_with_dtype(dtype: type[np.floating]) ->
 def test_channels_first_stereo_is_averaged() -> None:
     source = np.array([[1, 2, 3], [3, 4, 5]], dtype=np.float32)
 
-    result = downmix_to_mono(source)
+    result = downmix_to_mono(source, channel_axis=0)
 
     np.testing.assert_array_equal(result, np.array([2, 3, 4], dtype=np.float32))
 
@@ -38,19 +38,19 @@ def test_frames_first_stereo_supports_negative_axis_and_matches_ttsforge() -> No
     np.testing.assert_array_equal(source, original)
 
 
-def test_one_channel_and_three_channel_inputs_reduce_only_channel_axis() -> None:
+def test_higher_dimensional_inputs_are_rejected() -> None:
     one_channel = np.arange(5, dtype=np.float64).reshape(1, 5)
     three_channel = np.arange(24, dtype=np.float64).reshape(3, 2, 4)
 
-    one_result = downmix_to_mono(one_channel)
-    three_result = downmix_to_mono(three_channel, channel_axis=0)
+    one_result = downmix_to_mono(one_channel, channel_axis=0)
 
     np.testing.assert_array_equal(one_result, one_channel[0])
-    np.testing.assert_array_equal(three_result, three_channel.mean(axis=0, dtype=np.float64))
-    assert one_result.dtype == three_result.dtype == np.float64
+    assert one_result.dtype == np.float64
+    with pytest.raises(AudioShapeError):
+        downmix_to_mono(three_channel, channel_axis=0)
 
 
-def test_batched_channels_preserve_remaining_axes() -> None:
+def test_batched_channels_are_rejected() -> None:
     source = np.stack(
         [
             np.stack([np.ones(4, dtype=np.float32), np.zeros(4, dtype=np.float32)]),
@@ -58,10 +58,8 @@ def test_batched_channels_preserve_remaining_axes() -> None:
         ]
     )
 
-    result = downmix_to_mono(source, channel_axis=1)
-
-    assert result.shape == (2, 4)
-    np.testing.assert_array_equal(result, np.array([[0.5] * 4, [3.0] * 4], dtype=np.float32))
+    with pytest.raises(AudioShapeError):
+        downmix_to_mono(source, channel_axis=1)
 
 
 def test_empty_mono_and_sample_dimensions_are_supported() -> None:

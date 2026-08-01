@@ -55,25 +55,28 @@ uses a finite windowed-sinc low-pass filter and produces
 ## Waveform construction and channel downmixing
 
 `generate_silence(duration, sample_rate)` returns a newly allocated,
-one-dimensional mono buffer of zeros. Its length is exactly
-`int(duration * sample_rate)`, using truncation/floor semantics, and its dtype
-is float32 by default or float64 when requested. Only float32 and float64 are
-accepted. For long silence files, generate bounded chunks in the application
-and stream those chunks to the file layer; AudioSig does not provide file I/O
-or a streaming API.
+one-dimensional mono buffer of zeros. Duration is in seconds, sample rate is
+in samples per second, and its length is exactly `int(duration * sample_rate)`
+using truncation/floor semantics. The default dtype is float32; any NumPy real
+floating dtype, such as float16, float32, or float64, may be requested. Invalid
+duration, sample rate, or dtype values raise `InvalidParameterError`. For long
+silence files, generate bounded chunks in the application and stream those
+chunks to the file layer; AudioSig does not provide file I/O or a streaming API.
 
-`downmix_to_mono(audio, channel_axis=0)` averages the explicitly selected
-channel axis in the input dtype. It preserves all other axes, performs no
-clipping or normalization, and returns caller-owned storage. One-dimensional
-audio is treated as already mono and copied. SoundFile-style frames-first data
-uses `channel_axis=1`; AudioSig's channels-first layout uses the default:
+`downmix_to_mono(audio, channel_axis=-1)` averages the explicitly selected
+channel axis in the input dtype. It accepts finite real floating one- or
+two-dimensional arrays, preserves frame order and dtype, performs no clipping
+or normalization, and returns contiguous caller-owned storage. One-dimensional
+audio is treated as already mono and copied. Invalid shape, axis, dtype, or
+sample values raise `AudioShapeError`. SoundFile-style frames-first data uses
+the default `channel_axis=-1`; channels-first data uses `channel_axis=0`:
 
 ```python
 from audiosig import downmix_to_mono
 
 silence = generate_silence(0.5, 24_000)  # (12_000,), float32
 mono_frames = downmix_to_mono(frames, channel_axis=1)
-mono_channels = downmix_to_mono(channels)
+mono_channels = downmix_to_mono(channels, channel_axis=0)
 ```
 
 Both operations are NumPy-array primitives only. They do not decode or encode

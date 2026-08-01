@@ -5,6 +5,7 @@ import importlib.metadata
 import json
 import subprocess
 import sys
+import tarfile
 import zipfile
 from pathlib import Path
 
@@ -21,6 +22,13 @@ def _single_wheel() -> Path:
     if len(wheels) != 1:
         pytest.skip(f"expected one wheel in {DIST_DIR}, found {wheels}")
     return wheels[0]
+
+
+def _single_sdist() -> Path:
+    sdists = sorted(DIST_DIR.glob("audiosig-*.tar.gz"))
+    if len(sdists) != 1:
+        pytest.skip(f"expected one sdist in {DIST_DIR}, found {sdists}")
+    return sdists[0]
 
 
 def test_dynamic_versioning_is_configured() -> None:
@@ -58,6 +66,7 @@ def test_wheel_contains_typing_marker_and_required_modules() -> None:
 
     required = {
         "audiosig/__init__.py",
+        "audiosig/basic.py",
         "audiosig/py.typed",
         "audiosig/channels.py",
         "audiosig/generation.py",
@@ -71,6 +80,16 @@ def test_wheel_contains_typing_marker_and_required_modules() -> None:
     assert required <= names
     assert not any("__pycache__" in name for name in names)
     assert not any(name.endswith((".pyc", ".pyo")) for name in names)
+
+
+def test_source_distribution_contains_basic_module_and_typing_marker() -> None:
+    sdist = _single_sdist()
+
+    with tarfile.open(sdist, "r:gz") as archive:
+        names = {member.name.split("/", 1)[-1] for member in archive.getmembers()}
+
+    assert "audiosig/basic.py" in names
+    assert "audiosig/py.typed" in names
 
 
 def test_wheel_record_has_no_absolute_paths() -> None:
@@ -120,6 +139,9 @@ assert callable(audiosig.minmax_normalize)
 assert callable(audiosig.apply_speech_effects)
 assert callable(audiosig.downmix_to_mono)
 assert callable(audiosig.generate_silence)
+from audiosig.basic import downmix_to_mono, generate_silence
+assert callable(downmix_to_mono)
+assert callable(generate_silence)
 """
     subprocess.run(
         [sys.executable, "-I", "-c", code, str(target)],

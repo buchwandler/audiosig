@@ -14,10 +14,9 @@ except ImportError:  # pragma: no cover - only used in an unbuilt source checkou
 
 from ._resampling import resample, resample_speed, resample_to_length
 from .amplitude import apply_gain_db, peak_normalize
-from .channels import downmix_to_mono
+from .basic import downmix_to_mono, generate_silence
 from .effects import PitchShiftMethod, TimeStretchMethod, pitch_shift, time_stretch
 from .exceptions import AudioShapeError, AudioSignalError, InvalidParameterError
-from .generation import generate_silence
 from .silence import (
     abs2,
     activity_to_intervals,
