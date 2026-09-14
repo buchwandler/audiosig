@@ -325,6 +325,26 @@ if not np.array_equal(bounds, [0, 0]):
 
 ---
 
+### Smooth Cut-Point Selection
+
+#### `find_smooth_cut_point(audio, *, start, end, anchor=None, window_length=120, axis=-1)`
+
+Select a deterministic waveform boundary in the half-open sample interval `[start, end)`. The candidate minimizes a fixed combination of local RMS, adjacent endpoint amplitude, cross-boundary slope, and distance from the preferred anchor. This is not a silence detector and returns a legal candidate for continuous voiced or noisy audio.
+
+**Parameters:**
+
+- `audio` (np.ndarray): Finite float32 or float64 audio array
+- `start`, `end` (int): Legal half-open search bounds with `0 <= start < end <= sample_count`
+- `anchor` (int, optional): Preferred sample index; defaults to the middle legal candidate and may lie outside the interval
+- `window_length` (int): Local RMS analysis length in samples, at least 1
+- `axis` (int): Sample axis, default `-1`; all other dimensions are conservatively aggregated
+
+**Returns:** `int` for a legal candidate, or `None` only for the explicit empty case `start=0, end=0` on empty audio.
+
+Invalid arrays, axes, bounds, anchors, and parameters raise `AudioShapeError` or `InvalidParameterError`. Ties are resolved by total score, anchor distance, then lower sample index. The caller remains responsible for semantic interval legality and retry policy.
+
+---
+
 ### Silence Trimming
 
 #### `trim(audio, *, top_db=60.0, ref=np.max, frame_length=2048, hop_length=512, aggregate=np.max, axis=-1, center=True, pad_mode='constant')`

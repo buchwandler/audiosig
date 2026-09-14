@@ -67,6 +67,7 @@ def test_wheel_contains_typing_marker_and_required_modules() -> None:
     required = {
         "audiosig/__init__.py",
         "audiosig/basic.py",
+        "audiosig/boundaries.py",
         "audiosig/py.typed",
         "audiosig/channels.py",
         "audiosig/generation.py",
@@ -139,6 +140,7 @@ assert callable(audiosig.minmax_normalize)
 assert callable(audiosig.apply_speech_effects)
 assert callable(audiosig.downmix_to_mono)
 assert callable(audiosig.generate_silence)
+assert callable(audiosig.find_smooth_cut_point)
 from audiosig.basic import downmix_to_mono, generate_silence
 assert callable(downmix_to_mono)
 assert callable(generate_silence)

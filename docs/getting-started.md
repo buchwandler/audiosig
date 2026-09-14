@@ -70,6 +70,24 @@ normalization. Both functions return caller-owned arrays and raise typed
 stream long silence buffers; applications creating long files should write
 bounded silence chunks through their file layer.
 
+### Smooth Cut-Point Selection
+
+When an application already has a legal numeric interval, it can choose a low-disruption waveform boundary without changing the audio:
+
+```python
+from audiosig import find_smooth_cut_point
+
+candidate = find_smooth_cut_point(
+    audio,
+    start=search_start,
+    end=search_end,
+    anchor=preferred_index,
+    window_length=120,
+ )
+```
+
+The interval is half-open, the anchor is only a preference, and the function always returns a legal candidate for a non-empty interval. It is not a silence detector. Invalid arrays or parameters raise typed `AudioSig` exceptions. The application must decide whether the interval is semantically legal and whether a failed downstream policy should retry.
+
 ### Silence Detection and Trimming
 
 ```python

@@ -1,0 +1,172 @@
+schema: documentledger.doc_record.v4
+doc_path: docs/context.md
+linked_sources: []
+sections:
+  - section_id: md:section:docs/context.md::documentation-update-context
+    doc_path: docs/context.md
+    heading_path:
+      - Documentation update context
+    heading_slug: documentation-update-context
+    line_span:
+      - 8
+      - 9
+    section_hash: 34a2bb67b94d057c968b31daf68f7e0b8b1731d43d651a53e9b730228c8165b7
+    summary: Documentation update context
+    text: "# Documentation update context"
+    links: []
+  - section_id: md:section:docs/context.md::document-inventory
+    doc_path: docs/context.md
+    heading_path:
+      - Documentation update context
+      - Document inventory
+    heading_slug: document-inventory
+    line_span:
+      - 10
+      - 14
+    section_hash: 06fafdfb99f9b59fb4e8ff5d5810447fe24f5aff684dcb8e844d006c69a12f81
+    summary: Document inventory
+    text: "## Document inventory
+
+
+      - README.md
+
+      - docs/index.rst"
+    links: []
+  - section_id: md:section:docs/context.md::unlinked-source-inventory
+    doc_path: docs/context.md
+    heading_path:
+      - Documentation update context
+      - Unlinked source inventory
+    heading_slug: unlinked-source-inventory
+    line_span:
+      - 15
+      - 47
+    section_hash: 4d0aa8f416903b655f980f71cb4aa8be4c5b45869b46192e6e78f1a83abe43ad
+    summary: Unlinked source inventory
+    text: '## Unlinked source inventory
+
+
+      - audiosig/**init**.py
+
+      - audiosig/\_framing.py
+
+      - audiosig/\_resampling.py
+
+      - audiosig/\_spectral.py
+
+      - audiosig/\_validation.py
+
+      - audiosig/\_version.py
+
+      - audiosig/amplitude.py
+
+      - audiosig/effects.py
+
+      - audiosig/exceptions.py
+
+      - audiosig/silence.py
+
+      - tests/**init**.py
+
+      - tests/\_quality_helpers.py
+
+      - tests/conftest.py
+
+      - tests/test_amplitude.py
+
+      - tests/test_effects.py
+
+      - tests/test_effects_quality.py
+
+      - tests/test_framing.py
+
+      - tests/test_librosa_compat.py
+
+      - tests/test_packaging.py
+
+      - tests/test_resampling.py
+
+      - tests/test_resampling_quality.py
+
+      - tests/test_silence.py
+
+      - tests/test_spectral.py
+
+      - tests/test_spectral_quality.py
+
+      - tests/test_trim_split_quality.py
+
+      - tests/test_trim_vad_compat.py
+
+      - tests/test_vad_quality.py
+
+      - tests/test_validation.py
+
+
+      Create or update relevant docs, then add links with `docledger links add` or `docledger
+      links add-section`.'
+    links: []
+  - section_id: md:section:docs/context.md::unlinked-changed-sources
+    doc_path: docs/context.md
+    heading_path:
+      - Documentation update context
+      - Unlinked changed sources
+    heading_slug: unlinked-changed-sources
+    line_span:
+      - 48
+      - 51
+    section_hash: 08a0c59af872530cabdbfba04bd884a5edd9265c388fb33ae160563c6f5fe834
+    summary: Unlinked changed sources
+    text: "## Unlinked changed sources
+
+
+      - None"
+    links: []
+  - section_id: md:section:docs/context.md::validation-commands
+    doc_path: docs/context.md
+    heading_path:
+      - Documentation update context
+      - Validation commands
+    heading_slug: validation-commands
+    line_span:
+      - 52
+      - 55
+    section_hash: 5b9bf1a660ccaccd4cd79a1109c3a5099cf76f24279420be7f78048b3be43032
+    summary: Validation commands
+    text: "## Validation commands
+
+
+      - None configured"
+    links: []
+  - section_id: md:section:docs/context.md::agent-rules
+    doc_path: docs/context.md
+    heading_path:
+      - Documentation update context
+      - Agent rules
+    heading_slug: agent-rules
+    line_span:
+      - 56
+      - 62
+    section_hash: 0cd9180e384a70bf8b2bb68c9f09568e6dc9d29a99914722fca2b49149d0b195
+    summary: Agent rules
+    text: '## Agent rules
+
+
+      - Inspect affected or selected source units before editing docs.
+
+      - Rewrite only the selected sections unless broader consistency requires more.
+
+      - Do not invent behavior.
+
+      - Run the configured validation commands when they exist.
+
+      - Run `docledger mark-fresh --doc DOC --section SECTION --reason "Docs updated
+      after scan version VERSION."` only after docs are updated and validated.'
+    links: []
+last_fresh_scan_version: 5
+last_fresh_hash: ff3e571effd0ec0e24fc4a79597c7b6455d134ed6200f6cd67e2cd4c347f85dc
+notes:
+  Smooth cut-point documentation and source links reviewed after implementation;
+  remaining unlinked source units are intentional test and internal coverage gaps.
+  (intentionally unlinked)
+version: 14

@@ -160,6 +160,14 @@ activity = relative_db_vad(
 )
 ```
 
+### Smooth Cut-Point Selection
+
+`find_smooth_cut_point` is a bounded, sample-domain primitive for applications that already know a legal interval. It uses a cumulative-sum local RMS calculation plus endpoint amplitude, cross-boundary slope, and anchor-distance costs. The implementation allocates work proportional to the local search span, not candidate count times window length, and conservatively aggregates all non-sample lanes.
+
+The function accepts float32 or float64 NumPy arrays, supports an explicit sample axis, never mutates input, and returns a legal index even when no quiet run exists. An empty array returns `None` only for the explicit `start=0, end=0` contract. `AudioShapeError` and `InvalidParameterError` report invalid arrays and parameters.
+
+Keep semantic decisions outside AudioSig: callers choose the legal interval, interpret timestamps or application metadata, and decide whether to retry. Scoring weights are intentionally internal and are not public tuning parameters.
+
 ## Edge Cases and Special Handling
 
 ### Empty Audio

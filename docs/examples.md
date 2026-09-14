@@ -137,6 +137,25 @@ exact = resample_to_length(audio_48k, 12_000)
 faster_playback = resample_speed(audio_48k, speed=1.25)
 ```
 
+## Smooth Cut-Point Selection
+
+This numeric example searches a synthetic waveform near a preferred sample. The result is deterministic and remains inside the caller's legal interval:
+
+```python
+import numpy as np
+from audiosig import find_smooth_cut_point
+
+sample_rate = 24_000
+time = np.arange(sample_rate, dtype=np.float32) / sample_rate
+audio = np.sin(2.0 * np.pi * 220.0 * time)
+candidate = find_smooth_cut_point(
+    audio, start=10_000, end=14_000, anchor=12_000, window_length=120
+ )
+assert 10_000 <= candidate < 14_000
+```
+
+AudioSig does not decide whether the interval is semantically legal or whether an application should retry. It only selects a numeric waveform boundary.
+
 ## Silence Detection and VAD
 
 ### Basic VAD Usage

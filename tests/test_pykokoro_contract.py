@@ -19,6 +19,7 @@ from audiosig import (
     apply_gain_db,
     downmix_to_mono,
     energy_based_vad,
+    find_smooth_cut_point,
     frame_rms,
     generate_silence,
     pitch_shift,
@@ -46,6 +47,17 @@ print(json.dumps(sorted(forbidden.intersection(sys.modules))))
         text=True,
     )
     assert json.loads(result.stdout) == []
+
+
+def test_smooth_cut_contract_for_continuous_audio() -> None:
+    sample = np.arange(1_200, dtype=np.float32)
+    audio = np.sin(2.0 * np.pi * 180.0 * sample / 24_000.0)
+    first = find_smooth_cut_point(audio, start=120, end=1_080, anchor=640, window_length=120)
+    second = find_smooth_cut_point(audio, start=120, end=1_080, anchor=640, window_length=120)
+
+    assert isinstance(first, int)
+    assert 120 <= first < 1_080
+    assert first == second
 
 
 @pytest.mark.parametrize("dtype", [np.float32, np.float64])

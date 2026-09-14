@@ -15,6 +15,7 @@ except ImportError:  # pragma: no cover - only used in an unbuilt source checkou
 from ._resampling import resample, resample_speed, resample_to_length
 from .amplitude import apply_gain_db, peak_normalize
 from .basic import downmix_to_mono, generate_silence
+from .boundaries import find_smooth_cut_point
 from .effects import PitchShiftMethod, TimeStretchMethod, pitch_shift, time_stretch
 from .exceptions import AudioShapeError, AudioSignalError, InvalidParameterError
 from .silence import (
@@ -57,6 +58,7 @@ __all__ = [
     "apply_speech_effects",
     "downmix_to_mono",
     "energy_based_vad",
+    "find_smooth_cut_point",
     "find_speech_bounds",
     "find_speech_start",
     "frame_rms",

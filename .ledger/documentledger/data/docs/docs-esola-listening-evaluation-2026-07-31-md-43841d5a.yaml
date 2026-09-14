@@ -1,0 +1,147 @@
+schema: documentledger.doc_record.v4
+doc_path: docs/esola-listening-evaluation-2026-07-31.md
+linked_sources: []
+sections:
+  - section_id: md:section:docs/esola-listening-evaluation-2026-07-31.md::esola-listening-evaluation-2026-07-31
+    doc_path: docs/esola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - ESOLA listening evaluation — 2026-07-31
+    heading_slug: esola-listening-evaluation-2026-07-31
+    line_span:
+      - 1
+      - 2
+    section_hash: 7ae627bce73c77dff0efde7408dcf9779bbb2e46aa2f43c8b71adf68e6c9a67e
+    summary: ESOLA listening evaluation — 2026-07-31
+    text: "# ESOLA listening evaluation — 2026-07-31"
+    links: []
+  - section_id: md:section:docs/esola-listening-evaluation-2026-07-31.md::status
+    doc_path: docs/esola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - ESOLA listening evaluation — 2026-07-31
+      - Status
+    heading_slug: status
+    line_span:
+      - 3
+      - 15
+    section_hash: 3ae103d3764f5166b386791c1d0dd82860b41157d281041423649c49bca1d544
+    summary: Status
+    text: "## Status
+
+
+      The repository contains no redistribution-safe or local real-speech WAV corpus
+
+      and no listener responses. Consequently, this report records the required
+
+      evaluation protocol and an honest `not run` result; it does not claim that
+
+      ESOLA is ready to replace WSOLA or become the default speech backend.
+
+
+      Since this record was created, the implementation has added complete-frame
+
+      endpoint extraction, a bounded adaptive 1.5-period trend-window estimate, and
+
+      configurable one- versus two-pass ZFR detrending. Known-tone and synthetic-F0
+
+      sweep checks are automated, but they are objective fixtures rather than
+
+      labelled natural-speech GCI evidence."
+    links: []
+  - section_id: md:section:docs/esola-listening-evaluation-2026-07-31.md::planned-utterance-coverage
+    doc_path: docs/esola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - ESOLA listening evaluation — 2026-07-31
+      - Planned utterance coverage
+    heading_slug: planned-utterance-coverage
+    line_span:
+      - 16
+      - 34
+    section_hash: 1895593cbec5f950f1c258813bdff3fcf2a28d5d378ee67b53019b7fa07bf468
+    summary: Planned utterance coverage
+    text: "## Planned utterance coverage
+
+
+      The next evaluation should use at least one utterance in each category below,
+
+      with source license, attribution, sample rate, and filename recorded before
+
+      rendering:
+
+
+      |   # | Category                     | Listener result              |
+
+      | --: | ---------------------------- | ---------------------------- |
+
+      |   1 | lower-pitched voice          | not run — corpus unavailable |
+
+      |   2 | higher-pitched voice         | not run — corpus unavailable |
+
+      |   3 | breathy voice                | not run — corpus unavailable |
+
+      |   4 | rapid F0 motion              | not run — corpus unavailable |
+
+      |   5 | plosive-rich text            | not run — corpus unavailable |
+
+      |   6 | fricative-rich text          | not run — corpus unavailable |
+
+      |   7 | mixed voiced/unvoiced speech | not run — corpus unavailable |
+
+      |   8 | short TTS fragment           | not run — corpus unavailable |
+
+      |   9 | silence boundaries           | not run — corpus unavailable |
+
+      |  10 | mild background noise        | not run — corpus unavailable |"
+    links: []
+  - section_id: md:section:docs/esola-listening-evaluation-2026-07-31.md::required-matrix-and-protocol
+    doc_path: docs/esola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - ESOLA listening evaluation — 2026-07-31
+      - Required matrix and protocol
+    heading_slug: required-matrix-and-protocol
+    line_span:
+      - 35
+      - 43
+    section_hash: 956e50f5f4c37d65195e2fe7ef331150ded934da4f7b7f8856e1ef6881dd66b0
+    summary: Required matrix and protocol
+    text: "## Required matrix and protocol
+
+
+      Render rates `0.75, 0.8, 1.2, 1.25, 1.5, 2.0` with WSOLA, ESOLA, and
+
+      phase-vocoder diagnostic references. Include downstream pitch/rate combinations
+
+      whose computed ESOLA backend rate remains in `0.5 <= rate <= 2.0`. Randomize
+
+      A/B or ABX order, use at least two listeners, and record intelligibility,
+
+      naturalness, robotic/metallic character, pitch stability, transient duplication,
+
+      buzziness, flutter, clicks, and overall preference."
+    links: []
+  - section_id: md:section:docs/esola-listening-evaluation-2026-07-31.md::promotion-decision
+    doc_path: docs/esola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - ESOLA listening evaluation — 2026-07-31
+      - Promotion decision
+    heading_slug: promotion-decision
+    line_span:
+      - 44
+      - 48
+    section_hash: d9ba601f0eea64798e122d675dd4b7b1a676f50f8a09c063b612406d1256a78d
+    summary: Promotion decision
+    text: "## Promotion decision
+
+
+      No listener ratings are available, so the 65% moderate-rate ESOLA preference
+
+      gate is `not evaluated`. Defaults remain unchanged: phase vocoder for
+
+      `time_stretch` and `pitch_shift`, and WSOLA for `apply_speech_effects`."
+    links: []
+last_fresh_scan_version: 5
+last_fresh_hash: 56f104a1b0e0fc637366d85931cd16f3e053e6063d32900092e4be2b16d49ec7
+notes:
+  Smooth cut-point documentation and source links reviewed after implementation;
+  remaining unlinked source units are intentional test and internal coverage gaps.
+  (intentionally unlinked)
+version: 14

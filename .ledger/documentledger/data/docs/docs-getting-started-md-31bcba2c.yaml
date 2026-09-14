@@ -1,0 +1,83 @@
+schema: documentledger.doc_record.v4
+doc_path: docs/getting-started.md
+linked_sources:
+  - audiosig/boundaries.py
+  - audiosig/exceptions.py
+sections:
+  - section_id: md:section:docs/getting-started.md::error-handling
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Error Handling
+    heading_slug: error-handling
+    line_span:
+      - 306
+      - 322
+    section_hash: 605d7d9aef7139ff4f1f57b10d47b103c096cb8b24dd47bd8e5a4a0cafe84d12
+    summary: Error Handling
+    text:
+      "## Error Handling\n\nAudioSig raises typed exceptions for invalid inputs:\n\
+      \n```python\nfrom audiosig import AudioSignalError, AudioShapeError, InvalidParameterError\n\
+      \ntry:\n    result = time_stretch(audio, rate=-1.0)\nexcept InvalidParameterError\
+      \ as e:\n    print(f\"Invalid parameter: {e}\")\nexcept AudioShapeError as e:\n\
+      \    print(f\"Invalid audio shape: {e}\")\nexcept AudioSignalError as e:\n   \
+      \ print(f\"Audio processing error: {e}\")\n```"
+    links:
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::AudioSignalError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioSignalError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `InvalidParameterError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/getting-started.md::smooth-cut-point-selection
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Quick Start
+      - Smooth Cut-Point Selection
+    heading_slug: smooth-cut-point-selection
+    line_span:
+      - 73
+      - 91
+    section_hash: d499519c3ac248cdcf05516ebc19b307e0b798fb8f911ff398733223b89450bb
+    summary: Smooth Cut-Point Selection
+    text:
+      "### Smooth Cut-Point Selection\n\nWhen an application already has a legal\
+      \ numeric interval, it can choose a low-disruption waveform boundary without changing\
+      \ the audio:\n\n```python\nfrom audiosig import find_smooth_cut_point\n\ncandidate\
+      \ = find_smooth_cut_point(\n    audio,\n    start=search_start,\n    end=search_end,\n\
+      \    anchor=preferred_index,\n    window_length=120,\n )\n```\n\nThe interval\
+      \ is half-open, the anchor is only a preference, and the function always returns\
+      \ a legal candidate for a non-empty interval. It is not a silence detector. Invalid\
+      \ arrays or parameters raise typed `AudioSig` exceptions. The application must\
+      \ decide whether the interval is semantically legal and whether a failed downstream\
+      \ policy should retry."
+    links:
+      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+        source_path: audiosig/boundaries.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Getting-started example documents the public boundary primitive.
+        tracked_hashes:
+          body_hash: 22c9d828accffc5668fb2a6e940e29f9cfcfcfdeaaede01ffb43efa8047c51df
+last_fresh_scan_version: 5
+last_fresh_hash: 54ae5330ab3cb3e5df7dcd60633ad064af1d7cb3f2bc4e1175fe82ac214769ec
+notes:
+  Smooth cut-point documentation and source links reviewed after implementation;
+  remaining unlinked source units are intentional test and internal coverage gaps.
+version: 14

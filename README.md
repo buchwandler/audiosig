@@ -157,6 +157,20 @@ The relevant numeric operations are `apply_speech_effects`, `apply_gain_db`,
 `energy_based_vad`, `frame_rms`, `resample`, `resample_speed`,
 `resample_to_length`, `trim`, and `activity_to_intervals`.
 
+`find_smooth_cut_point` selects a waveform-safe candidate inside a caller-provided numeric half-open interval. It uses the sample axis and optional preferred anchor supplied by the caller, but it does not decide whether that interval is semantically legal or whether a downstream application should retry.
+
+```python
+from audiosig import find_smooth_cut_point
+
+candidate = find_smooth_cut_point(
+    audio,
+    start=search_start,
+    end=search_end,
+    anchor=preferred_index,
+    window_length=120,
+ )
+```
+
 This checkout contains AudioSig only; downstream source changes and release
 verification require the PyKokoro and TTSForge repositories.
 

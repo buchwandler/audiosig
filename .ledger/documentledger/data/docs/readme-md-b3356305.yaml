@@ -1,0 +1,133 @@
+schema: documentledger.doc_record.v4
+doc_path: README.md
+linked_sources:
+  - audiosig/boundaries.py
+  - audiosig/exceptions.py
+sections:
+  - section_id: md:section:README.md::pykokoro-integration
+    doc_path: README.md
+    heading_path:
+      - AudioSig
+      - PyKokoro integration
+    heading_slug: pykokoro-integration
+    line_span:
+      - 148
+      - 176
+    section_hash: e8c1e91fa13eb62bea48c4eb5407889b203242abb16ef70c9489878acc50fdcc
+    summary: PyKokoro integration
+    text:
+      "## PyKokoro integration\n\nAudioSig provides numeric DSP only. PyKokoro should\
+      \ parse SSMD strings at its\napplication boundary, call AudioSig with numeric\
+      \ parameters, catch\n`AudioSignalError`, and decide whether to log, retry, or\
+      \ return the original\naudio. A stable dependency range such as `audiosig>=0.1.0,<0.2`\
+      \ should only be\ndeclared after that release is published on the intended package\
+      \ index.\n\nThe relevant numeric operations are `apply_speech_effects`, `apply_gain_db`,\n\
+      `energy_based_vad`, `frame_rms`, `resample`, `resample_speed`,\n`resample_to_length`,\
+      \ `trim`, and `activity_to_intervals`.\n\n`find_smooth_cut_point` selects a waveform-safe\
+      \ candidate inside a caller-provided numeric half-open interval. It uses the sample\
+      \ axis and optional preferred anchor supplied by the caller, but it does not decide\
+      \ whether that interval is semantically legal or whether a downstream application\
+      \ should retry.\n\n```python\nfrom audiosig import find_smooth_cut_point\n\ncandidate\
+      \ = find_smooth_cut_point(\n    audio,\n    start=search_start,\n    end=search_end,\n\
+      \    anchor=preferred_index,\n    window_length=120,\n )\n```\n\nThis checkout\
+      \ contains AudioSig only; downstream source changes and release\nverification\
+      \ require the PyKokoro and TTSForge repositories."
+    links:
+      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+        source_path: audiosig/boundaries.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README integration guidance documents the public numeric boundary primitive.
+        tracked_hashes:
+          body_hash: 22c9d828accffc5668fb2a6e940e29f9cfcfcfdeaaede01ffb43efa8047c51df
+      - source_id: py:class:audiosig/exceptions.py::AudioSignalError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioSignalError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:README.md::waveform-construction-and-channel-downmixing
+    doc_path: README.md
+    heading_path:
+      - AudioSig
+      - Waveform construction and channel downmixing
+    heading_slug: waveform-construction-and-channel-downmixing
+    line_span:
+      - 55
+      - 84
+    section_hash: 0a8a320d58121ce9d5871023eec818129b49d63272f14201685f7695e0aac4e0
+    summary: Waveform construction and channel downmixing
+    text: "## Waveform construction and channel downmixing
+
+
+      `generate_silence(duration, sample_rate)` returns a newly allocated,
+
+      one-dimensional mono buffer of zeros. Duration is in seconds, sample rate is
+
+      in samples per second, and its length is exactly `int(duration * sample_rate)`
+
+      using truncation/floor semantics. The default dtype is float32; any NumPy real
+
+      floating dtype, such as float16, float32, or float64, may be requested. Invalid
+
+      duration, sample rate, or dtype values raise `InvalidParameterError`. For long
+
+      silence files, generate bounded chunks in the application and stream those
+
+      chunks to the file layer; AudioSig does not provide file I/O or a streaming API.
+
+
+      `downmix_to_mono(audio, channel_axis=-1)` averages the explicitly selected
+
+      channel axis in the input dtype. It accepts finite real floating one- or
+
+      two-dimensional arrays, preserves frame order and dtype, performs no clipping
+
+      or normalization, and returns contiguous caller-owned storage. One-dimensional
+
+      audio is treated as already mono and copied. Invalid shape, axis, dtype, or
+
+      sample values raise `AudioShapeError`. SoundFile-style frames-first data uses
+
+      the default `channel_axis=-1`; channels-first data uses `channel_axis=0`:
+
+
+      ```python
+
+      from audiosig import downmix_to_mono
+
+
+      silence = generate_silence(0.5, 24_000)  # (12_000,), float32
+
+      mono_frames = downmix_to_mono(frames, channel_axis=1)
+
+      mono_channels = downmix_to_mono(channels, channel_axis=0)
+
+      ```
+
+
+      Both operations are NumPy-array primitives only. They do not decode or encode
+
+      WAV/FLAC/MP3 files, resolve URLs, play audio, or compose audiobook chapters."
+    links:
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `InvalidParameterError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+last_fresh_scan_version: 5
+last_fresh_hash: aa29d1994080d3ddcc412232f6b8176876c90f12b7fcbed4528549433632f14e
+notes:
+  Smooth cut-point documentation and source links reviewed after implementation;
+  remaining unlinked source units are intentional test and internal coverage gaps.
+version: 14

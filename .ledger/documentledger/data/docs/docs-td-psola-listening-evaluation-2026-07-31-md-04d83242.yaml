@@ -1,0 +1,139 @@
+schema: documentledger.doc_record.v4
+doc_path: docs/td-psola-listening-evaluation-2026-07-31.md
+linked_sources: []
+sections:
+  - section_id: md:section:docs/td-psola-listening-evaluation-2026-07-31.md::td-psola-listening-evaluation-2026-07-31
+    doc_path: docs/td-psola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - TD-PSOLA listening evaluation — 2026-07-31
+    heading_slug: td-psola-listening-evaluation-2026-07-31
+    line_span:
+      - 1
+      - 2
+    section_hash: 9ba483a2ca097843853fc7edb22572296cf0f7734bf3187f65f56d36d134bd74
+    summary: TD-PSOLA listening evaluation — 2026-07-31
+    text: "# TD-PSOLA listening evaluation — 2026-07-31"
+    links: []
+  - section_id: md:section:docs/td-psola-listening-evaluation-2026-07-31.md::status
+    doc_path: docs/td-psola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - TD-PSOLA listening evaluation — 2026-07-31
+      - Status
+    heading_slug: status
+    line_span:
+      - 3
+      - 16
+    section_hash: fbdf13cdf4e30da93ac5101488efe25683d2ad8afe5da4d5da1e07c9c24fc57c
+    summary: Status
+    text: "## Status
+
+
+      This is the milestone-5 evaluation record and reproducible protocol for the
+
+      experimental direct TD-PSOLA speech path. No default method is changed by this
+
+      work. Listener results remain **pending** until a licensed corpus and at least
+
+      two development listeners are available; this file deliberately does not invent
+
+      ratings.
+
+
+      The implementation now uses approximately-two-period centered grains, local-F0
+
+      pitch-mark propagation, tracker voiced intervals for synthesis masking, and an
+
+      explicit insufficient-mark fallback. Synthetic leakage, normalization, sample-
+
+      rate, noise, and reverberation checks are automated; they do not constitute the
+
+      real-speech listening gate below."
+    links: []
+  - section_id: md:section:docs/td-psola-listening-evaluation-2026-07-31.md::corpus-and-reproducibility
+    doc_path: docs/td-psola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - TD-PSOLA listening evaluation — 2026-07-31
+      - Corpus and reproducibility
+    heading_slug: corpus-and-reproducibility
+    line_span:
+      - 17
+      - 34
+    section_hash: 767f9c73aaa09dbdeca8c53f76c81137225702748de81e0cb0a6c586ed2a2f85
+    summary: Corpus and reproducibility
+    text:
+      "## Corpus and reproducibility\n\nUse licensed or consented 16/24/48 kHz mono\
+      \ or stereo WAV material and record,\nfor every source: corpus/license, attribution,\
+      \ sample rate, filename or stable\nidentifier, channel count, and whether the\
+      \ segment is clean, noisy, breathy,\ncreaky, reverberant, or TTS-generated. Do\
+      \ not commit private speech recordings.\n\nRender with:\n\n```bash\npython scripts/compare_speech_effects.py\
+      \ INPUT.wav OUTPUT_DIR \\\n  --rates 0.8 1.0 1.25 --semitones -6 -4 -2 2 4 6\n\
+      ```\n\nThe comparison output records exact-length error, finite output, RMS/peak,\n\
+      continuity jumps, runtime, and generated WAVs. Keep `metrics.json` and the\ncommand\
+      \ line with the evaluation notes."
+    links: []
+  - section_id: md:section:docs/td-psola-listening-evaluation-2026-07-31.md::listening-matrix
+    doc_path: docs/td-psola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - TD-PSOLA listening evaluation — 2026-07-31
+      - Listening matrix
+    heading_slug: listening-matrix
+    line_span:
+      - 35
+      - 50
+    section_hash: 97abb68746ad5e18ef83bd018e9dab266847c85932b95b31c36f548e9a4b45b9
+    summary: Listening matrix
+    text: "## Listening matrix
+
+
+      Include lower- and higher-pitched voices, breathy voice, rapid F0 motion,
+
+      plosive-rich and fricative-rich text, mixed voiced/unvoiced speech, a short TTS
+
+      fragment, silence boundaries, mild noise, creaky/fry speech, and intelligible
+
+      reverberant speech.
+
+
+      Compare the unmodified reference, current WSOLA plus resampling, current ESOLA
+
+      plus resampling where its rate is supported, phase-vocoder diagnostics, and
+
+      direct TD-PSOLA. Randomize A/B or ABX order and do not reveal method names.
+
+
+      For each trial, collect 1–5 ratings for naturalness, intelligibility, speaker
+
+      or timbre preservation, pitch correctness, buzziness, flutter, echo/reverb,
+
+      transient duplication, unvoiced tonalization, clicks, and overall preference.
+
+      Record severe-artifact flags and free-text comments."
+    links: []
+  - section_id: md:section:docs/td-psola-listening-evaluation-2026-07-31.md::promotion-gates
+    doc_path: docs/td-psola-listening-evaluation-2026-07-31.md
+    heading_path:
+      - TD-PSOLA listening evaluation — 2026-07-31
+      - Promotion gates
+    heading_slug: promotion-gates
+    line_span:
+      - 51
+      - 62
+    section_hash: b0bc48ee6d4da4b8918967db8ae9ccbabc1bd329d421efd4e3725a8a39d982c0
+    summary: Promotion gates
+    text:
+      "## Promotion gates\n\n- At least two listeners for development screening\
+      \ and at least ten before any\n  default-method consideration.\n- TD-PSOLA preferred\
+      \ over current WSOLA pitch shifting in at least 65% of\n  moderate ±2/±4 semitone\
+      \ trials.\n- Severe artifacts below 5% of trials, with no intelligibility regression.\n\
+      - Objective synthetic and runtime gates pass alongside the listening result.\n\
+      \nUntil these fields are populated and reviewed, TD-PSOLA remains experimental\
+      \ and\nthe existing defaults remain phase vocoder for generic `time_stretch` and\
+      \ WSOLA\nfor `apply_speech_effects`."
+    links: []
+last_fresh_scan_version: 5
+last_fresh_hash: 36b3dc94b4a110515673b4ec848a647ae721d4475b2933c2b070124128463433
+notes:
+  Smooth cut-point documentation and source links reviewed after implementation;
+  remaining unlinked source units are intentional test and internal coverage gaps.
+  (intentionally unlinked)
+version: 14

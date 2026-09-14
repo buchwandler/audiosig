@@ -1,0 +1,143 @@
+schema: documentledger.doc_record.v4
+doc_path: docs/advanced.md
+linked_sources:
+  - audiosig/boundaries.py
+  - audiosig/exceptions.py
+sections:
+  - section_id: md:section:docs/advanced.md::fail-fast-vs-fail-open
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Error Handling Strategies
+      - Fail-Fast vs Fail-Open
+    heading_slug: fail-fast-vs-fail-open
+    line_span:
+      - 274
+      - 305
+    section_hash: 96b91a514069d9f426896e5007d9c9f95fc12f0acbfb7dbe57ddc9f14842a7c1
+    summary: Fail-Fast vs Fail-Open
+    text:
+      "### Fail-Fast vs Fail-Open\n\n```python\nfrom audiosig import (\n    time_stretch,\n\
+      \    AudioSignalError,\n    InvalidParameterError,\n    AudioShapeError,\n)\n\n\
+      def safe_time_stretch(audio, rate, fail_fast=True):\n    \"\"\"Time stretch with\
+      \ error handling.\"\"\"\n    try:\n        return time_stretch(audio, rate=rate)\n\
+      \    except InvalidParameterError as e:\n        if fail_fast:\n            raise\n\
+      \        print(f\"Warning: {e}\")\n        return audio  # Return original\n \
+      \   except AudioShapeError as e:\n        if fail_fast:\n            raise\n \
+      \       print(f\"Warning: Invalid shape: {e}\")\n        return audio\n\n# Fail-fast\
+      \ (default)\nresult = safe_time_stretch(audio, rate=-1.0, fail_fast=True)\n\n\
+      # Fail-open (return original on error)\nresult = safe_time_stretch(audio, rate=-1.0,\
+      \ fail_fast=False)\n```"
+    links:
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::AudioSignalError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioSignalError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `InvalidParameterError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/advanced.md::input-validation
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Error Handling Strategies
+      - Input Validation
+    heading_slug: input-validation
+    line_span:
+      - 306
+      - 328
+    section_hash: 31b182e097969938d7b4c521462f13a60504654682bc3d1c43244595e3b40542
+    summary: Input Validation
+    text:
+      "### Input Validation\n\n```python\nimport numpy as np\nfrom audiosig import\
+      \ AudioShapeError\n\ndef validate_audio_input(audio, expected_sr=None):\n    \"\
+      \"\"Validate audio before processing.\"\"\"\n    if not isinstance(audio, np.ndarray):\n\
+      \        raise TypeError(f\"Expected np.ndarray, got {type(audio)}\")\n\n    if\
+      \ audio.dtype not in (np.float32, np.float64):\n        raise ValueError(f\"Expected\
+      \ float32 or float64, got {audio.dtype}\")\n\n    if audio.ndim == 0:\n      \
+      \  raise ValueError(\"Audio must have at least 1 dimension\")\n\n    if audio.size\
+      \ == 0:\n        raise ValueError(\"Audio array is empty\")\n\n    return True\n\
+      ```"
+    links:
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/advanced.md::smooth-cut-point-selection
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - VAD Algorithm Details
+      - Smooth Cut-Point Selection
+    heading_slug: smooth-cut-point-selection
+    line_span:
+      - 163
+      - 171
+    section_hash: a58bf43dfb462a34af05d547f3c16ee0b3111e50cd3080051938736b45e11fa7
+    summary: Smooth Cut-Point Selection
+    text: "### Smooth Cut-Point Selection
+
+
+      `find_smooth_cut_point` is a bounded, sample-domain primitive for applications
+      that already know a legal interval. It uses a cumulative-sum local RMS calculation
+      plus endpoint amplitude, cross-boundary slope, and anchor-distance costs. The
+      implementation allocates work proportional to the local search span, not candidate
+      count times window length, and conservatively aggregates all non-sample lanes.
+
+
+      The function accepts float32 or float64 NumPy arrays, supports an explicit sample
+      axis, never mutates input, and returns a legal index even when no quiet run exists.
+      An empty array returns `None` only for the explicit `start=0, end=0` contract.
+      `AudioShapeError` and `InvalidParameterError` report invalid arrays and parameters.
+
+
+      Keep semantic decisions outside AudioSig: callers choose the legal interval, interpret
+      timestamps or application metadata, and decide whether to retry. Scoring weights
+      are intentionally internal and are not public tuning parameters."
+    links:
+      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+        source_path: audiosig/boundaries.py
+        coverage: implementation-note
+        impact: unknown
+        reason:
+          Advanced documentation explains the smooth cut-point implementation and
+          complexity.
+        tracked_hashes:
+          body_hash: 22c9d828accffc5668fb2a6e940e29f9cfcfcfdeaaede01ffb43efa8047c51df
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `InvalidParameterError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+last_fresh_scan_version: 5
+last_fresh_hash: 4e8c0ca4344b04461045eec389e3d795d7c7dfdb5eebb686799ee9ad927556a1
+notes:
+  Smooth cut-point documentation and source links reviewed after implementation;
+  remaining unlinked source units are intentional test and internal coverage gaps.
+version: 14

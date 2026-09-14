@@ -1,62 +1,125 @@
 schema: documentledger.scan.v5
-version: 4
+version: 5
 source_index_file: source-index.json
-source_index_hash: 6477cbc9e4c9ac2f08e539c554ce4f081ef32080a52f70077a18f51512b05039
-source_file_count: 33
-source_unit_count: 276
-doc_file_count: 8
+source_index_hash: b015cea85180e04e7f100aa7b3e0909104237f28415ca36a81adbfcec4e53197
+source_file_count: 53
+source_unit_count: 489
+doc_file_count: 11
 source_hashes:
-  audiosig/__init__.py: b2b980028deffc46f2798a91c0199aac5fc2f370242ab0dd37c49ee0c5c26f6a
+  audiosig/__init__.py: 92889d3f23f300dbb4b18f0c12847825364b67add268a8a783bca1492aebeaaa
+  audiosig/_esola.py: 7bb7983fd671fd5e2b3271d8eb927af5f939af3b78a9cc972b6fb80239ccd669
   audiosig/_framing.py: 1eaa63c96a083d0cf372a159f051b4f162d84689c64de793aa590d723d3af80f
+  audiosig/_pitch.py: 4b332ce9ccec630a325cf51a409a5fa409cc861cb46c014f191fa23b9b626155
   audiosig/_resampling.py: a237f6bc81607d0178fe3897d00003c962d8cad6530bf696b4f2e4f1bf69e987
   audiosig/_spectral.py: ee44c88e16a6c7519c2f12d0690e67628b1d996bb9f8c590973467e23ecaab15
+  audiosig/_td_psola.py: 05bb30e3990636dc5323a31af0d55e07fb9f40dcff90e26af627f78ac9b2906c
   audiosig/_validation.py: 980e15ff06bc522ae59aeb6d2cf70477a041d625ff10e037f3e8c911018a6c22
-  audiosig/_version.py: 9ffe6f749b0f36eef0679ecb1ae44be7ce6ebe597e862baf654056cdd1b44505
+  audiosig/_version.py: be8570d384ff30d265c564144e48001d79f8c791886ae62090666feb63785780
+  audiosig/_wsola.py: 55c3095c945dc3295737abdccb33338f4f1f4f61b1d5cf5d85f5084bf4d3ede0
   audiosig/amplitude.py: dca92242bc2fabaeca6b504909d3dc280cfdf4af86e4cd43ea7037cf88f2c4c6
-  audiosig/effects.py: 95200d581b772e47593f2415d56b45ed36b276df750b418e8d138f048decb61f
+  audiosig/basic.py: bb63065b2957e2e3ea1ab381a6bed353c22b89093c64c8dd8c4c95f265f9b0eb
+  audiosig/boundaries.py: de9202e25aa6f426175b50361ea8a80017629c8f15522c44e095cb431cb9f4e2
+  audiosig/channels.py: 585d432f2edc7dbc00b033ed241aae401380f7367b2bdbaf9422b25adac7d194
+  audiosig/effects.py: 0cd4d02bd43a5675a6bd3c3afcbc23676bf7685d2f374b5a74da2f7f55271cb2
   audiosig/exceptions.py: 2dade4ed3dd95e1ee641b9e7f662342af9af2d6c39ed62a6d9f6dad9250853f6
+  audiosig/generation.py: f2572307e7cfb1557e271516597e33e4563290412624e87fbd6327f52dcc53cc
   audiosig/silence.py: 936db74acdf62e968adb770e3591f65b841030999e4b77892a23ee11499ef198
-  audiosig/speech.py: 2218c56e38e089892a476f2d5f77dfb738d3a05562fc911c9717d54fefe34f24
+  audiosig/speech.py: 7b311eba1d916ab80851379793cf6e55eb9f9deafb1a056676b2f273cbd8c37e
   tests/__init__.py: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
   tests/_quality_helpers.py: 439bac99d0354aec77c1a2e0e8f84b026fa14d7d8fb545afedbd0f22c8c12ee6
-  tests/conftest.py: e22388161809058ae9c71ad3d19b60c0db1a602698a3e1260166abc376298541
-  tests/test_amplitude.py: a1efc840e0f0459a2465645cbade4c98985e2b254d9ad89b48000a57508e25b2
-  tests/test_documentation_examples.py: 514b4568c040043f373b4e1b0845de8f377a0ceb1a8f5ec964bed033e967aa9d
-  tests/test_effects.py: b95f38c8629bf9cb6b25024e13866130fd611f2f28bb35f4cc955cefc280a611
+  tests/conftest.py: 7af3dca62343478e8c6233f335d87442a9e9ea641a38fccd381db885281a1614
+  tests/test_amplitude.py: 4d14c5cc719907a0a5216282d107034f12f830a65c5117c59319447744168156
+  tests/test_basic.py: 40fef6b60891caf9cb1346e8ad396f5c181234bea94565cf27561b98d6b9375c
+  tests/test_boundaries.py: 333e2ed6413e2efe6cabdf11dbbd4282f98293623b0240cdf07926a221c5631f
+  tests/test_channels.py: 2b392bcc61c7d9bf3b443a1f22dc202659a619fe696ee40719145b2570b1e70b
+  tests/test_documentation_examples.py: 907b6a2dfb695f320c15e733832e63cc5c1e314d2b94a800afa15503abbe1fee
+  tests/test_effects.py: f0a6d1623f2df780e8d1d47c71cc1a6dbed6239a0ea81957ee0bac8777e82ab5
   tests/test_effects_quality.py: 10f310bb122c3cce68f0924c929b452d8fc99dfdc343013f0bbcde053c84f054
+  tests/test_esola.py: 17d6ae8be7f720cb210602645f27dfe0dd7d0a64c34ae99c8ec7b5915c6edae2
+  tests/test_esola_quality.py: 21c915aaef6f86988c5a188fa44e88905bddb3347eae7bff57f1b43bb8b68608
   tests/test_framing.py: dee77756cc46fb900ea6918a73bb37061ce934e1362f5ff471c7094556e7b01e
+  tests/test_generation.py: cdfd3adf4e53767da2fa5570b60efadc5f7531ba50ee59a71f957df6311b1e9b
   tests/test_librosa_compat.py: ab6834454164be3cca49ad9627a09cb3c39fd76008ed57c129134cf22932946a
-  tests/test_packaging.py: 201743ac34f7b4f4e31e208f7d153100e7ff6b98dfda5c796095abe692f8ac90
-  tests/test_pykokoro_contract.py: 1c1f04d9d0a6cd0de3277760cc5958cde1853fd9f05e8cd7b838c60d63593bc1
+  tests/test_packaging.py: 767cdb32be43a9d1c29354b7cecd74592cf54c440810e5a16fd0dba60ebfb8ce
+  tests/test_pitch.py: 717d31cc8504637fbb252293b92f5ae325ee1be8c6482a9aa720aec751cd2b0a
+  tests/test_pykokoro_contract.py: 9450d30c5533fa01f220987aa891df08db981e753c978df462dab6d09b1e1119
   tests/test_resampling.py: ba08d178d3f1fb9423e2af27769e215c7f829eeb7a8c6495879803c591ab6060
   tests/test_resampling_quality.py: 6f2b82584878e0dcb14321ef6ccb421557ee16a178823d04b48fb0dedd416aaf
   tests/test_silence.py: 422994dcac7599d7adf5fb2d97582acc39dfa2135ed93e719ec5707176b35289
   tests/test_spectral.py: 722f205431e5a32cab569ab71c652e2dd203d2aaa3e157922b23fbe5dd1251ea
   tests/test_spectral_quality.py: 7b50de231215f6c075659263cac7f3660d45e7efbab615e7a8f69dbe5c935fbb
-  tests/test_speech.py: 2ace51078baeb49ed5bd04c679d82019116edd303ac07e07cb5dc9292e8cc640
+  tests/test_speech.py: 1dbd828c88cf1c970d78562700d6b9b57b43a14a0bac939fa27c1ec94312ff6c
+  tests/test_speech_effects_quality.py: eea3e727e1208f536b5fdb418322046d0197bf72b58e2ab0065f3dc34b40082d
   tests/test_speech_quality.py: 29e1e9f4d98dc12b2422503ef81a3f9a9d940be0dbdec221d5f7b2cde3ce4974
+  tests/test_td_psola.py: 21dea1b5cd41d60e6df8da354a277119cf451a12f7da518b7cdd3974bc86036c
+  tests/test_td_psola_quality.py: 3526f61987ef1db2442bfadf97bb8399107a5044acee9a929a8a2ca62fc161b2
   tests/test_trim_split_quality.py: 7d346ac1e633bd48c78669752078fdff1ae9f7f18b74d196c36041071712fc90
   tests/test_trim_vad_compat.py: 050fc878fff00ca59244e6233daec6c42d9651e0358ef495283b05fa96a0a284
+  tests/test_ttsforge_contract.py: 5236d48a60541b0df37bcd3e471d7b2f9ed5edfb8e6e55397bdf2e2ecfaa62a3
   tests/test_vad_quality.py: 010a43bd9bd8364e0569c85acf64ead491ba291ed4226713fe29f446484f8fcc
   tests/test_validation.py: 4f4e9258bab22b8693073a53e97a7b62838659d327e001400570a35390baca76
+  tests/test_wsola.py: dc22a7ef68bde74c29daeae6f2d3cb7a247f2bfad7ebaad2b9e369606a2ff87d
 doc_hashes:
-  README.md: 76e587970cb59d32bbbc6c309dd35a9396ff13710a0c20e566a90e5bf47931ec
-  docs/advanced.md: 0aaa11c9630736e05760159f0d230879f30a18ce9c5eb970d564bd9baddb18a7
-  docs/api-reference.md: 2c9a0b6be8b5b1d854421fdc7a4279d40a8f7ecb5a37094537b4c58e4e2d61e9
-  docs/changelog.md: 7241567a215200ea1ad28f515dfed22b47dbabfa24d7c11b365245ffc468fb35
+  README.md: aa29d1994080d3ddcc412232f6b8176876c90f12b7fcbed4528549433632f14e
+  docs/advanced.md: 4e8c0ca4344b04461045eec389e3d795d7c7dfdb5eebb686799ee9ad927556a1
+  docs/api-reference.md: 26d5b6e535c1df0362688b3bec3c8e77fafb05088228c952d2e08a93fe11269c
+  docs/changelog.md: 92de21133c9c3f18e6a2a0242f58868a51bde4b71c48162fc7e537abc0150881
   docs/context.md: ff3e571effd0ec0e24fc4a79597c7b6455d134ed6200f6cd67e2cd4c347f85dc
-  docs/examples.md: 951b385835f0256d732ef68a0808ca84625129ae0295e43aeb87a3b9121081a2
-  docs/getting-started.md: 39721381ca1f4bc944712906a66e081381e9f24a3cdbb77903f6c1f06a93be00
+  docs/esola-listening-evaluation-2026-07-31.md: 56f104a1b0e0fc637366d85931cd16f3e053e6063d32900092e4be2b16d49ec7
+  docs/examples.md: 7c9624617ad568340ed9d1e5bc0b4167fb4eaaad9c55e471132733ba9e61b14a
+  docs/getting-started.md: 54ae5330ab3cb3e5df7dcd60633ad064af1d7cb3f2bc4e1175fe82ac214769ec
   docs/index.rst: 423dbef38926cb813fc67bc883a900b887c71df36377d18c30f06e148c1faf81
+  docs/quality-evaluation.md: 533ef71eb0dba935a187ad22f332ba678f23ddc40ccc79c3e6de4b9db8642454
+  docs/td-psola-listening-evaluation-2026-07-31.md: 36b3dc94b4a110515673b4ec848a647ae721d4475b2933c2b070124128463433
 changed_sources:
+  - audiosig/__init__.py
+  - audiosig/_esola.py
+  - audiosig/_pitch.py
+  - audiosig/_td_psola.py
   - audiosig/_version.py
-  - audiosig/amplitude.py
+  - audiosig/_wsola.py
+  - audiosig/basic.py
+  - audiosig/boundaries.py
+  - audiosig/channels.py
   - audiosig/effects.py
+  - audiosig/generation.py
+  - audiosig/speech.py
+  - tests/conftest.py
   - tests/test_amplitude.py
+  - tests/test_basic.py
+  - tests/test_boundaries.py
+  - tests/test_channels.py
+  - tests/test_documentation_examples.py
   - tests/test_effects.py
+  - tests/test_esola.py
+  - tests/test_esola_quality.py
+  - tests/test_generation.py
   - tests/test_packaging.py
+  - tests/test_pitch.py
+  - tests/test_pykokoro_contract.py
+  - tests/test_speech.py
+  - tests/test_speech_effects_quality.py
+  - tests/test_td_psola.py
+  - tests/test_td_psola_quality.py
+  - tests/test_ttsforge_contract.py
+  - tests/test_wsola.py
 deleted_sources: []
 changed_units:
+  - source_id: py:module:audiosig/__init__.py
+    path: audiosig/__init__.py
+    kind: module
+    qualname: audiosig/__init__.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 1
+      - 78
+    new_line_span:
+      - 1
+      - 86
   - source_id: py:module:audiosig/_version.py
     path: audiosig/_version.py
     kind: module
@@ -73,36 +136,6 @@ changed_units:
     new_line_span:
       - 1
       - 24
-  - source_id: py:function:audiosig/amplitude.py::apply_gain_db
-    path: audiosig/amplitude.py
-    kind: function
-    qualname: apply_gain_db
-    change_type: modified
-    changed_hashes:
-      - body_hash
-      - content_hash
-      - public_contract_hash
-    old_line_span:
-      - 11
-      - 23
-    new_line_span:
-      - 11
-      - 32
-  - source_id: py:function:audiosig/amplitude.py::peak_normalize
-    path: audiosig/amplitude.py
-    kind: function
-    qualname: peak_normalize
-    change_type: modified
-    changed_hashes:
-      - body_hash
-      - content_hash
-      - public_contract_hash
-    old_line_span:
-      - 26
-      - 40
-    new_line_span:
-      - 35
-      - 55
   - source_id: py:function:audiosig/effects.py::pitch_shift
     path: audiosig/effects.py
     kind: function
@@ -111,17 +144,53 @@ changed_units:
     changed_hashes:
       - body_hash
       - content_hash
+      - docstring_hash
       - public_contract_hash
+      - signature_hash
     old_line_span:
-      - 65
-      - 103
-    new_line_span:
       - 65
       - 113
-  - source_id: py:module:tests/test_amplitude.py
-    path: tests/test_amplitude.py
+    new_line_span:
+      - 98
+      - 170
+  - source_id: py:function:audiosig/effects.py::time_stretch
+    path: audiosig/effects.py
+    kind: function
+    qualname: time_stretch
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 19
+      - 62
+    new_line_span:
+      - 25
+      - 95
+  - source_id: py:function:audiosig/speech.py::apply_speech_effects
+    path: audiosig/speech.py
+    kind: function
+    qualname: apply_speech_effects
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 21
+      - 82
+    new_line_span:
+      - 26
+      - 120
+  - source_id: py:module:tests/conftest.py
+    path: tests/conftest.py
     kind: module
-    qualname: tests/test_amplitude.py
+    qualname: tests/conftest.py
     change_type: modified
     changed_hashes:
       - body_hash
@@ -131,60 +200,20 @@ changed_units:
       - signature_hash
     old_line_span:
       - 1
-      - 48
+      - 57
     new_line_span:
       - 1
-      - 63
-  - source_id: py:module:tests/test_effects.py
-    path: tests/test_effects.py
-    kind: module
-    qualname: tests/test_effects.py
-    change_type: modified
-    changed_hashes:
-      - body_hash
-      - content_hash
-      - docstring_hash
-      - public_contract_hash
-      - signature_hash
-    old_line_span:
-      - 1
-      - 96
-    new_line_span:
-      - 1
-      - 103
-  - source_id: py:module:tests/test_packaging.py
-    path: tests/test_packaging.py
-    kind: module
-    qualname: tests/test_packaging.py
-    change_type: modified
-    changed_hashes:
-      - body_hash
-      - content_hash
-      - docstring_hash
-      - public_contract_hash
-      - signature_hash
-    old_line_span:
-      - 1
-      - 171
-    new_line_span:
-      - 1
-      - 176
-added_units:
+      - 102
   - source_id: py:function:tests/test_amplitude.py::test_gain_rejects_unrepresentable_finite_db
     path: tests/test_amplitude.py
     kind: function
     qualname: test_gain_rejects_unrepresentable_finite_db
-    change_type: added
+    change_type: modified
     changed_hashes:
-      - body_hash
       - content_hash
-      - decorator_hash
-      - docstring_hash
-      - public_contract_hash
-      - signature_hash
     old_line_span:
-      - 0
-      - 0
+      - 52
+      - 55
     new_line_span:
       - 52
       - 55
@@ -192,6 +221,107 @@ added_units:
     path: tests/test_amplitude.py
     kind: function
     qualname: test_peak_normalize_rejects_target_outside_dtype_range
+    change_type: modified
+    changed_hashes:
+      - content_hash
+    old_line_span:
+      - 59
+      - 63
+    new_line_span:
+      - 59
+      - 63
+  - source_id: py:module:tests/test_documentation_examples.py
+    path: tests/test_documentation_examples.py
+    kind: module
+    qualname: tests/test_documentation_examples.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+    old_line_span:
+      - 1
+      - 33
+    new_line_span:
+      - 1
+      - 32
+  - source_id: py:function:tests/test_effects.py::test_pitch_shift_rejects_unrepresentable_finite_ratio
+    path: tests/test_effects.py
+    kind: function
+    qualname: test_pitch_shift_rejects_unrepresentable_finite_ratio
+    change_type: modified
+    changed_hashes:
+      - content_hash
+    old_line_span:
+      - 86
+      - 89
+    new_line_span:
+      - 86
+      - 89
+  - source_id: py:function:tests/test_packaging.py::test_installed_wheel_imports_without_source_tree
+    path: tests/test_packaging.py
+    kind: function
+    qualname: test_installed_wheel_imports_without_source_tree
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 87
+      - 123
+    new_line_span:
+      - 110
+      - 152
+  - source_id: py:function:tests/test_packaging.py::test_wheel_contains_typing_marker_and_required_modules
+    path: tests/test_packaging.py
+    kind: function
+    qualname: test_wheel_contains_typing_marker_and_required_modules
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 53
+      - 70
+    new_line_span:
+      - 61
+      - 83
+  - source_id: py:function:tests/test_pykokoro_contract.py::test_contract_does_not_import_forbidden_dsp_packages
+    path: tests/test_pykokoro_contract.py
+    kind: function
+    qualname: test_contract_does_not_import_forbidden_dsp_packages
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 31
+      - 45
+    new_line_span:
+      - 34
+      - 49
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_apply_all_effects_and_exact_length
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_apply_all_effects_and_exact_length
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 35
+      - 51
+    new_line_span:
+      - 35
+      - 52
+added_units:
+  - source_id: py:function:audiosig/_esola.py::_analysis_shift
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _analysis_shift
     change_type: added
     changed_hashes:
       - body_hash
@@ -204,12 +334,804 @@ added_units:
       - 0
       - 0
     new_line_span:
-      - 59
-      - 63
-  - source_id: py:function:tests/test_effects.py::test_pitch_shift_rejects_unrepresentable_finite_ratio
-    path: tests/test_effects.py
+      - 96
+      - 108
+  - source_id: py:function:audiosig/_esola.py::_analysis_source
+    path: audiosig/_esola.py
     kind: function
-    qualname: test_pitch_shift_rejects_unrepresentable_finite_ratio
+    qualname: _analysis_source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 145
+      - 149
+  - source_id: py:function:audiosig/_esola.py::_centered_moving_average
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _centered_moving_average
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 19
+      - 34
+  - source_id: py:function:audiosig/_esola.py::_complete_slice
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _complete_slice
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 152
+      - 157
+  - source_id: py:function:audiosig/_esola.py::_esola_lane
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _esola_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 167
+      - 242
+  - source_id: py:function:audiosig/_esola.py::_estimate_trend_window_ms
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _estimate_trend_window_ms
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 111
+      - 142
+  - source_id: py:function:audiosig/_esola.py::_extract_epochs_lane
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _extract_epochs_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 73
+      - 93
+  - source_id: py:function:audiosig/_esola.py::_positive_zero_crossings
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _positive_zero_crossings
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 62
+      - 70
+  - source_id: py:function:audiosig/_esola.py::_raised_cosine_crossfade
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _raised_cosine_crossfade
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 160
+      - 164
+  - source_id: py:function:audiosig/_esola.py::_zero_frequency_signal
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _zero_frequency_signal
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 37
+      - 59
+  - source_id: py:function:audiosig/_esola.py::esola_time_stretch
+    path: audiosig/_esola.py
+    kind: function
+    qualname: esola_time_stretch
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 245
+      - 303
+  - source_id: py:class:audiosig/_pitch.py::PitchTrack
+    path: audiosig/_pitch.py
+    kind: class
+    qualname: PitchTrack
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 13
+      - 27
+  - source_id: py:class:audiosig/_pitch.py::_Candidate
+    path: audiosig/_pitch.py
+    kind: class
+    qualname: _Candidate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 31
+      - 34
+  - source_id: py:function:audiosig/_pitch.py::_analysis_geometry
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _analysis_geometry
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 56
+      - 61
+  - source_id: py:function:audiosig/_pitch.py::_correlation_score
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _correlation_score
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 235
+      - 246
+  - source_id: py:function:audiosig/_pitch.py::_frame_pitch_candidates
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _frame_pitch_candidates
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 98
+      - 137
+  - source_id: py:function:audiosig/_pitch.py::_frame_starts
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _frame_starts
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 64
+      - 70
+  - source_id: py:function:audiosig/_pitch.py::_local_peak_indices
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _local_peak_indices
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 91
+      - 95
+  - source_id: py:function:audiosig/_pitch.py::_normalized_correlations
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _normalized_correlations
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 73
+      - 88
+  - source_id: py:function:audiosig/_pitch.py::_refine_pitch_marks_lane
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _refine_pitch_marks_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 249
+      - 324
+  - source_id: py:function:audiosig/_pitch.py::_track_pitch_candidates
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _track_pitch_candidates
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 149
+      - 209
+  - source_id: py:function:audiosig/_pitch.py::_transition_cost
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _transition_cost
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 140
+      - 146
+  - source_id: py:function:audiosig/_pitch.py::_validate_pitch_parameters
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _validate_pitch_parameters
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 37
+      - 53
+  - source_id: py:function:audiosig/_pitch.py::_voiced_intervals
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _voiced_intervals
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 212
+      - 232
+  - source_id: py:function:audiosig/_pitch.py::estimate_pitch_track
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: estimate_pitch_track
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 383
+      - 399
+  - source_id: py:function:audiosig/_pitch.py::estimate_pitch_track_lane
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: estimate_pitch_track_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 327
+      - 380
+  - source_id: py:function:audiosig/_td_psola.py::_duration_fallback
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _duration_fallback
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 200
+      - 218
+  - source_id: py:function:audiosig/_td_psola.py::_extract_pitch_grain
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _extract_pitch_grain
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 84
+      - 104
+  - source_id: py:function:audiosig/_td_psola.py::_overlap_add_grains
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _overlap_add_grains
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 107
+      - 136
+  - source_id: py:function:audiosig/_td_psola.py::_padded_slice
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _padded_slice
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 21
+      - 31
+  - source_id: py:function:audiosig/_td_psola.py::_pitch_duration_fallback
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _pitch_duration_fallback
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 221
+      - 240
+  - source_id: py:function:audiosig/_td_psola.py::_target_marks
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _target_marks
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 34
+      - 81
+  - source_id: py:function:audiosig/_td_psola.py::_td_psola_lane
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _td_psola_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 257
+      - 306
+  - source_id: py:function:audiosig/_td_psola.py::_validate_limits
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _validate_limits
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 243
+      - 254
+  - source_id: py:function:audiosig/_td_psola.py::_voiced_output_mask
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _voiced_output_mask
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 139
+      - 163
+  - source_id: py:function:audiosig/_td_psola.py::_voiced_td_psola_lane
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _voiced_td_psola_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 166
+      - 197
+  - source_id: py:function:audiosig/_td_psola.py::td_psola_prosody
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: td_psola_prosody
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 309
+      - 359
+  - source_id: py:function:audiosig/_wsola.py::_analysis_source
+    path: audiosig/_wsola.py
+    kind: function
+    qualname: _analysis_source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 14
+      - 25
+  - source_id: py:function:audiosig/_wsola.py::_choose_candidate
+    path: audiosig/_wsola.py
+    kind: function
+    qualname: _choose_candidate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 36
+      - 68
+  - source_id: py:function:audiosig/_wsola.py::_complete_slice
+    path: audiosig/_wsola.py
+    kind: function
+    qualname: _complete_slice
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 28
+      - 33
+  - source_id: py:function:audiosig/_wsola.py::wsola_time_stretch
+    path: audiosig/_wsola.py
+    kind: function
+    qualname: wsola_time_stretch
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 71
+      - 159
+  - source_id: py:function:audiosig/basic.py::_validate_audio_for_downmix
+    path: audiosig/basic.py
+    kind: function
+    qualname: _validate_audio_for_downmix
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 74
+      - 83
+  - source_id: py:function:audiosig/basic.py::_validate_duration
+    path: audiosig/basic.py
+    kind: function
+    qualname: _validate_duration
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 13
+      - 23
+  - source_id: py:function:audiosig/basic.py::_validate_float_dtype
+    path: audiosig/basic.py
+    kind: function
+    qualname: _validate_float_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 36
+      - 44
+  - source_id: py:function:audiosig/basic.py::_validate_sample_rate
+    path: audiosig/basic.py
+    kind: function
+    qualname: _validate_sample_rate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 33
+  - source_id: py:function:audiosig/basic.py::downmix_to_mono
+    path: audiosig/basic.py
+    kind: function
+    qualname: downmix_to_mono
     change_type: added
     changed_hashes:
       - body_hash
@@ -223,11 +1145,11 @@ added_units:
       - 0
     new_line_span:
       - 86
-      - 89
-  - source_id: py:function:tests/test_packaging.py::test_release_files_exist
-    path: tests/test_packaging.py
+      - 109
+  - source_id: py:function:audiosig/basic.py::generate_silence
+    path: audiosig/basic.py
     kind: function
-    qualname: test_release_files_exist
+    qualname: generate_silence
     change_type: added
     changed_hashes:
       - body_hash
@@ -240,19 +1162,2399 @@ added_units:
       - 0
       - 0
     new_line_span:
+      - 47
+      - 71
+  - source_id: py:function:audiosig/boundaries.py::_aggregate_lanes
+    path: audiosig/boundaries.py
+    kind: function
+    qualname: _aggregate_lanes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 25
+      - 29
+  - source_id: py:function:audiosig/boundaries.py::_normalize_cost
+    path: audiosig/boundaries.py
+    kind: function
+    qualname: _normalize_cost
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 16
+      - 22
+  - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+    path: audiosig/boundaries.py
+    kind: function
+    qualname: find_smooth_cut_point
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 32
+      - 114
+  - source_id: py:module:audiosig/channels.py
+    path: audiosig/channels.py
+    kind: module
+    qualname: audiosig/channels.py
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 1
+      - 7
+  - source_id: py:module:audiosig/generation.py
+    path: audiosig/generation.py
+    kind: module
+    qualname: audiosig/generation.py
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 1
+      - 7
+  - source_id: py:function:tests/conftest.py::speech_like_factory
+    path: tests/conftest.py
+    kind: function
+    qualname: speech_like_factory
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 61
+      - 102
+  - source_id: py:function:tests/test_basic.py::test_downmix_channel_first_and_one_channel_inputs
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_channel_first_and_one_channel_inputs
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 101
+      - 109
+  - source_id: py:function:tests/test_basic.py::test_downmix_does_not_mutate_source_or_share_result_storage
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_does_not_mutate_source_or_share_result_storage
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 146
+      - 153
+  - source_id: py:function:tests/test_basic.py::test_downmix_empty_frames_are_empty_and_empty_channels_are_invalid
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_empty_frames_are_empty_and_empty_channels_are_invalid
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 112
+      - 119
+  - source_id: py:function:tests/test_basic.py::test_downmix_frames_first_averages_channels_in_source_dtype
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_frames_first_averages_channels_in_source_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 91
+      - 98
+  - source_id: py:function:tests/test_basic.py::test_downmix_mono_is_an_independent_contiguous_copy
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_mono_is_an_independent_contiguous_copy
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 77
+      - 87
+  - source_id: py:function:tests/test_basic.py::test_downmix_rejects_invalid_channel_axis
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_rejects_invalid_channel_axis
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 141
+      - 143
+  - source_id: py:function:tests/test_basic.py::test_downmix_rejects_invalid_shape_dtype_and_values
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_rejects_invalid_shape_dtype_and_values
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 135
+      - 137
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_allocations_are_independent
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_allocations_are_independent
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 30
+      - 36
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_has_exact_length_zero_content_and_dtype
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_has_exact_length_zero_content_and_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 11
+      - 19
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_rejects_invalid_duration
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_rejects_invalid_duration
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 43
+      - 45
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_rejects_invalid_sample_rate
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_rejects_invalid_sample_rate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 49
+      - 51
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_rejects_non_floating_dtype
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_rejects_non_floating_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 55
+      - 57
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_rejects_oversized_length_before_allocation
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_rejects_oversized_length_before_allocation
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 60
+      - 73
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_truncates_and_zero_duration_is_empty
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_truncates_and_zero_duration_is_empty
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 22
+      - 27
+  - source_id: py:function:tests/test_boundaries.py::test_axis_support_matches_channels_first_and_samples_first
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_axis_support_matches_channels_first_and_samples_first
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 74
+      - 82
+  - source_id: py:function:tests/test_boundaries.py::test_continuous_non_silent_signal_still_returns_a_legal_cut
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_continuous_non_silent_signal_still_returns_a_legal_cut
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 54
+      - 61
+  - source_id: py:function:tests/test_boundaries.py::test_empty_audio_has_explicit_none_contract
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_empty_audio_has_explicit_none_contract
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 102
+      - 103
+  - source_id: py:function:tests/test_boundaries.py::test_empty_audio_rejects_non_empty_range
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_empty_audio_rejects_non_empty_range
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 143
+      - 145
+  - source_id: py:function:tests/test_boundaries.py::test_energy_valley_is_preferred_to_high_energy_region
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_energy_valley_is_preferred_to_high_energy_region
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 45
+      - 51
+  - source_id: py:function:tests/test_boundaries.py::test_input_is_not_modified
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_input_is_not_modified
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 85
+      - 91
+  - source_id: py:function:tests/test_boundaries.py::test_invalid_inputs_raise_typed_exceptions
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_invalid_inputs_raise_typed_exceptions
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 136
+      - 140
+  - source_id: py:function:tests/test_boundaries.py::test_multichannel_scoring_is_conservative
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_multichannel_scoring_is_conservative
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 64
+      - 71
+  - source_id: py:function:tests/test_boundaries.py::test_near_zero_waveform_boundary_beats_high_amplitude_anchor
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_near_zero_waveform_boundary_beats_high_amplitude_anchor
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 29
+      - 41
+  - source_id: py:function:tests/test_boundaries.py::test_short_legal_interval_returns_a_cut
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_short_legal_interval_returns_a_cut
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 94
+      - 99
+  - source_id: py:function:tests/test_boundaries.py::test_silence_chooses_anchor
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_silence_chooses_anchor
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 10
+      - 16
+  - source_id: py:function:tests/test_boundaries.py::test_silence_with_external_anchor_chooses_nearest_legal_sample
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_silence_with_external_anchor_chooses_nearest_legal_sample
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 20
+      - 25
+  - source_id: py:function:tests/test_channels.py::test_batched_channels_are_rejected
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_batched_channels_are_rejected
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 53
+      - 62
+  - source_id: py:function:tests/test_channels.py::test_channels_first_stereo_is_averaged
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_channels_first_stereo_is_averaged
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 22
+      - 27
+  - source_id: py:function:tests/test_channels.py::test_empty_channel_axis_is_rejected
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_empty_channel_axis_is_rejected
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 76
+      - 80
+  - source_id: py:function:tests/test_channels.py::test_empty_mono_and_sample_dimensions_are_supported
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_empty_mono_and_sample_dimensions_are_supported
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 65
+      - 73
+  - source_id: py:function:tests/test_channels.py::test_frames_first_stereo_supports_negative_axis_and_matches_ttsforge
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_frames_first_stereo_supports_negative_axis_and_matches_ttsforge
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 30
+      - 38
+  - source_id: py:function:tests/test_channels.py::test_higher_dimensional_inputs_are_rejected
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_higher_dimensional_inputs_are_rejected
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 41
+      - 50
+  - source_id: py:function:tests/test_channels.py::test_invalid_audio_raises_typed_shape_error
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_invalid_audio_raises_typed_shape_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 94
+      - 96
+  - source_id: py:function:tests/test_channels.py::test_invalid_channel_axis_raises_typed_shape_error
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_invalid_channel_axis_raises_typed_shape_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 100
+      - 102
+  - source_id: py:function:tests/test_channels.py::test_one_dimensional_audio_is_copied_with_dtype
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_one_dimensional_audio_is_copied_with_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 10
+      - 19
+  - source_id: py:function:tests/test_channels.py::test_result_does_not_share_storage_with_input
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_result_does_not_share_storage_with_input
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 105
+      - 111
+  - source_id: py:function:tests/test_effects.py::test_esola_rate_and_sample_rate_validation
+    path: tests/test_effects.py
+    kind: function
+    qualname: test_esola_rate_and_sample_rate_validation
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 116
+      - 121
+  - source_id: py:function:tests/test_effects.py::test_esola_time_stretch_and_pitch_shift_public_contracts
+    path: tests/test_effects.py
+    kind: function
+    qualname: test_esola_time_stretch_and_pitch_shift_public_contracts
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 106
+      - 113
+  - source_id: py:function:tests/test_esola.py::speech_like
+    path: tests/test_esola.py
+    kind: function
+    qualname: speech_like
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 17
+      - 23
+  - source_id: py:function:tests/test_esola.py::test_adaptive_trend_window_tracks_known_pitch_period
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_adaptive_trend_window_tracks_known_pitch_period
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 84
+      - 91
+  - source_id: py:function:tests/test_esola.py::test_analysis_shift_selects_smallest_valid_candidate
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_analysis_shift_selects_smallest_valid_candidate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 160
+      - 166
+  - source_id: py:function:tests/test_esola.py::test_centered_moving_average_uses_edge_padding
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_centered_moving_average_uses_edge_padding
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 28
+  - source_id: py:function:tests/test_esola.py::test_epoch_extraction_is_finite_deterministic_and_sample_rate_aware
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_epoch_extraction_is_finite_deterministic_and_sample_rate_aware
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 73
+      - 80
+  - source_id: py:function:tests/test_esola.py::test_epoch_extraction_remains_finite_for_a_minute_signal
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_epoch_extraction_remains_finite_for_a_minute_signal
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 142
+      - 146
+  - source_id: py:function:tests/test_esola.py::test_epoch_timing_follows_a_slow_f0_sweep
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_epoch_timing_follows_a_slow_f0_sweep
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 105
+      - 118
+  - source_id: py:function:tests/test_esola.py::test_esola_exact_length_dtype_finite_deterministic_and_non_mutating
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_esola_exact_length_dtype_finite_deterministic_and_non_mutating
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 171
+      - 182
+  - source_id: py:function:tests/test_esola.py::test_esola_handles_edge_inputs_and_arbitrary_sample_axis
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_esola_handles_edge_inputs_and_arbitrary_sample_axis
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 185
+      - 201
+  - source_id: py:function:tests/test_esola.py::test_esola_mixed_voiced_unvoiced_boundary_has_no_endpoint_hold
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_esola_mixed_voiced_unvoiced_boundary_has_no_endpoint_hold
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 121
+      - 138
+  - source_id: py:function:tests/test_esola.py::test_esola_silence_short_inputs_and_invalid_rates
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_esola_silence_short_inputs_and_invalid_rates
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 204
+      - 222
+  - source_id: py:function:tests/test_esola.py::test_four_cumulative_sums_match_two_zero_frequency_resonators
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_four_cumulative_sums_match_two_zero_frequency_resonators
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 31
+      - 55
+  - source_id: py:function:tests/test_esola.py::test_positive_zero_crossings_are_deterministic
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_positive_zero_crossings_are_deterministic
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 67
+      - 70
+  - source_id: py:function:tests/test_esola.py::test_two_pass_zfr_is_the_selected_stable_epoch_variant
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_two_pass_zfr_is_the_selected_stable_epoch_variant
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 94
+      - 102
+  - source_id: py:function:tests/test_esola_quality.py::dominant_frequency
+    path: tests/test_esola_quality.py
+    kind: function
+    qualname: dominant_frequency
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 8
+      - 11
+  - source_id: py:function:tests/test_esola_quality.py::test_esola_batch_lane_has_no_lane_count_dependent_gain
+    path: tests/test_esola_quality.py
+    kind: function
+    qualname: test_esola_batch_lane_has_no_lane_count_dependent_gain
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 23
+      - 29
+  - source_id: py:function:tests/test_esola_quality.py::test_esola_keeps_steady_voiced_frequency_in_moderate_range
+    path: tests/test_esola_quality.py
+    kind: function
+    qualname: test_esola_keeps_steady_voiced_frequency_in_moderate_range
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 14
+      - 20
+  - source_id: py:function:tests/test_generation.py::test_default_silence_is_float32_and_zero
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_default_silence_is_float32_and_zero
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 9
+      - 14
+  - source_id: py:function:tests/test_generation.py::test_invalid_duration_raises_typed_error
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_invalid_duration_raises_typed_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 49
+      - 51
+  - source_id: py:function:tests/test_generation.py::test_invalid_sample_rate_raises_typed_error
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_invalid_sample_rate_raises_typed_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 55
+      - 57
+  - source_id: py:function:tests/test_generation.py::test_non_finite_product_is_rejected
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_non_finite_product_is_rejected
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 82
+      - 84
+  - source_id: py:function:tests/test_generation.py::test_overflow_is_rejected_before_allocation
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_overflow_is_rejected_before_allocation
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 66
+      - 79
+  - source_id: py:function:tests/test_generation.py::test_silence_calls_are_independent_allocations
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_silence_calls_are_independent_allocations
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 36
+      - 42
+  - source_id: py:function:tests/test_generation.py::test_silence_supports_float64_and_floor_sample_count
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_silence_supports_float64_and_floor_sample_count
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 17
+      - 23
+  - source_id: py:function:tests/test_generation.py::test_unsupported_dtype_raises_typed_error
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_unsupported_dtype_raises_typed_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 61
+      - 63
+  - source_id: py:function:tests/test_generation.py::test_zero_and_subsample_duration_return_empty_arrays
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_zero_and_subsample_duration_return_empty_arrays
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 33
+  - source_id: py:function:tests/test_packaging.py::_single_sdist
+    path: tests/test_packaging.py
+    kind: function
+    qualname: _single_sdist
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 27
+      - 31
+  - source_id: py:function:tests/test_packaging.py::test_source_distribution_contains_basic_module_and_typing_marker
+    path: tests/test_packaging.py
+    kind: function
+    qualname: test_source_distribution_contains_basic_module_and_typing_marker
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 86
+      - 93
+  - source_id: py:function:tests/test_pitch.py::_tone
+    path: tests/test_pitch.py
+    kind: function
+    qualname: _tone
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 11
+      - 13
+  - source_id: py:function:tests/test_pitch.py::test_pitch_marks_follow_local_f0_contours
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_marks_follow_local_f0_contours
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 64
+      - 80
+  - source_id: py:function:tests/test_pitch.py::test_pitch_private_edge_helpers_and_empty_lanes
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_private_edge_helpers_and_empty_lanes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 101
+      - 112
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_is_amplitude_invariant_and_deterministic
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_is_amplitude_invariant_and_deterministic
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 41
+      - 49
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_is_silent_for_silence_and_mostly_unvoiced_noise
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_is_silent_for_silence_and_mostly_unvoiced_noise
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 31
+      - 38
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_recovers_clean_tones
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_recovers_clean_tones
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 19
+      - 28
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_rejects_invalid_parameters
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_rejects_invalid_parameters
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 87
+      - 98
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_uses_an_energetic_frame_silence_cost
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_uses_an_energetic_frame_silence_cost
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 52
+      - 60
+  - source_id: py:function:tests/test_pykokoro_contract.py::test_smooth_cut_contract_for_continuous_audio
+    path: tests/test_pykokoro_contract.py
+    kind: function
+    qualname: test_smooth_cut_contract_for_continuous_audio
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 51
+      - 59
+  - source_id: py:function:tests/test_pykokoro_contract.py::test_ttsforge_audio_primitives_contract
+    path: tests/test_pykokoro_contract.py
+    kind: function
+    qualname: test_ttsforge_audio_primitives_contract
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 152
       - 159
-      - 161
-deleted_units: []
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_combined_plan_uses_one_tsm_pass
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_combined_plan_uses_one_tsm_pass
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 55
+      - 78
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_matching_rate_and_pitch_uses_only_resampling
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_matching_rate_and_pitch_uses_only_resampling
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 81
+      - 99
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_passes_rolloff_to_pitch_resampler
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_passes_rolloff_to_pitch_resampler
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 102
+      - 115
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_supports_esola_and_keeps_one_tsm_pass
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_supports_esola_and_keeps_one_tsm_pass
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 134
+      - 148
+  - source_id: py:function:tests/test_speech_effects_quality.py::_continuity_metric
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: _continuity_metric
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 18
+      - 22
+  - source_id: py:function:tests/test_speech_effects_quality.py::_frame_rms
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: _frame_rms
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 12
+      - 15
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_combined_wsola_effects_hit_duration_and_remain_finite
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_combined_wsola_effects_hit_duration_and_remain_finite
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 69
+      - 83
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_wsola_pitch_shift_hits_target_without_formant_claim
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_wsola_pitch_shift_hits_target_without_formant_claim
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 52
+      - 65
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_wsola_preserves_moderate_pitch_on_a_voiced_tone
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_wsola_preserves_moderate_pitch_on_a_voiced_tone
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 44
+      - 49
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_wsola_quality_metrics_are_comparable_to_basic_phase_vocoder
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_wsola_quality_metrics_are_comparable_to_basic_phase_vocoder
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 86
+      - 98
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_wsola_speech_fixture_is_finite_sized_and_continuous
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_wsola_speech_fixture_is_finite_sized_and_continuous
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 41
+  - source_id: py:function:tests/test_td_psola.py::_speech_fixture
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: _speech_fixture
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 12
+      - 15
+  - source_id: py:function:tests/test_td_psola.py::test_public_direct_methods_preserve_gain_and_duration
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_public_direct_methods_preserve_gain_and_duration
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 149
+      - 162
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_exact_contracts
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_exact_contracts
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 21
+      - 29
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_handles_unvoiced_and_mixed_input
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_handles_unvoiced_and_mixed_input
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 129
+      - 135
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_interior_grains_span_adjacent_periods
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_interior_grains_span_adjacent_periods
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 105
+      - 114
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_is_rejected_by_time_stretch
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_is_rejected_by_time_stretch
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 124
+      - 126
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_neutral_empty_short_axis_and_lanes
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_neutral_empty_short_axis_and_lanes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 32
+      - 52
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_private_empty_and_fallback_helpers
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_private_empty_and_fallback_helpers
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 66
+      - 102
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_rejects_invalid_pitch_ceiling
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_rejects_invalid_pitch_ceiling
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 117
+      - 121
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_rejects_unsupported_pitch
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_rejects_unsupported_pitch
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 61
+      - 63
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_rejects_unsupported_rate
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_rejects_unsupported_rate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 56
+      - 58
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_short_pitch_request_uses_explicit_pitch_fallback
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_short_pitch_request_uses_explicit_pitch_fallback
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 138
+      - 146
+  - source_id: py:function:tests/test_td_psola_quality.py::_envelope_peak_frequencies
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: _envelope_peak_frequencies
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 39
+      - 48
+  - source_id: py:function:tests/test_td_psola_quality.py::_harmonic_source
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: _harmonic_source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 10
+      - 16
+  - source_id: py:function:tests/test_td_psola_quality.py::_source_filter_fixture
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: _source_filter_fixture
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 19
+      - 36
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_does_not_tonalize_unvoiced_noise
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_does_not_tonalize_unvoiced_noise
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 96
+      - 102
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_hits_target_f0_for_harmonic_source
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_hits_target_f0_for_harmonic_source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 53
+      - 60
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_limits_residual_original_f0_leakage
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_limits_residual_original_f0_leakage
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 65
+      - 80
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_mixed_transition_has_no_uninitialized_holes
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_mixed_transition_has_no_uninitialized_holes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 105
+      - 114
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_preserves_source_filter_formant_envelope_fixture
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_preserves_source_filter_formant_envelope_fixture
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 84
+      - 93
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_reverberant_voiced_material_remains_finite
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_reverberant_voiced_material_remains_finite
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 128
+      - 140
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_sample_rate_and_odd_length_matrix
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_sample_rate_and_odd_length_matrix
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 118
+      - 125
+  - source_id: py:function:tests/test_ttsforge_contract.py::test_ttsforge_import_and_basic_usage_contract
+    path: tests/test_ttsforge_contract.py
+    kind: function
+    qualname: test_ttsforge_import_and_basic_usage_contract
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 14
+      - 23
+  - source_id: py:function:tests/test_ttsforge_contract.py::test_ttsforge_import_resolves_from_source_package_without_optional_dependencies
+    path: tests/test_ttsforge_contract.py
+    kind: function
+    qualname: test_ttsforge_import_resolves_from_source_package_without_optional_dependencies
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 46
+  - source_id: py:function:tests/test_wsola.py::source
+    path: tests/test_wsola.py
+    kind: function
+    qualname: source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 10
+      - 12
+  - source_id: py:function:tests/test_wsola.py::test_wsola_batch_lane_matches_standalone_amplitude
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_batch_lane_matches_standalone_amplitude
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 99
+      - 110
+  - source_id: py:function:tests/test_wsola.py::test_wsola_boundary_policy_handles_short_and_exact_frame_inputs
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_boundary_policy_handles_short_and_exact_frame_inputs
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 54
+      - 59
+  - source_id: py:function:tests/test_wsola.py::test_wsola_constant_and_silence_are_finite
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_constant_and_silence_are_finite
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 34
+      - 39
+  - source_id: py:function:tests/test_wsola.py::test_wsola_constant_input_has_no_fabricated_zero_tail
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_constant_input_has_no_fabricated_zero_tail
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 43
+      - 50
+  - source_id: py:function:tests/test_wsola.py::test_wsola_exact_length_finiteness_and_dtype
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_exact_length_finiteness_and_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 16
+      - 22
+  - source_id: py:function:tests/test_wsola.py::test_wsola_is_deterministic_and_requires_sample_rate
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_is_deterministic_and_requires_sample_rate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 113
+      - 119
+  - source_id: py:function:tests/test_wsola.py::test_wsola_neutral_rate_is_non_aliasing_copy
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_neutral_rate_is_non_aliasing_copy
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 25
+      - 30
+  - source_id: py:function:tests/test_wsola.py::test_wsola_preserves_a_final_transient_without_a_synthetic_silence_suffix
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_preserves_a_final_transient_without_a_synthetic_silence_suffix
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 62
+      - 67
+  - source_id: py:function:tests/test_wsola.py::test_wsola_rejects_invalid_frame_relationships
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_rejects_invalid_frame_relationships
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 122
+      - 137
+  - source_id: py:function:tests/test_wsola.py::test_wsola_short_inputs_and_final_partial_frame
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_short_inputs_and_final_partial_frame
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 71
+      - 82
+  - source_id: py:function:tests/test_wsola.py::test_wsola_supports_non_final_sample_axis_and_independent_lanes
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_supports_non_final_sample_axis_and_independent_lanes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 85
+      - 96
+deleted_units:
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_operation_order
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_operation_order
+    change_type: deleted
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 54
+      - 82
+    new_line_span:
+      - 0
+      - 0
 affected_sections: []
 stale_docs: []
 unlinked_changed_sources:
+  - audiosig/__init__.py
+  - audiosig/_esola.py
+  - audiosig/_pitch.py
+  - audiosig/_td_psola.py
   - audiosig/_version.py
-  - audiosig/amplitude.py
+  - audiosig/_wsola.py
+  - audiosig/basic.py
+  - audiosig/boundaries.py
+  - audiosig/channels.py
   - audiosig/effects.py
+  - audiosig/generation.py
+  - audiosig/speech.py
+  - tests/conftest.py
   - tests/test_amplitude.py
+  - tests/test_basic.py
+  - tests/test_boundaries.py
+  - tests/test_channels.py
+  - tests/test_documentation_examples.py
   - tests/test_effects.py
+  - tests/test_esola.py
+  - tests/test_esola_quality.py
+  - tests/test_generation.py
   - tests/test_packaging.py
+  - tests/test_pitch.py
+  - tests/test_pykokoro_contract.py
+  - tests/test_speech.py
+  - tests/test_speech_effects_quality.py
+  - tests/test_td_psola.py
+  - tests/test_td_psola_quality.py
+  - tests/test_ttsforge_contract.py
+  - tests/test_wsola.py
 unmapped_changed_units:
+  - source_id: py:module:audiosig/__init__.py
+    path: audiosig/__init__.py
+    kind: module
+    qualname: audiosig/__init__.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 1
+      - 78
+    new_line_span:
+      - 1
+      - 86
   - source_id: py:module:audiosig/_version.py
     path: audiosig/_version.py
     kind: module
@@ -269,36 +3571,6 @@ unmapped_changed_units:
     new_line_span:
       - 1
       - 24
-  - source_id: py:function:audiosig/amplitude.py::apply_gain_db
-    path: audiosig/amplitude.py
-    kind: function
-    qualname: apply_gain_db
-    change_type: modified
-    changed_hashes:
-      - body_hash
-      - content_hash
-      - public_contract_hash
-    old_line_span:
-      - 11
-      - 23
-    new_line_span:
-      - 11
-      - 32
-  - source_id: py:function:audiosig/amplitude.py::peak_normalize
-    path: audiosig/amplitude.py
-    kind: function
-    qualname: peak_normalize
-    change_type: modified
-    changed_hashes:
-      - body_hash
-      - content_hash
-      - public_contract_hash
-    old_line_span:
-      - 26
-      - 40
-    new_line_span:
-      - 35
-      - 55
   - source_id: py:function:audiosig/effects.py::pitch_shift
     path: audiosig/effects.py
     kind: function
@@ -307,17 +3579,53 @@ unmapped_changed_units:
     changed_hashes:
       - body_hash
       - content_hash
+      - docstring_hash
       - public_contract_hash
+      - signature_hash
     old_line_span:
-      - 65
-      - 103
-    new_line_span:
       - 65
       - 113
-  - source_id: py:module:tests/test_amplitude.py
-    path: tests/test_amplitude.py
+    new_line_span:
+      - 98
+      - 170
+  - source_id: py:function:audiosig/effects.py::time_stretch
+    path: audiosig/effects.py
+    kind: function
+    qualname: time_stretch
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 19
+      - 62
+    new_line_span:
+      - 25
+      - 95
+  - source_id: py:function:audiosig/speech.py::apply_speech_effects
+    path: audiosig/speech.py
+    kind: function
+    qualname: apply_speech_effects
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 21
+      - 82
+    new_line_span:
+      - 26
+      - 120
+  - source_id: py:module:tests/conftest.py
+    path: tests/conftest.py
     kind: module
-    qualname: tests/test_amplitude.py
+    qualname: tests/conftest.py
     change_type: modified
     changed_hashes:
       - body_hash
@@ -327,59 +3635,20 @@ unmapped_changed_units:
       - signature_hash
     old_line_span:
       - 1
-      - 48
+      - 57
     new_line_span:
       - 1
-      - 63
-  - source_id: py:module:tests/test_effects.py
-    path: tests/test_effects.py
-    kind: module
-    qualname: tests/test_effects.py
-    change_type: modified
-    changed_hashes:
-      - body_hash
-      - content_hash
-      - docstring_hash
-      - public_contract_hash
-      - signature_hash
-    old_line_span:
-      - 1
-      - 96
-    new_line_span:
-      - 1
-      - 103
-  - source_id: py:module:tests/test_packaging.py
-    path: tests/test_packaging.py
-    kind: module
-    qualname: tests/test_packaging.py
-    change_type: modified
-    changed_hashes:
-      - body_hash
-      - content_hash
-      - docstring_hash
-      - public_contract_hash
-      - signature_hash
-    old_line_span:
-      - 1
-      - 171
-    new_line_span:
-      - 1
-      - 176
+      - 102
   - source_id: py:function:tests/test_amplitude.py::test_gain_rejects_unrepresentable_finite_db
     path: tests/test_amplitude.py
     kind: function
     qualname: test_gain_rejects_unrepresentable_finite_db
-    change_type: added
+    change_type: modified
     changed_hashes:
-      - body_hash
       - content_hash
-      - decorator_hash
-      - docstring_hash
-      - public_contract_hash
-      - signature_hash
     old_line_span:
-      - 0
-      - 0
+      - 52
+      - 55
     new_line_span:
       - 52
       - 55
@@ -387,6 +3656,106 @@ unmapped_changed_units:
     path: tests/test_amplitude.py
     kind: function
     qualname: test_peak_normalize_rejects_target_outside_dtype_range
+    change_type: modified
+    changed_hashes:
+      - content_hash
+    old_line_span:
+      - 59
+      - 63
+    new_line_span:
+      - 59
+      - 63
+  - source_id: py:module:tests/test_documentation_examples.py
+    path: tests/test_documentation_examples.py
+    kind: module
+    qualname: tests/test_documentation_examples.py
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+    old_line_span:
+      - 1
+      - 33
+    new_line_span:
+      - 1
+      - 32
+  - source_id: py:function:tests/test_effects.py::test_pitch_shift_rejects_unrepresentable_finite_ratio
+    path: tests/test_effects.py
+    kind: function
+    qualname: test_pitch_shift_rejects_unrepresentable_finite_ratio
+    change_type: modified
+    changed_hashes:
+      - content_hash
+    old_line_span:
+      - 86
+      - 89
+    new_line_span:
+      - 86
+      - 89
+  - source_id: py:function:tests/test_packaging.py::test_installed_wheel_imports_without_source_tree
+    path: tests/test_packaging.py
+    kind: function
+    qualname: test_installed_wheel_imports_without_source_tree
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 87
+      - 123
+    new_line_span:
+      - 110
+      - 152
+  - source_id: py:function:tests/test_packaging.py::test_wheel_contains_typing_marker_and_required_modules
+    path: tests/test_packaging.py
+    kind: function
+    qualname: test_wheel_contains_typing_marker_and_required_modules
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 53
+      - 70
+    new_line_span:
+      - 61
+      - 83
+  - source_id: py:function:tests/test_pykokoro_contract.py::test_contract_does_not_import_forbidden_dsp_packages
+    path: tests/test_pykokoro_contract.py
+    kind: function
+    qualname: test_contract_does_not_import_forbidden_dsp_packages
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 31
+      - 45
+    new_line_span:
+      - 34
+      - 49
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_apply_all_effects_and_exact_length
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_apply_all_effects_and_exact_length
+    change_type: modified
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - public_contract_hash
+    old_line_span:
+      - 35
+      - 51
+    new_line_span:
+      - 35
+      - 52
+  - source_id: py:function:audiosig/_esola.py::_analysis_shift
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _analysis_shift
     change_type: added
     changed_hashes:
       - body_hash
@@ -399,12 +3768,804 @@ unmapped_changed_units:
       - 0
       - 0
     new_line_span:
-      - 59
-      - 63
-  - source_id: py:function:tests/test_effects.py::test_pitch_shift_rejects_unrepresentable_finite_ratio
-    path: tests/test_effects.py
+      - 96
+      - 108
+  - source_id: py:function:audiosig/_esola.py::_analysis_source
+    path: audiosig/_esola.py
     kind: function
-    qualname: test_pitch_shift_rejects_unrepresentable_finite_ratio
+    qualname: _analysis_source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 145
+      - 149
+  - source_id: py:function:audiosig/_esola.py::_centered_moving_average
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _centered_moving_average
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 19
+      - 34
+  - source_id: py:function:audiosig/_esola.py::_complete_slice
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _complete_slice
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 152
+      - 157
+  - source_id: py:function:audiosig/_esola.py::_esola_lane
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _esola_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 167
+      - 242
+  - source_id: py:function:audiosig/_esola.py::_estimate_trend_window_ms
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _estimate_trend_window_ms
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 111
+      - 142
+  - source_id: py:function:audiosig/_esola.py::_extract_epochs_lane
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _extract_epochs_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 73
+      - 93
+  - source_id: py:function:audiosig/_esola.py::_positive_zero_crossings
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _positive_zero_crossings
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 62
+      - 70
+  - source_id: py:function:audiosig/_esola.py::_raised_cosine_crossfade
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _raised_cosine_crossfade
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 160
+      - 164
+  - source_id: py:function:audiosig/_esola.py::_zero_frequency_signal
+    path: audiosig/_esola.py
+    kind: function
+    qualname: _zero_frequency_signal
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 37
+      - 59
+  - source_id: py:function:audiosig/_esola.py::esola_time_stretch
+    path: audiosig/_esola.py
+    kind: function
+    qualname: esola_time_stretch
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 245
+      - 303
+  - source_id: py:class:audiosig/_pitch.py::PitchTrack
+    path: audiosig/_pitch.py
+    kind: class
+    qualname: PitchTrack
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 13
+      - 27
+  - source_id: py:class:audiosig/_pitch.py::_Candidate
+    path: audiosig/_pitch.py
+    kind: class
+    qualname: _Candidate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 31
+      - 34
+  - source_id: py:function:audiosig/_pitch.py::_analysis_geometry
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _analysis_geometry
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 56
+      - 61
+  - source_id: py:function:audiosig/_pitch.py::_correlation_score
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _correlation_score
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 235
+      - 246
+  - source_id: py:function:audiosig/_pitch.py::_frame_pitch_candidates
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _frame_pitch_candidates
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 98
+      - 137
+  - source_id: py:function:audiosig/_pitch.py::_frame_starts
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _frame_starts
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 64
+      - 70
+  - source_id: py:function:audiosig/_pitch.py::_local_peak_indices
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _local_peak_indices
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 91
+      - 95
+  - source_id: py:function:audiosig/_pitch.py::_normalized_correlations
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _normalized_correlations
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 73
+      - 88
+  - source_id: py:function:audiosig/_pitch.py::_refine_pitch_marks_lane
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _refine_pitch_marks_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 249
+      - 324
+  - source_id: py:function:audiosig/_pitch.py::_track_pitch_candidates
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _track_pitch_candidates
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 149
+      - 209
+  - source_id: py:function:audiosig/_pitch.py::_transition_cost
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _transition_cost
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 140
+      - 146
+  - source_id: py:function:audiosig/_pitch.py::_validate_pitch_parameters
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _validate_pitch_parameters
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 37
+      - 53
+  - source_id: py:function:audiosig/_pitch.py::_voiced_intervals
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: _voiced_intervals
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 212
+      - 232
+  - source_id: py:function:audiosig/_pitch.py::estimate_pitch_track
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: estimate_pitch_track
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 383
+      - 399
+  - source_id: py:function:audiosig/_pitch.py::estimate_pitch_track_lane
+    path: audiosig/_pitch.py
+    kind: function
+    qualname: estimate_pitch_track_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 327
+      - 380
+  - source_id: py:function:audiosig/_td_psola.py::_duration_fallback
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _duration_fallback
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 200
+      - 218
+  - source_id: py:function:audiosig/_td_psola.py::_extract_pitch_grain
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _extract_pitch_grain
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 84
+      - 104
+  - source_id: py:function:audiosig/_td_psola.py::_overlap_add_grains
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _overlap_add_grains
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 107
+      - 136
+  - source_id: py:function:audiosig/_td_psola.py::_padded_slice
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _padded_slice
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 21
+      - 31
+  - source_id: py:function:audiosig/_td_psola.py::_pitch_duration_fallback
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _pitch_duration_fallback
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 221
+      - 240
+  - source_id: py:function:audiosig/_td_psola.py::_target_marks
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _target_marks
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 34
+      - 81
+  - source_id: py:function:audiosig/_td_psola.py::_td_psola_lane
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _td_psola_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 257
+      - 306
+  - source_id: py:function:audiosig/_td_psola.py::_validate_limits
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _validate_limits
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 243
+      - 254
+  - source_id: py:function:audiosig/_td_psola.py::_voiced_output_mask
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _voiced_output_mask
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 139
+      - 163
+  - source_id: py:function:audiosig/_td_psola.py::_voiced_td_psola_lane
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: _voiced_td_psola_lane
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 166
+      - 197
+  - source_id: py:function:audiosig/_td_psola.py::td_psola_prosody
+    path: audiosig/_td_psola.py
+    kind: function
+    qualname: td_psola_prosody
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 309
+      - 359
+  - source_id: py:function:audiosig/_wsola.py::_analysis_source
+    path: audiosig/_wsola.py
+    kind: function
+    qualname: _analysis_source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 14
+      - 25
+  - source_id: py:function:audiosig/_wsola.py::_choose_candidate
+    path: audiosig/_wsola.py
+    kind: function
+    qualname: _choose_candidate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 36
+      - 68
+  - source_id: py:function:audiosig/_wsola.py::_complete_slice
+    path: audiosig/_wsola.py
+    kind: function
+    qualname: _complete_slice
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 28
+      - 33
+  - source_id: py:function:audiosig/_wsola.py::wsola_time_stretch
+    path: audiosig/_wsola.py
+    kind: function
+    qualname: wsola_time_stretch
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 71
+      - 159
+  - source_id: py:function:audiosig/basic.py::_validate_audio_for_downmix
+    path: audiosig/basic.py
+    kind: function
+    qualname: _validate_audio_for_downmix
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 74
+      - 83
+  - source_id: py:function:audiosig/basic.py::_validate_duration
+    path: audiosig/basic.py
+    kind: function
+    qualname: _validate_duration
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 13
+      - 23
+  - source_id: py:function:audiosig/basic.py::_validate_float_dtype
+    path: audiosig/basic.py
+    kind: function
+    qualname: _validate_float_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 36
+      - 44
+  - source_id: py:function:audiosig/basic.py::_validate_sample_rate
+    path: audiosig/basic.py
+    kind: function
+    qualname: _validate_sample_rate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 33
+  - source_id: py:function:audiosig/basic.py::downmix_to_mono
+    path: audiosig/basic.py
+    kind: function
+    qualname: downmix_to_mono
     change_type: added
     changed_hashes:
       - body_hash
@@ -418,11 +4579,11 @@ unmapped_changed_units:
       - 0
     new_line_span:
       - 86
-      - 89
-  - source_id: py:function:tests/test_packaging.py::test_release_files_exist
-    path: tests/test_packaging.py
+      - 109
+  - source_id: py:function:audiosig/basic.py::generate_silence
+    path: audiosig/basic.py
     kind: function
-    qualname: test_release_files_exist
+    qualname: generate_silence
     change_type: added
     changed_hashes:
       - body_hash
@@ -435,5 +4596,2327 @@ unmapped_changed_units:
       - 0
       - 0
     new_line_span:
+      - 47
+      - 71
+  - source_id: py:function:audiosig/boundaries.py::_aggregate_lanes
+    path: audiosig/boundaries.py
+    kind: function
+    qualname: _aggregate_lanes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 25
+      - 29
+  - source_id: py:function:audiosig/boundaries.py::_normalize_cost
+    path: audiosig/boundaries.py
+    kind: function
+    qualname: _normalize_cost
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 16
+      - 22
+  - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+    path: audiosig/boundaries.py
+    kind: function
+    qualname: find_smooth_cut_point
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 32
+      - 114
+  - source_id: py:module:audiosig/channels.py
+    path: audiosig/channels.py
+    kind: module
+    qualname: audiosig/channels.py
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 1
+      - 7
+  - source_id: py:module:audiosig/generation.py
+    path: audiosig/generation.py
+    kind: module
+    qualname: audiosig/generation.py
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 1
+      - 7
+  - source_id: py:function:tests/conftest.py::speech_like_factory
+    path: tests/conftest.py
+    kind: function
+    qualname: speech_like_factory
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 61
+      - 102
+  - source_id: py:function:tests/test_basic.py::test_downmix_channel_first_and_one_channel_inputs
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_channel_first_and_one_channel_inputs
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 101
+      - 109
+  - source_id: py:function:tests/test_basic.py::test_downmix_does_not_mutate_source_or_share_result_storage
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_does_not_mutate_source_or_share_result_storage
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 146
+      - 153
+  - source_id: py:function:tests/test_basic.py::test_downmix_empty_frames_are_empty_and_empty_channels_are_invalid
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_empty_frames_are_empty_and_empty_channels_are_invalid
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 112
+      - 119
+  - source_id: py:function:tests/test_basic.py::test_downmix_frames_first_averages_channels_in_source_dtype
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_frames_first_averages_channels_in_source_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 91
+      - 98
+  - source_id: py:function:tests/test_basic.py::test_downmix_mono_is_an_independent_contiguous_copy
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_mono_is_an_independent_contiguous_copy
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 77
+      - 87
+  - source_id: py:function:tests/test_basic.py::test_downmix_rejects_invalid_channel_axis
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_rejects_invalid_channel_axis
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 141
+      - 143
+  - source_id: py:function:tests/test_basic.py::test_downmix_rejects_invalid_shape_dtype_and_values
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_downmix_rejects_invalid_shape_dtype_and_values
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 135
+      - 137
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_allocations_are_independent
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_allocations_are_independent
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 30
+      - 36
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_has_exact_length_zero_content_and_dtype
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_has_exact_length_zero_content_and_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 11
+      - 19
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_rejects_invalid_duration
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_rejects_invalid_duration
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 43
+      - 45
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_rejects_invalid_sample_rate
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_rejects_invalid_sample_rate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 49
+      - 51
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_rejects_non_floating_dtype
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_rejects_non_floating_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 55
+      - 57
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_rejects_oversized_length_before_allocation
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_rejects_oversized_length_before_allocation
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 60
+      - 73
+  - source_id: py:function:tests/test_basic.py::test_generate_silence_truncates_and_zero_duration_is_empty
+    path: tests/test_basic.py
+    kind: function
+    qualname: test_generate_silence_truncates_and_zero_duration_is_empty
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 22
+      - 27
+  - source_id: py:function:tests/test_boundaries.py::test_axis_support_matches_channels_first_and_samples_first
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_axis_support_matches_channels_first_and_samples_first
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 74
+      - 82
+  - source_id: py:function:tests/test_boundaries.py::test_continuous_non_silent_signal_still_returns_a_legal_cut
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_continuous_non_silent_signal_still_returns_a_legal_cut
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 54
+      - 61
+  - source_id: py:function:tests/test_boundaries.py::test_empty_audio_has_explicit_none_contract
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_empty_audio_has_explicit_none_contract
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 102
+      - 103
+  - source_id: py:function:tests/test_boundaries.py::test_empty_audio_rejects_non_empty_range
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_empty_audio_rejects_non_empty_range
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 143
+      - 145
+  - source_id: py:function:tests/test_boundaries.py::test_energy_valley_is_preferred_to_high_energy_region
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_energy_valley_is_preferred_to_high_energy_region
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 45
+      - 51
+  - source_id: py:function:tests/test_boundaries.py::test_input_is_not_modified
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_input_is_not_modified
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 85
+      - 91
+  - source_id: py:function:tests/test_boundaries.py::test_invalid_inputs_raise_typed_exceptions
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_invalid_inputs_raise_typed_exceptions
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 136
+      - 140
+  - source_id: py:function:tests/test_boundaries.py::test_multichannel_scoring_is_conservative
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_multichannel_scoring_is_conservative
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 64
+      - 71
+  - source_id: py:function:tests/test_boundaries.py::test_near_zero_waveform_boundary_beats_high_amplitude_anchor
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_near_zero_waveform_boundary_beats_high_amplitude_anchor
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 29
+      - 41
+  - source_id: py:function:tests/test_boundaries.py::test_short_legal_interval_returns_a_cut
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_short_legal_interval_returns_a_cut
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 94
+      - 99
+  - source_id: py:function:tests/test_boundaries.py::test_silence_chooses_anchor
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_silence_chooses_anchor
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 10
+      - 16
+  - source_id: py:function:tests/test_boundaries.py::test_silence_with_external_anchor_chooses_nearest_legal_sample
+    path: tests/test_boundaries.py
+    kind: function
+    qualname: test_silence_with_external_anchor_chooses_nearest_legal_sample
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 20
+      - 25
+  - source_id: py:function:tests/test_channels.py::test_batched_channels_are_rejected
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_batched_channels_are_rejected
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 53
+      - 62
+  - source_id: py:function:tests/test_channels.py::test_channels_first_stereo_is_averaged
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_channels_first_stereo_is_averaged
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 22
+      - 27
+  - source_id: py:function:tests/test_channels.py::test_empty_channel_axis_is_rejected
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_empty_channel_axis_is_rejected
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 76
+      - 80
+  - source_id: py:function:tests/test_channels.py::test_empty_mono_and_sample_dimensions_are_supported
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_empty_mono_and_sample_dimensions_are_supported
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 65
+      - 73
+  - source_id: py:function:tests/test_channels.py::test_frames_first_stereo_supports_negative_axis_and_matches_ttsforge
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_frames_first_stereo_supports_negative_axis_and_matches_ttsforge
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 30
+      - 38
+  - source_id: py:function:tests/test_channels.py::test_higher_dimensional_inputs_are_rejected
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_higher_dimensional_inputs_are_rejected
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 41
+      - 50
+  - source_id: py:function:tests/test_channels.py::test_invalid_audio_raises_typed_shape_error
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_invalid_audio_raises_typed_shape_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 94
+      - 96
+  - source_id: py:function:tests/test_channels.py::test_invalid_channel_axis_raises_typed_shape_error
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_invalid_channel_axis_raises_typed_shape_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 100
+      - 102
+  - source_id: py:function:tests/test_channels.py::test_one_dimensional_audio_is_copied_with_dtype
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_one_dimensional_audio_is_copied_with_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 10
+      - 19
+  - source_id: py:function:tests/test_channels.py::test_result_does_not_share_storage_with_input
+    path: tests/test_channels.py
+    kind: function
+    qualname: test_result_does_not_share_storage_with_input
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 105
+      - 111
+  - source_id: py:function:tests/test_effects.py::test_esola_rate_and_sample_rate_validation
+    path: tests/test_effects.py
+    kind: function
+    qualname: test_esola_rate_and_sample_rate_validation
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 116
+      - 121
+  - source_id: py:function:tests/test_effects.py::test_esola_time_stretch_and_pitch_shift_public_contracts
+    path: tests/test_effects.py
+    kind: function
+    qualname: test_esola_time_stretch_and_pitch_shift_public_contracts
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 106
+      - 113
+  - source_id: py:function:tests/test_esola.py::speech_like
+    path: tests/test_esola.py
+    kind: function
+    qualname: speech_like
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 17
+      - 23
+  - source_id: py:function:tests/test_esola.py::test_adaptive_trend_window_tracks_known_pitch_period
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_adaptive_trend_window_tracks_known_pitch_period
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 84
+      - 91
+  - source_id: py:function:tests/test_esola.py::test_analysis_shift_selects_smallest_valid_candidate
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_analysis_shift_selects_smallest_valid_candidate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 160
+      - 166
+  - source_id: py:function:tests/test_esola.py::test_centered_moving_average_uses_edge_padding
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_centered_moving_average_uses_edge_padding
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 28
+  - source_id: py:function:tests/test_esola.py::test_epoch_extraction_is_finite_deterministic_and_sample_rate_aware
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_epoch_extraction_is_finite_deterministic_and_sample_rate_aware
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 73
+      - 80
+  - source_id: py:function:tests/test_esola.py::test_epoch_extraction_remains_finite_for_a_minute_signal
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_epoch_extraction_remains_finite_for_a_minute_signal
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 142
+      - 146
+  - source_id: py:function:tests/test_esola.py::test_epoch_timing_follows_a_slow_f0_sweep
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_epoch_timing_follows_a_slow_f0_sweep
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 105
+      - 118
+  - source_id: py:function:tests/test_esola.py::test_esola_exact_length_dtype_finite_deterministic_and_non_mutating
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_esola_exact_length_dtype_finite_deterministic_and_non_mutating
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 171
+      - 182
+  - source_id: py:function:tests/test_esola.py::test_esola_handles_edge_inputs_and_arbitrary_sample_axis
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_esola_handles_edge_inputs_and_arbitrary_sample_axis
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 185
+      - 201
+  - source_id: py:function:tests/test_esola.py::test_esola_mixed_voiced_unvoiced_boundary_has_no_endpoint_hold
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_esola_mixed_voiced_unvoiced_boundary_has_no_endpoint_hold
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 121
+      - 138
+  - source_id: py:function:tests/test_esola.py::test_esola_silence_short_inputs_and_invalid_rates
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_esola_silence_short_inputs_and_invalid_rates
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 204
+      - 222
+  - source_id: py:function:tests/test_esola.py::test_four_cumulative_sums_match_two_zero_frequency_resonators
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_four_cumulative_sums_match_two_zero_frequency_resonators
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 31
+      - 55
+  - source_id: py:function:tests/test_esola.py::test_positive_zero_crossings_are_deterministic
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_positive_zero_crossings_are_deterministic
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 67
+      - 70
+  - source_id: py:function:tests/test_esola.py::test_two_pass_zfr_is_the_selected_stable_epoch_variant
+    path: tests/test_esola.py
+    kind: function
+    qualname: test_two_pass_zfr_is_the_selected_stable_epoch_variant
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 94
+      - 102
+  - source_id: py:function:tests/test_esola_quality.py::dominant_frequency
+    path: tests/test_esola_quality.py
+    kind: function
+    qualname: dominant_frequency
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 8
+      - 11
+  - source_id: py:function:tests/test_esola_quality.py::test_esola_batch_lane_has_no_lane_count_dependent_gain
+    path: tests/test_esola_quality.py
+    kind: function
+    qualname: test_esola_batch_lane_has_no_lane_count_dependent_gain
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 23
+      - 29
+  - source_id: py:function:tests/test_esola_quality.py::test_esola_keeps_steady_voiced_frequency_in_moderate_range
+    path: tests/test_esola_quality.py
+    kind: function
+    qualname: test_esola_keeps_steady_voiced_frequency_in_moderate_range
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 14
+      - 20
+  - source_id: py:function:tests/test_generation.py::test_default_silence_is_float32_and_zero
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_default_silence_is_float32_and_zero
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 9
+      - 14
+  - source_id: py:function:tests/test_generation.py::test_invalid_duration_raises_typed_error
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_invalid_duration_raises_typed_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 49
+      - 51
+  - source_id: py:function:tests/test_generation.py::test_invalid_sample_rate_raises_typed_error
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_invalid_sample_rate_raises_typed_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 55
+      - 57
+  - source_id: py:function:tests/test_generation.py::test_non_finite_product_is_rejected
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_non_finite_product_is_rejected
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 82
+      - 84
+  - source_id: py:function:tests/test_generation.py::test_overflow_is_rejected_before_allocation
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_overflow_is_rejected_before_allocation
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 66
+      - 79
+  - source_id: py:function:tests/test_generation.py::test_silence_calls_are_independent_allocations
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_silence_calls_are_independent_allocations
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 36
+      - 42
+  - source_id: py:function:tests/test_generation.py::test_silence_supports_float64_and_floor_sample_count
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_silence_supports_float64_and_floor_sample_count
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 17
+      - 23
+  - source_id: py:function:tests/test_generation.py::test_unsupported_dtype_raises_typed_error
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_unsupported_dtype_raises_typed_error
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 61
+      - 63
+  - source_id: py:function:tests/test_generation.py::test_zero_and_subsample_duration_return_empty_arrays
+    path: tests/test_generation.py
+    kind: function
+    qualname: test_zero_and_subsample_duration_return_empty_arrays
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 33
+  - source_id: py:function:tests/test_packaging.py::_single_sdist
+    path: tests/test_packaging.py
+    kind: function
+    qualname: _single_sdist
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 27
+      - 31
+  - source_id: py:function:tests/test_packaging.py::test_source_distribution_contains_basic_module_and_typing_marker
+    path: tests/test_packaging.py
+    kind: function
+    qualname: test_source_distribution_contains_basic_module_and_typing_marker
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 86
+      - 93
+  - source_id: py:function:tests/test_pitch.py::_tone
+    path: tests/test_pitch.py
+    kind: function
+    qualname: _tone
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 11
+      - 13
+  - source_id: py:function:tests/test_pitch.py::test_pitch_marks_follow_local_f0_contours
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_marks_follow_local_f0_contours
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 64
+      - 80
+  - source_id: py:function:tests/test_pitch.py::test_pitch_private_edge_helpers_and_empty_lanes
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_private_edge_helpers_and_empty_lanes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 101
+      - 112
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_is_amplitude_invariant_and_deterministic
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_is_amplitude_invariant_and_deterministic
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 41
+      - 49
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_is_silent_for_silence_and_mostly_unvoiced_noise
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_is_silent_for_silence_and_mostly_unvoiced_noise
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 31
+      - 38
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_recovers_clean_tones
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_recovers_clean_tones
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 19
+      - 28
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_rejects_invalid_parameters
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_rejects_invalid_parameters
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 87
+      - 98
+  - source_id: py:function:tests/test_pitch.py::test_pitch_tracker_uses_an_energetic_frame_silence_cost
+    path: tests/test_pitch.py
+    kind: function
+    qualname: test_pitch_tracker_uses_an_energetic_frame_silence_cost
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 52
+      - 60
+  - source_id: py:function:tests/test_pykokoro_contract.py::test_smooth_cut_contract_for_continuous_audio
+    path: tests/test_pykokoro_contract.py
+    kind: function
+    qualname: test_smooth_cut_contract_for_continuous_audio
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 51
+      - 59
+  - source_id: py:function:tests/test_pykokoro_contract.py::test_ttsforge_audio_primitives_contract
+    path: tests/test_pykokoro_contract.py
+    kind: function
+    qualname: test_ttsforge_audio_primitives_contract
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 152
       - 159
-      - 161
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_combined_plan_uses_one_tsm_pass
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_combined_plan_uses_one_tsm_pass
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 55
+      - 78
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_matching_rate_and_pitch_uses_only_resampling
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_matching_rate_and_pitch_uses_only_resampling
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 81
+      - 99
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_passes_rolloff_to_pitch_resampler
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_passes_rolloff_to_pitch_resampler
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 102
+      - 115
+  - source_id: py:function:tests/test_speech.py::test_speech_effects_supports_esola_and_keeps_one_tsm_pass
+    path: tests/test_speech.py
+    kind: function
+    qualname: test_speech_effects_supports_esola_and_keeps_one_tsm_pass
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 134
+      - 148
+  - source_id: py:function:tests/test_speech_effects_quality.py::_continuity_metric
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: _continuity_metric
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 18
+      - 22
+  - source_id: py:function:tests/test_speech_effects_quality.py::_frame_rms
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: _frame_rms
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 12
+      - 15
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_combined_wsola_effects_hit_duration_and_remain_finite
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_combined_wsola_effects_hit_duration_and_remain_finite
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 69
+      - 83
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_wsola_pitch_shift_hits_target_without_formant_claim
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_wsola_pitch_shift_hits_target_without_formant_claim
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 52
+      - 65
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_wsola_preserves_moderate_pitch_on_a_voiced_tone
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_wsola_preserves_moderate_pitch_on_a_voiced_tone
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 44
+      - 49
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_wsola_quality_metrics_are_comparable_to_basic_phase_vocoder
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_wsola_quality_metrics_are_comparable_to_basic_phase_vocoder
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 86
+      - 98
+  - source_id: py:function:tests/test_speech_effects_quality.py::test_wsola_speech_fixture_is_finite_sized_and_continuous
+    path: tests/test_speech_effects_quality.py
+    kind: function
+    qualname: test_wsola_speech_fixture_is_finite_sized_and_continuous
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 41
+  - source_id: py:function:tests/test_td_psola.py::_speech_fixture
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: _speech_fixture
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 12
+      - 15
+  - source_id: py:function:tests/test_td_psola.py::test_public_direct_methods_preserve_gain_and_duration
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_public_direct_methods_preserve_gain_and_duration
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 149
+      - 162
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_exact_contracts
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_exact_contracts
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 21
+      - 29
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_handles_unvoiced_and_mixed_input
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_handles_unvoiced_and_mixed_input
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 129
+      - 135
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_interior_grains_span_adjacent_periods
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_interior_grains_span_adjacent_periods
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 105
+      - 114
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_is_rejected_by_time_stretch
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_is_rejected_by_time_stretch
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 124
+      - 126
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_neutral_empty_short_axis_and_lanes
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_neutral_empty_short_axis_and_lanes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 32
+      - 52
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_private_empty_and_fallback_helpers
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_private_empty_and_fallback_helpers
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 66
+      - 102
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_rejects_invalid_pitch_ceiling
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_rejects_invalid_pitch_ceiling
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 117
+      - 121
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_rejects_unsupported_pitch
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_rejects_unsupported_pitch
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 61
+      - 63
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_rejects_unsupported_rate
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_rejects_unsupported_rate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 56
+      - 58
+  - source_id: py:function:tests/test_td_psola.py::test_td_psola_short_pitch_request_uses_explicit_pitch_fallback
+    path: tests/test_td_psola.py
+    kind: function
+    qualname: test_td_psola_short_pitch_request_uses_explicit_pitch_fallback
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 138
+      - 146
+  - source_id: py:function:tests/test_td_psola_quality.py::_envelope_peak_frequencies
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: _envelope_peak_frequencies
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 39
+      - 48
+  - source_id: py:function:tests/test_td_psola_quality.py::_harmonic_source
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: _harmonic_source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 10
+      - 16
+  - source_id: py:function:tests/test_td_psola_quality.py::_source_filter_fixture
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: _source_filter_fixture
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 19
+      - 36
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_does_not_tonalize_unvoiced_noise
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_does_not_tonalize_unvoiced_noise
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 96
+      - 102
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_hits_target_f0_for_harmonic_source
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_hits_target_f0_for_harmonic_source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 53
+      - 60
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_limits_residual_original_f0_leakage
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_limits_residual_original_f0_leakage
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 65
+      - 80
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_mixed_transition_has_no_uninitialized_holes
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_mixed_transition_has_no_uninitialized_holes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 105
+      - 114
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_preserves_source_filter_formant_envelope_fixture
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_preserves_source_filter_formant_envelope_fixture
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 84
+      - 93
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_reverberant_voiced_material_remains_finite
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_reverberant_voiced_material_remains_finite
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 128
+      - 140
+  - source_id: py:function:tests/test_td_psola_quality.py::test_td_psola_sample_rate_and_odd_length_matrix
+    path: tests/test_td_psola_quality.py
+    kind: function
+    qualname: test_td_psola_sample_rate_and_odd_length_matrix
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 118
+      - 125
+  - source_id: py:function:tests/test_ttsforge_contract.py::test_ttsforge_import_and_basic_usage_contract
+    path: tests/test_ttsforge_contract.py
+    kind: function
+    qualname: test_ttsforge_import_and_basic_usage_contract
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 14
+      - 23
+  - source_id: py:function:tests/test_ttsforge_contract.py::test_ttsforge_import_resolves_from_source_package_without_optional_dependencies
+    path: tests/test_ttsforge_contract.py
+    kind: function
+    qualname: test_ttsforge_import_resolves_from_source_package_without_optional_dependencies
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 26
+      - 46
+  - source_id: py:function:tests/test_wsola.py::source
+    path: tests/test_wsola.py
+    kind: function
+    qualname: source
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 10
+      - 12
+  - source_id: py:function:tests/test_wsola.py::test_wsola_batch_lane_matches_standalone_amplitude
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_batch_lane_matches_standalone_amplitude
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 99
+      - 110
+  - source_id: py:function:tests/test_wsola.py::test_wsola_boundary_policy_handles_short_and_exact_frame_inputs
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_boundary_policy_handles_short_and_exact_frame_inputs
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 54
+      - 59
+  - source_id: py:function:tests/test_wsola.py::test_wsola_constant_and_silence_are_finite
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_constant_and_silence_are_finite
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 34
+      - 39
+  - source_id: py:function:tests/test_wsola.py::test_wsola_constant_input_has_no_fabricated_zero_tail
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_constant_input_has_no_fabricated_zero_tail
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 43
+      - 50
+  - source_id: py:function:tests/test_wsola.py::test_wsola_exact_length_finiteness_and_dtype
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_exact_length_finiteness_and_dtype
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 16
+      - 22
+  - source_id: py:function:tests/test_wsola.py::test_wsola_is_deterministic_and_requires_sample_rate
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_is_deterministic_and_requires_sample_rate
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 113
+      - 119
+  - source_id: py:function:tests/test_wsola.py::test_wsola_neutral_rate_is_non_aliasing_copy
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_neutral_rate_is_non_aliasing_copy
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 25
+      - 30
+  - source_id: py:function:tests/test_wsola.py::test_wsola_preserves_a_final_transient_without_a_synthetic_silence_suffix
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_preserves_a_final_transient_without_a_synthetic_silence_suffix
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 62
+      - 67
+  - source_id: py:function:tests/test_wsola.py::test_wsola_rejects_invalid_frame_relationships
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_rejects_invalid_frame_relationships
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 122
+      - 137
+  - source_id: py:function:tests/test_wsola.py::test_wsola_short_inputs_and_final_partial_frame
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_short_inputs_and_final_partial_frame
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 71
+      - 82
+  - source_id: py:function:tests/test_wsola.py::test_wsola_supports_non_final_sample_axis_and_independent_lanes
+    path: tests/test_wsola.py
+    kind: function
+    qualname: test_wsola_supports_non_final_sample_axis_and_independent_lanes
+    change_type: added
+    changed_hashes:
+      - body_hash
+      - content_hash
+      - decorator_hash
+      - docstring_hash
+      - public_contract_hash
+      - signature_hash
+    old_line_span:
+      - 0
+      - 0
+    new_line_span:
+      - 85
+      - 96

@@ -1,0 +1,704 @@
+schema: documentledger.doc_record.v4
+doc_path: docs/examples.md
+linked_sources:
+  - audiosig/boundaries.py
+sections:
+  - section_id: md:section:docs/examples.md::audiosig-examples
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+    heading_slug: audiosig-examples
+    line_span:
+      - 1
+      - 2
+    section_hash: bcfd05a85ede75a7242fb25fd771a745551c34f1bb895b0bb565c43b2faad236
+    summary: AudioSig Examples
+    text: "# AudioSig Examples"
+    links: []
+  - section_id: md:section:docs/examples.md::basic-audio-processing
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Basic Audio Processing
+    heading_slug: basic-audio-processing
+    line_span:
+      - 3
+      - 4
+    section_hash: 09ab48633d59df62527e05211af5f79bdad8c01360980ee5c08380ca82fc445d
+    summary: Basic Audio Processing
+    text: "## Basic Audio Processing"
+    links: []
+  - section_id: md:section:docs/examples.md::creating-test-signals
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Basic Audio Processing
+      - Creating Test Signals
+    heading_slug: creating-test-signals
+    line_span:
+      - 5
+      - 22
+    section_hash: 9b4031ec9afbbeecb4d88e97989ab8968e264e13cc5530a8b79370b86694958c
+    summary: Creating Test Signals
+    text:
+      "### Creating Test Signals\n\n```python\nimport numpy as np\n\ndef create_sine_wave(frequency=440,\
+      \ duration=1.0, sample_rate=24000):\n    \"\"\"Create a sine wave for testing.\"\
+      \"\"\n    t = np.linspace(0, duration, int(sample_rate * duration), dtype=np.float32)\n\
+      \    return np.sin(2 * np.pi * frequency * t)\n\ndef create_chirp(f_start=220,\
+      \ f_end=880, duration=1.0, sample_rate=24000):\n    \"\"\"Create a frequency sweep\
+      \ for testing.\"\"\"\n    t = np.linspace(0, duration, int(sample_rate * duration),\
+      \ dtype=np.float32)\n    frequency = f_start + (f_end - f_start) * t / duration\n\
+      \    phase = 2 * np.pi * (f_start * t + (f_end - f_start) * t**2 / (2 * duration))\n\
+      \    return np.sin(phase).astype(np.float32)\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::silence-and-channel-layouts
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Basic Audio Processing
+      - Silence and Channel Layouts
+    heading_slug: silence-and-channel-layouts
+    line_span:
+      - 23
+      - 50
+    section_hash: 92cf8afd8dd1d4ab5a5fea73a263b7be2bc17e07c1dc195d43917fe1dcee29e0
+    summary: Silence and Channel Layouts
+    text: "### Silence and Channel Layouts
+
+
+      ```python
+
+      import numpy as np
+
+      from audiosig import downmix_to_mono, generate_silence
+
+
+      silence = generate_silence(0.5, 24_000)
+
+      assert silence.shape == (12_000,)
+
+
+      left = np.ones(8, dtype=np.float32)
+
+      right = np.zeros(8, dtype=np.float32)
+
+      frames_first = np.column_stack([left, right])
+
+      mono_frames = downmix_to_mono(frames_first)
+
+
+      channels_first = np.stack([left, right])
+
+      mono_channels = downmix_to_mono(channels_first, channel_axis=0)
+
+      np.testing.assert_array_equal(mono_frames, 0.5)
+
+      np.testing.assert_array_equal(mono_channels, 0.5)
+
+      ```
+
+
+      Silence length uses `int(duration * sample_rate)` truncation. Silence accepts
+
+      real floating NumPy dtypes; downmixing accepts finite real floating one- or
+
+      two-dimensional audio, preserves the source dtype, returns independent
+
+      contiguous storage, and does not clip or normalize. For a long file, produce
+
+      bounded silence chunks in the application rather than requesting one
+
+      unbounded array; AudioSig deliberately does not provide file I/O or streaming
+
+      wrappers."
+    links: []
+  - section_id: md:section:docs/examples.md::time-stretching-examples
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Basic Audio Processing
+      - Time Stretching Examples
+    heading_slug: time-stretching-examples
+    line_span:
+      - 51
+      - 78
+    section_hash: 8eddb8d5a4e07f40b1b2a0fe041bc887cad89325021187a810bfd2a78c5451fd
+    summary: Time Stretching Examples
+    text:
+      "### Time Stretching Examples\n\n```python\nfrom audiosig import time_stretch\n\
+      \n# Create a 1-second tone\naudio = create_sine_wave(440, duration=1.0)\n\n# Speed\
+      \ up by 50% (shorter duration)\nfaster = time_stretch(audio, rate=1.5)\nprint(f\"\
+      Original: {len(audio)} samples\")\nprint(f\"Faster: {len(faster)} samples\") \
+      \ # ~16000 samples\n\n# Slow down by 50% (longer duration)\nslower = time_stretch(audio,\
+      \ rate=0.5)\nprint(f\"Slower: {len(slower)} samples\")  # ~48000 samples\n\n#\
+      \ Music tempo adjustment\ndef adjust_tempo(audio, tempo_factor):\n    \"\"\"Adjust\
+      \ audio tempo by a factor.\"\"\"\n    return time_stretch(audio, rate=tempo_factor)\n\
+      \n# Speech rate adjustment\ndef slow_speech(audio, factor=0.8):\n    \"\"\"Make\
+      \ speech slower and clearer.\"\"\"\n    return time_stretch(audio, rate=factor)\n\
+      ```"
+    links: []
+  - section_id: md:section:docs/examples.md::pitch-shifting-examples
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Basic Audio Processing
+      - Pitch Shifting Examples
+    heading_slug: pitch-shifting-examples
+    line_span:
+      - 79
+      - 117
+    section_hash: 812d26802713df5c1217ce19778b0759d93b9f8b5ef318673ef8972180673d71
+    summary: Pitch Shifting Examples
+    text:
+      "### Pitch Shifting Examples\n\n```python\nfrom audiosig import pitch_shift\n\
+      \naudio = create_sine_wave(440, duration=1.0, sample_rate=24000)\n\n# Raise pitch\
+      \ by 1 octave (12 semitones)\noctave_up = pitch_shift(audio, sample_rate=24000,\
+      \ semitones=12.0)\n\n# Lower pitch by 1 octave\noctave_down = pitch_shift(audio,\
+      \ sample_rate=24000, semitones=-12.0)\n\n# Musical transposition\ndef transpose(audio,\
+      \ semitones, sample_rate=24000):\n    \"\"\"Transpose audio by semitones.\"\"\"\
+      \n    return pitch_shift(audio, sample_rate=sample_rate, semitones=semitones)\n\
+      \n# A4 (440 Hz) to C5 (523 Hz) - about 3 semitones\nc5 = transpose(audio, semitones=3.0)\n\
+      ```\n\nFor a speech-only experimental direct pitch path, keep changes moderate\
+      \ and\nopt in explicitly:\n\n```python\nfrom audiosig import apply_speech_effects\n\
+      \nspeech_up = apply_speech_effects(\n    audio,\n    sample_rate=24_000,\n   \
+      \ semitones=4.0,\n    method=\"td_psola\",\n)\n```\n\nTD-PSOLA does not guarantee\
+      \ formant preservation, does not pitch unvoiced\nregions, and is not intended\
+      \ for music or polyphonic material."
+    links: []
+  - section_id: md:section:docs/examples.md::resampling-examples
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Basic Audio Processing
+      - Resampling Examples
+    heading_slug: resampling-examples
+    line_span:
+      - 118
+      - 139
+    section_hash: 8b5be101df178e75a6b099308f28aa54ee9f1aa91594bfd4801017937456d7d4
+    summary: Resampling Examples
+    text: '### Resampling Examples
+
+
+      ```python
+
+      from audiosig import resample, resample_speed, resample_to_length
+
+
+      # Create audio at 48kHz
+
+      audio_48k = create_sine_wave(440, duration=1.0, sample_rate=48000)
+
+
+      # Downsample to 16kHz
+
+      audio_16k = resample(audio_48k, source_rate=48000, target_rate=16000)
+
+      print(f"48kHz: {len(audio_48k)} samples")
+
+      print(f"16kHz: {len(audio_16k)} samples")  # 1/3 of original
+
+
+      # Upsample to 96kHz
+
+      audio_96k = resample(audio_48k, source_rate=48000, target_rate=96000)
+
+      print(f"96kHz: {len(audio_96k)} samples")  # 2x original
+
+
+      # Exact sample-count and playback-speed operations
+
+      exact = resample_to_length(audio_48k, 12_000)
+
+      faster_playback = resample_speed(audio_48k, speed=1.25)
+
+      ```'
+    links: []
+  - section_id: md:section:docs/examples.md::smooth-cut-point-selection
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Smooth Cut-Point Selection
+    heading_slug: smooth-cut-point-selection
+    line_span:
+      - 140
+      - 159
+    section_hash: ce647ad49665ac49fbb4ef2700ab32c877695d3b02f5ba3ff074be80bf65d547
+    summary: Smooth Cut-Point Selection
+    text:
+      "## Smooth Cut-Point Selection\n\nThis numeric example searches a synthetic\
+      \ waveform near a preferred sample. The result is deterministic and remains inside\
+      \ the caller's legal interval:\n\n```python\nimport numpy as np\nfrom audiosig\
+      \ import find_smooth_cut_point\n\nsample_rate = 24_000\ntime = np.arange(sample_rate,\
+      \ dtype=np.float32) / sample_rate\naudio = np.sin(2.0 * np.pi * 220.0 * time)\n\
+      candidate = find_smooth_cut_point(\n    audio, start=10_000, end=14_000, anchor=12_000,\
+      \ window_length=120\n )\nassert 10_000 <= candidate < 14_000\n```\n\nAudioSig\
+      \ does not decide whether the interval is semantically legal or whether an application\
+      \ should retry. It only selects a numeric waveform boundary."
+    links:
+      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+        source_path: audiosig/boundaries.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Examples document the synthetic smooth cut-point usage.
+        tracked_hashes:
+          body_hash: 22c9d828accffc5668fb2a6e940e29f9cfcfcfdeaaede01ffb43efa8047c51df
+  - section_id: md:section:docs/examples.md::silence-detection-and-vad
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Silence Detection and VAD
+    heading_slug: silence-detection-and-vad
+    line_span:
+      - 160
+      - 161
+    section_hash: 9b71cc83a8e1561fd04bdf47b057ee788fb5ae84a48e02e9dfb2858fe84af244
+    summary: Silence Detection and VAD
+    text: "## Silence Detection and VAD"
+    links: []
+  - section_id: md:section:docs/examples.md::basic-vad-usage
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Silence Detection and VAD
+      - Basic VAD Usage
+    heading_slug: basic-vad-usage
+    line_span:
+      - 162
+      - 184
+    section_hash: 434b83b06da5b062825f0728b86f5b5a4a6d131fc578baf1c4c2c234fcc0cb67
+    summary: Basic VAD Usage
+    text:
+      "### Basic VAD Usage\n\n```python\nfrom audiosig import normalized_energy_vad,\
+      \ energy_based_vad\n\n# Create audio with silence and speech\nsample_rate = 24000\n\
+      silence = np.zeros(sample_rate // 2, dtype=np.float32)  # 0.5s silence\nspeech\
+      \ = create_sine_wave(440, duration=0.5, sample_rate=sample_rate)\naudio = np.concatenate([silence,\
+      \ speech, silence])\n\n# Detect voice activity\nactivity = normalized_energy_vad(\n\
+      \    audio,\n    sample_rate=sample_rate,\n    frame_duration_ms=10,\n    energy_threshold=0.1,\n\
+      )\n\nprint(f\"Active frames: {np.sum(activity)}\")\nprint(f\"Total frames: {len(activity)}\"\
+      )\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::tuning-vad-parameters
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Silence Detection and VAD
+      - Tuning VAD Parameters
+    heading_slug: tuning-vad-parameters
+    line_span:
+      - 185
+      - 208
+    section_hash: 180a5899de9a557293a02748c599813edc54e411761698e1076a4589836483c4
+    summary: Tuning VAD Parameters
+    text:
+      "### Tuning VAD Parameters\n\n```python\nfrom audiosig import normalized_energy_vad\n\
+      \ndef detect_speech(audio, sample_rate, sensitivity='medium'):\n    \"\"\"Detect\
+      \ speech with different sensitivity levels.\"\"\"\n    thresholds = {\n      \
+      \  'low': 0.05,      # More permissive\n        'medium': 0.15,   # Balanced\n\
+      \        'high': 0.30,     # More strict\n    }\n\n    return normalized_energy_vad(\n\
+      \        audio,\n        sample_rate=sample_rate,\n        frame_duration_ms=10,\n\
+      \        energy_threshold=thresholds[sensitivity],\n    )\n\n# Usage\nactivity\
+      \ = detect_speech(audio, sample_rate=24000, sensitivity='medium')\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::finding-speech-boundaries
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Silence Detection and VAD
+      - Finding Speech Boundaries
+    heading_slug: finding-speech-boundaries
+    line_span:
+      - 209
+      - 233
+    section_hash: 7846ce8515b1e2c0e484753d2d88e97f46d1da1a82acb8f98afc2935dee4ca6d
+    summary: Finding Speech Boundaries
+    text:
+      "### Finding Speech Boundaries\n\n```python\nfrom audiosig import find_speech_bounds,\
+      \ find_speech_start\n\n# Create test audio\nsample_rate = 24000\nsilence = np.zeros(sample_rate\
+      \ // 2, dtype=np.float32)\nspeech = create_sine_wave(440, duration=1.0, sample_rate=sample_rate)\n\
+      audio = np.concatenate([silence, speech, silence])\n\n# Find speech bounds\nbounds\
+      \ = find_speech_bounds(audio, sample_rate=sample_rate)\nprint(f\"Speech from {bounds[0]}\
+      \ to {bounds[1]}\")\n\n# Extract just the speech\nif not np.array_equal(bounds,\
+      \ [0, 0]):\n    start, end = bounds\n    speech_only = audio[start:end]\n\n# Find\
+      \ speech start\nstart_idx = find_speech_start(audio, sample_rate=sample_rate)\n\
+      print(f\"Speech starts at sample {start_idx}\")\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::silence-trimming
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Silence Trimming
+    heading_slug: silence-trimming
+    line_span:
+      - 234
+      - 235
+    section_hash: 46519470a4100dc3482b2bd314bc7ba7e59cab3ce9fcf49fc1a42cacaa23a5a9
+    summary: Silence Trimming
+    text: "## Silence Trimming"
+    links: []
+  - section_id: md:section:docs/examples.md::basic-trimming
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Silence Trimming
+      - Basic Trimming
+    heading_slug: basic-trimming
+    line_span:
+      - 236
+      - 254
+    section_hash: b58f63a990ac95f428d1a36939376791da2eb14e01c210321c11f7f7c649150b
+    summary: Basic Trimming
+    text: '### Basic Trimming
+
+
+      ```python
+
+      from audiosig import trim
+
+
+      # Create audio with leading/trailing silence
+
+      sample_rate = 24000
+
+      silence = np.zeros(sample_rate // 4, dtype=np.float32)  # 0.25s silence
+
+      speech = create_sine_wave(440, duration=0.5, sample_rate=sample_rate)
+
+      audio = np.concatenate([silence, speech, silence])
+
+
+      # Trim silence
+
+      trimmed, interval = trim(audio, top_db=40.0)
+
+
+      print(f"Original length: {len(audio)}")
+
+      print(f"Trimmed length: {len(trimmed)}")
+
+      print(f"Kept samples {interval[0]} to {interval[1]}")
+
+      ```'
+    links: []
+  - section_id: md:section:docs/examples.md::splitting-audio-segments
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Silence Trimming
+      - Splitting Audio Segments
+    heading_slug: splitting-audio-segments
+    line_span:
+      - 255
+      - 276
+    section_hash: 4aee7b277a81c5581e78ca3a40aab35deec201e465724dbbb41bfc3fb677b880
+    summary: Splitting Audio Segments
+    text:
+      "### Splitting Audio Segments\n\n```python\nfrom audiosig import split\n\n\
+      # Create audio with multiple speech segments\nsample_rate = 24000\nsegment1 =\
+      \ create_sine_wave(440, duration=0.3, sample_rate=sample_rate)\nsegment2 = create_sine_wave(880,\
+      \ duration=0.3, sample_rate=sample_rate)\nsilence = np.zeros(sample_rate // 4,\
+      \ dtype=np.float32)\n\naudio = np.concatenate([segment1, silence, segment2, silence,\
+      \ segment1])\n\n# Split into non-silent segments\nintervals = split(audio, top_db=40.0,\
+      \ frame_length=512, hop_length=128)\n\nprint(f\"Found {len(intervals)} segments\"\
+      )\nfor i, (start, end) in enumerate(intervals):\n    segment = audio[start:end]\n\
+      \    print(f\"Segment {i}: samples {start}-{end} ({len(segment)} samples)\")\n\
+      ```"
+    links: []
+  - section_id: md:section:docs/examples.md::custom-trimming-parameters
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Silence Trimming
+      - Custom Trimming Parameters
+    heading_slug: custom-trimming-parameters
+    line_span:
+      - 277
+      - 294
+    section_hash: 08f5eb98c20f45a0164c3154fe43eb0534ffd09221e9a42f29f171b46f3b04a8
+    summary: Custom Trimming Parameters
+    text:
+      "### Custom Trimming Parameters\n\n```python\nfrom audiosig import trim\n\n\
+      def aggressive_trim(audio, top_db=20.0):\n    \"\"\"More aggressive silence removal.\"\
+      \"\"\n    return trim(audio, top_db=top_db, frame_length=1024, hop_length=64)\n\
+      \ndef gentle_trim(audio, top_db=60.0):\n    \"\"\"More conservative silence removal.\"\
+      \"\"\n    return trim(audio, top_db=top_db, frame_length=4096, hop_length=256)\n\
+      \n# Use different strategies\ntrimmed_aggressive, _ = aggressive_trim(audio)\n\
+      trimmed_gentle, _ = gentle_trim(audio)\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::amplitude-processing
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Amplitude Processing
+    heading_slug: amplitude-processing
+    line_span:
+      - 295
+      - 296
+    section_hash: 0c74f88a70ca2f36b72e6a20ca63dc28489aa959ed71222facb7b23d38ba4b31
+    summary: Amplitude Processing
+    text: "## Amplitude Processing"
+    links: []
+  - section_id: md:section:docs/examples.md::gain-control
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Amplitude Processing
+      - Gain Control
+    heading_slug: gain-control
+    line_span:
+      - 297
+      - 328
+    section_hash: ff9ee4b7382e30a164c2dc0fc23ae1b3ce4ce5baa38f37719369492c6a456696
+    summary: Gain Control
+    text:
+      "### Gain Control\n\n```python\nfrom audiosig import apply_gain_db\n\naudio\
+      \ = create_sine_wave(440, duration=1.0, sample_rate=24000)\n\n# Boost by 6 dB\n\
+      boosted = apply_gain_db(audio, db=6.0)\n\n# Attenuate by 10 dB\nattenuated = apply_gain_db(audio,\
+      \ db=-10.0)\n\n# With clipping protection\nloud_clipped = apply_gain_db(audio,\
+      \ db=20.0, clip=True)\n\n# Fade in/out effect\ndef fade_in(audio, duration_samples):\n\
+      \    \"\"\"Apply linear fade in.\"\"\"\n    fade = np.linspace(0, 1, duration_samples,\
+      \ dtype=audio.dtype)\n    result = audio.copy()\n    result[:duration_samples]\
+      \ *= fade\n    return result\n\ndef fade_out(audio, duration_samples):\n    \"\
+      \"\"Apply linear fade out.\"\"\"\n    fade = np.linspace(1, 0, duration_samples,\
+      \ dtype=audio.dtype)\n    result = audio.copy()\n    result[-duration_samples:]\
+      \ *= fade\n    return result\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::normalization
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Amplitude Processing
+      - Normalization
+    heading_slug: normalization
+    line_span:
+      - 329
+      - 346
+    section_hash: 9260484c313d39e8313d23231ebc7403e09f31a7f9c9439ee022c2938b79f84e
+    summary: Normalization
+    text:
+      "### Normalization\n\n```python\nfrom audiosig import peak_normalize\n\naudio\
+      \ = create_sine_wave(440, duration=1.0, sample_rate=24000) * 0.5\n\n# Normalize\
+      \ to peak 0.9\nnormalized = peak_normalize(audio, peak=0.9)\nprint(f\"Peak before:\
+      \ {np.max(np.abs(audio)):.3f}\")\nprint(f\"Peak after: {np.max(np.abs(normalized)):.3f}\"\
+      )\n\n# Normalize to different targets\ndef normalize_to_target(audio, target_peak=0.95):\n\
+      \    \"\"\"Normalize to specific peak level.\"\"\"\n    return peak_normalize(audio,\
+      \ peak=target_peak)\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::frame-analysis
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Frame Analysis
+    heading_slug: frame-analysis
+    line_span:
+      - 347
+      - 348
+    section_hash: e13af51ce590491375ec1488f4b109a2961bbd932f24e844f2620fcdafdac51f
+    summary: Frame Analysis
+    text: "## Frame Analysis"
+    links: []
+  - section_id: md:section:docs/examples.md::basic-framing
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Frame Analysis
+      - Basic Framing
+    heading_slug: basic-framing
+    line_span:
+      - 349
+      - 373
+    section_hash: 9734827ab12c4b31a0f0b0ef706fec8e11f5495fda8e904258aabb792f836911
+    summary: Basic Framing
+    text:
+      "### Basic Framing\n\n```python\nfrom audiosig import frame_signal, frame_rms\n\
+      \naudio = create_sine_wave(440, duration=1.0, sample_rate=24000)\n\n# Split into\
+      \ frames\nframes = frame_signal(\n    audio,\n    frame_length=2048,\n    hop_length=512,\n\
+      )\nprint(f\"Audio shape: {audio.shape}\")\nprint(f\"Frames shape: {frames.shape}\"\
+      )  # (n_frames, 2048)\n\n# Compute RMS per frame\nrms_values = frame_rms(\n  \
+      \  audio,\n    frame_length=2048,\n    hop_length=512,\n)\nprint(f\"RMS shape:\
+      \ {rms_values.shape}\")  # (n_frames,)\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::feature-extraction
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Frame Analysis
+      - Feature Extraction
+    heading_slug: feature-extraction
+    line_span:
+      - 374
+      - 398
+    section_hash: 3ebedd1d91c224e59d0a48cc08937e350c440bb20289f4462dfa4819df9ce69f
+    summary: Feature Extraction
+    text:
+      "### Feature Extraction\n\n```python\nfrom audiosig import (\n    short_time_energy,\n\
+      \    zero_crossing_rate,\n    spectral_flux,\n)\n\naudio = create_sine_wave(440,\
+      \ duration=1.0, sample_rate=24000)\n\n# Short-time energy\nenergy = short_time_energy(audio,\
+      \ frame_length=2048, hop_length=512)\n\n# Zero-crossing rate\nzcr = zero_crossing_rate(audio,\
+      \ frame_length=2048, hop_length=512)\n\n# Spectral flux\nflux = spectral_flux(audio,\
+      \ frame_length=2048, hop_length=512)\n\nprint(f\"Energy shape: {energy.shape}\"\
+      )\nprint(f\"ZCR shape: {zcr.shape}\")\nprint(f\"Flux shape: {flux.shape}\")\n\
+      ```"
+    links: []
+  - section_id: md:section:docs/examples.md::real-world-examples
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Real-World Examples
+    heading_slug: real-world-examples
+    line_span:
+      - 399
+      - 400
+    section_hash: 47fc289c964d539dd675d7420f900cf1e41f5c1b3bab0fb304751ab85c933505
+    summary: Real-World Examples
+    text: "## Real-World Examples"
+    links: []
+  - section_id: md:section:docs/examples.md::audio-preprocessing-pipeline
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Real-World Examples
+      - Audio Preprocessing Pipeline
+    heading_slug: audio-preprocessing-pipeline
+    line_span:
+      - 401
+      - 436
+    section_hash: 28de27837a3bf900a86a808632370a8e02f8a39cbc05046e70db98aa8866683e
+    summary: Audio Preprocessing Pipeline
+    text:
+      "### Audio Preprocessing Pipeline\n\n```python\nimport numpy as np\nfrom audiosig\
+      \ import (\n    trim,\n    peak_normalize,\n    resample,\n    normalized_energy_vad,\n\
+      )\n\ndef preprocess_audio(audio, source_rate, target_rate=16000):\n    \"\"\"\
+      Complete audio preprocessing pipeline.\"\"\"\n    # 1. Trim silence\n    trimmed,\
+      \ _ = trim(audio, top_db=40.0)\n\n    # 2. Normalize amplitude\n    normalized\
+      \ = peak_normalize(trimmed, peak=0.95)\n\n    # 3. Resample if needed\n    if\
+      \ source_rate != target_rate:\n        resampled = resample(\n            normalized,\n\
+      \            source_rate=source_rate,\n            target_rate=target_rate,\n\
+      \        )\n    else:\n        resampled = normalized\n\n    return resampled\n\
+      \n# Usage\naudio_48k = load_audio(\"speech.wav\")  # Your audio loading function\n\
+      processed = preprocess_audio(audio_48k, source_rate=48000, target_rate=16000)\n\
+      ```"
+    links: []
+  - section_id: md:section:docs/examples.md::speech-segmentation
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Real-World Examples
+      - Speech Segmentation
+    heading_slug: speech-segmentation
+    line_span:
+      - 437
+      - 468
+    section_hash: eeaac01e3a95f37d9cf5ed26922fefa3f78a4a191682cecf6f31432667b19498
+    summary: Speech Segmentation
+    text:
+      "### Speech Segmentation\n\n```python\nimport numpy as np\nfrom audiosig import\
+      \ split, trim, normalized_energy_vad\n\ndef segment_speech(audio, sample_rate,\
+      \ min_duration_ms=100):\n    \"\"\"Segment audio into speech portions.\"\"\"\n\
+      \    # Split into non-silent intervals\n    intervals = split(\n        audio,\n\
+      \        top_db=35.0,\n        frame_length=512,\n        hop_length=128,\n  \
+      \  )\n\n    # Filter by minimum duration\n    min_samples = int(sample_rate *\
+      \ min_duration_ms / 1000)\n    segments = []\n\n    for start, end in intervals:\n\
+      \        if (end - start) >= min_samples:\n            segments.append(audio[start:end])\n\
+      \n    return segments\n\n# Usage\naudio = load_audio(\"long_speech.wav\")\nsegments\
+      \ = segment_speech(audio, sample_rate=24000)\nprint(f\"Found {len(segments)} speech\
+      \ segments\")\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::batch-processing
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Real-World Examples
+      - Batch Processing
+    heading_slug: batch-processing
+    line_span:
+      - 469
+      - 500
+    section_hash: 3371a0b4407500caeee57beeb54b8264354209a3b93e18ac70e633bb94b6732d
+    summary: Batch Processing
+    text:
+      "### Batch Processing\n\n```python\nimport numpy as np\nfrom audiosig import\
+      \ time_stretch, pitch_shift\n\ndef process_batch(audio_list, rate=1.0, semitones=0.0,\
+      \ sample_rate=24000):\n    \"\"\"Process a batch of audio files.\"\"\"\n    results\
+      \ = []\n\n    for audio in audio_list:\n        # Apply time stretch if needed\n\
+      \        if rate != 1.0:\n            audio = time_stretch(audio, rate=rate)\n\
+      \n        # Apply pitch shift if needed\n        if semitones != 0.0:\n      \
+      \      audio = pitch_shift(\n                audio,\n                sample_rate=sample_rate,\n\
+      \                semitones=semitones,\n            )\n\n        results.append(audio)\n\
+      \n    return results\n\n# Usage\naudio_files = [load_audio(f) for f in file_list]\n\
+      processed = process_batch(audio_files, rate=1.1, semitones=2.0)\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::performance-tips
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Performance Tips
+    heading_slug: performance-tips
+    line_span:
+      - 501
+      - 502
+    section_hash: 9f45e623a3799bb28d59bece819699f2b641c69ae542ac5cb9301f949760f6cc
+    summary: Performance Tips
+    text: "## Performance Tips"
+    links: []
+  - section_id: md:section:docs/examples.md::memory-efficiency
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Performance Tips
+      - Memory Efficiency
+    heading_slug: memory-efficiency
+    line_span:
+      - 503
+      - 518
+    section_hash: 84157e356fd24f4e18ef4410722f4b43ca7e3e422f982e6a1fb6f6b6a351d9ce
+    summary: Memory Efficiency
+    text:
+      "### Memory Efficiency\n\n```python\nimport numpy as np\n\n# Process in chunks\
+      \ for large files\ndef process_large_audio(audio, chunk_size=24000):\n    \"\"\
+      \"Process large audio in chunks.\"\"\"\n    results = []\n    for i in range(0,\
+      \ len(audio), chunk_size):\n        chunk = audio[i:i + chunk_size]\n        processed\
+      \ = process_chunk(chunk)  # Your processing function\n        results.append(processed)\n\
+      \    return np.concatenate(results)\n```"
+    links: []
+  - section_id: md:section:docs/examples.md::using-appropriate-dtypes
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Performance Tips
+      - Using Appropriate dtypes
+    heading_slug: using-appropriate-dtypes
+    line_span:
+      - 519
+      - 531
+    section_hash: 64941a9172dab6ea26ef161f3e09829979e778443566cefaad4555ec4bf469ae
+    summary: Using Appropriate dtypes
+    text: "### Using Appropriate dtypes
+
+
+      ```python
+
+      # For storage efficiency
+
+      audio_int16 = (audio * 32767).astype(np.int16)
+
+
+      # For processing (always use float)
+
+      audio_float = audio_int16.astype(np.float32) / 32767.0
+
+
+      # AudioSig preserves dtype
+
+      from audiosig import time_stretch
+
+      result = time_stretch(audio_float, rate=1.1)  # Returns float32
+
+      ```"
+    links: []
+last_fresh_scan_version: 5
+last_fresh_hash: 7c9624617ad568340ed9d1e5bc0b4167fb4eaaad9c55e471132733ba9e61b14a
+notes:
+  Smooth cut-point documentation and source links reviewed after implementation;
+  remaining unlinked source units are intentional test and internal coverage gaps.
+version: 14

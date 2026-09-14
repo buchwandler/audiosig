@@ -1,0 +1,369 @@
+schema: documentledger.doc_record.v4
+doc_path: docs/api-reference.md
+linked_sources:
+  - audiosig/boundaries.py
+  - audiosig/exceptions.py
+sections:
+  - section_id: md:section:docs/api-reference.md::audioshapeerror-audiosignalerror-valueerror
+    doc_path: docs/api-reference.md
+    heading_path:
+      - AudioSig API Reference
+      - Exceptions
+      - "`AudioShapeError(AudioSignalError, ValueError)`"
+    heading_slug: audioshapeerror-audiosignalerror-valueerror
+    line_span:
+      - 568
+      - 573
+    section_hash: 812fad288ea4c8a5a778b54daa47f8419103178a8c578ed9ad7c2c0ba267b2a0
+    summary: "`AudioShapeError(AudioSignalError, ValueError)`"
+    text: "### `AudioShapeError(AudioSignalError, ValueError)`
+
+
+      Raised when audio array shape or dtype is unsupported.
+
+
+      ---"
+    links:
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::AudioSignalError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioSignalError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/api-reference.md::audiosignalerror
+    doc_path: docs/api-reference.md
+    heading_path:
+      - AudioSig API Reference
+      - Exceptions
+      - "`AudioSignalError`"
+    heading_slug: audiosignalerror
+    line_span:
+      - 560
+      - 563
+    section_hash: b8e8aaf51db71de751863838fab2b969aad3d9137cdf156e3f5fb3f2fd8e856a
+    summary: "`AudioSignalError`"
+    text: "### `AudioSignalError`
+
+
+      Base exception for all AudioSig operations."
+    links:
+      - source_id: py:class:audiosig/exceptions.py::AudioSignalError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioSignalError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/api-reference.md::downmix-to-mono-audio-channel-axis-1
+    doc_path: docs/api-reference.md
+    heading_path:
+      - AudioSig API Reference
+      - Core Functions
+      - Waveform Construction and Channels
+      - "`downmix_to_mono(audio, *, channel_axis=-1)`"
+    heading_slug: downmix-to-mono-audio-channel-axis-1
+    line_span:
+      - 17
+      - 36
+    section_hash: 0909032de10ded4d7d80d9d93c2811a9b78251a8146cf2e55b1684dd28b5c328
+    summary: "`downmix_to_mono(audio, *, channel_axis=-1)`"
+    text: "#### `downmix_to_mono(audio, *, channel_axis=-1)`
+
+
+      Return a caller-owned mono array by taking the arithmetic mean over the
+
+      explicit channel axis. Input must be a finite real floating one- or
+
+      two-dimensional NumPy array; the source dtype and frame order are preserved.
+
+      One-dimensional input is already mono and is copied. The operation does not
+
+      clip or normalize amplitude. Invalid shape, axis, dtype, or sample values
+
+      raise `AudioShapeError`; the result is contiguous.
+
+
+      ```python
+
+      from audiosig import downmix_to_mono, generate_silence
+
+
+      silence = generate_silence(0.5, 24_000)
+
+      mono_soundfile = downmix_to_mono(frames_first, channel_axis=1)
+
+      mono_audiosig = downmix_to_mono(channels_first, channel_axis=0)
+
+      ```
+
+
+      These functions do not perform file decoding/encoding, URL handling, playback,
+
+      streaming, or audiobook composition."
+    links:
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/api-reference.md::find-smooth-cut-point-audio-start-end-anchor-none-window-length-120-axis-1
+    doc_path: docs/api-reference.md
+    heading_path:
+      - AudioSig API Reference
+      - Silence Detection
+      - Smooth Cut-Point Selection
+      - "`find_smooth_cut_point(audio, *, start, end, anchor=None, window_length=120,
+        axis=-1)`"
+    heading_slug: find-smooth-cut-point-audio-start-end-anchor-none-window-length-120-axis-1
+    line_span:
+      - 329
+      - 347
+    section_hash: fc27d6974c9eaf71d88c6cf7e4db3f6f7d18ec85d58e8143971dbd0297281847
+    summary:
+      "`find_smooth_cut_point(audio, *, start, end, anchor=None, window_length=120,
+      axis=-1)`"
+    text:
+      "#### `find_smooth_cut_point(audio, *, start, end, anchor=None, window_length=120,
+      axis=-1)`
+
+
+      Select a deterministic waveform boundary in the half-open sample interval `[start,
+      end)`. The candidate minimizes a fixed combination of local RMS, adjacent endpoint
+      amplitude, cross-boundary slope, and distance from the preferred anchor. This
+      is not a silence detector and returns a legal candidate for continuous voiced
+      or noisy audio.
+
+
+      **Parameters:**
+
+
+      - `audio` (np.ndarray): Finite float32 or float64 audio array
+
+      - `start`, `end` (int): Legal half-open search bounds with `0 <= start < end <=
+      sample_count`
+
+      - `anchor` (int, optional): Preferred sample index; defaults to the middle legal
+      candidate and may lie outside the interval
+
+      - `window_length` (int): Local RMS analysis length in samples, at least 1
+
+      - `axis` (int): Sample axis, default `-1`; all other dimensions are conservatively
+      aggregated
+
+
+      **Returns:** `int` for a legal candidate, or `None` only for the explicit empty
+      case `start=0, end=0` on empty audio.
+
+
+      Invalid arrays, axes, bounds, anchors, and parameters raise `AudioShapeError`
+      or `InvalidParameterError`. Ties are resolved by total score, anchor distance,
+      then lower sample index. The caller remains responsible for semantic interval
+      legality and retry policy.
+
+
+      ---"
+    links:
+      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+        source_path: audiosig/boundaries.py
+        coverage: implementation-note
+        impact: unknown
+        reason: API reference documents the public smooth cut-point implementation.
+        tracked_hashes:
+          body_hash: 22c9d828accffc5668fb2a6e940e29f9cfcfcfdeaaede01ffb43efa8047c51df
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `InvalidParameterError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/api-reference.md::generate-silence-duration-sample-rate-dtype-np-float32
+    doc_path: docs/api-reference.md
+    heading_path:
+      - AudioSig API Reference
+      - Core Functions
+      - Waveform Construction and Channels
+      - "`generate_silence(duration, sample_rate, *, dtype=np.float32)`"
+    heading_slug: generate-silence-duration-sample-rate-dtype-np-float32
+    line_span:
+      - 7
+      - 16
+    section_hash: 0a193f29736eece285940ff2422a028bd153cbd96899f4b0d302d5e26ac6ec39
+    summary: "`generate_silence(duration, sample_rate, *, dtype=np.float32)`"
+    text: "#### `generate_silence(duration, sample_rate, *, dtype=np.float32)`
+
+
+      Return a newly allocated one-dimensional mono NumPy buffer filled with zeros.
+
+      Duration is in seconds, sample rate is in samples per second, and the sample
+
+      count is exactly `int(duration * sample_rate)`, so fractional sample counts
+
+      are truncated. `dtype` must be a real NumPy floating dtype; the default is
+
+      float32. Invalid duration, sample rate, and dtype values raise
+
+      `InvalidParameterError`. Long silence creation should use bounded
+
+      application-level chunks rather than one arbitrarily large array."
+    links:
+      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `InvalidParameterError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/api-reference.md::invalidparametererror-audiosignalerror-valueerror
+    doc_path: docs/api-reference.md
+    heading_path:
+      - AudioSig API Reference
+      - Exceptions
+      - "`InvalidParameterError(AudioSignalError, ValueError)`"
+    heading_slug: invalidparametererror-audiosignalerror-valueerror
+    line_span:
+      - 564
+      - 567
+    section_hash: 5e6bef3c5d2ccdd68f849ccec20684bdaf638990f5da6737f063ce1ca5aea943
+    summary: "`InvalidParameterError(AudioSignalError, ValueError)`"
+    text: "### `InvalidParameterError(AudioSignalError, ValueError)`
+
+
+      Raised when a parameter is outside the supported domain."
+    links:
+      - source_id: py:class:audiosig/exceptions.py::AudioSignalError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioSignalError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `InvalidParameterError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/api-reference.md::time-stretch-audio-rate-sample-rate-none-method-phase-vocoder-axis-1-n-fft-2048-hop-length-none
+    doc_path: docs/api-reference.md
+    heading_path:
+      - AudioSig API Reference
+      - Core Functions
+      - Time and Pitch Effects
+      - "`time_stretch(audio, rate, *, sample_rate=None, method='phase_vocoder', axis=-1,
+        n_fft=2048, hop_length=None)`"
+    heading_slug: time-stretch-audio-rate-sample-rate-none-method-phase-vocoder-axis-1-n-fft-2048-hop-length-none
+    line_span:
+      - 39
+      - 76
+    section_hash: e71512428f1fddc57195b3b5858e9123131ae5d3a68101a538431350f2e3ccff
+    summary:
+      "`time_stretch(audio, rate, *, sample_rate=None, method='phase_vocoder',
+      axis=-1, n_fft=2048, hop_length=None)`"
+    text:
+      "#### `time_stretch(audio, rate, *, sample_rate=None, method='phase_vocoder',
+      axis=-1, n_fft=2048, hop_length=None)`
+
+
+      Change audio duration while approximately preserving pitch.
+
+
+      **Parameters:**
+
+
+      - `audio` (np.ndarray): Input audio array
+
+      - `rate` (float): Stretch factor. Values > 1.0 make audio faster/shorter, < 1.0
+      slower/longer
+
+      - `sample_rate` (int, optional): Required when `method='wsola'` or `method='esola'`;
+      used for speech-time geometry
+
+      - `method` (`'phase_vocoder'`, `'wsola'`, or `'esola'`): Select the generic
+      or speech-oriented backend. `'td_psola'` is intentionally not a `time_stretch`
+      method.
+
+      - `axis` (int): Sample axis (default: -1)
+
+      - `n_fft` (int): FFT window size (default: 2048)
+
+      - `hop_length` (int, optional): Hop size. Defaults to n_fft // 4
+
+
+      **Returns:** np.ndarray - Stretched audio with same dtype as input
+
+
+      **Raises:**
+
+
+      - `InvalidParameterError`: If rate is not positive or parameters are invalid
+
+      - `AudioShapeError`: If audio array is invalid
+
+
+      ESOLA is an experimental speech backend with exact output length
+
+      `round(input_samples / rate)` and supported rates from 0.5 through 2.0. It
+
+      does not make a general music-quality or formant-preservation claim.
+
+
+      **Example:**
+
+
+      ```python
+
+      import numpy as np
+
+      from audiosig import time_stretch
+
+
+      audio = np.random.randn(24000).astype(np.float32)
+
+      faster = time_stretch(audio, rate=1.2)  # 20% faster
+
+      slower = time_stretch(audio, rate=0.8)  # 20% slower
+
+      ```
+
+
+      ---"
+    links:
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `InvalidParameterError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+last_fresh_scan_version: 5
+last_fresh_hash: 26d5b6e535c1df0362688b3bec3c8e77fafb05088228c952d2e08a93fe11269c
+notes:
+  Smooth cut-point documentation and source links reviewed after implementation;
+  remaining unlinked source units are intentional test and internal coverage gaps.
+version: 14
