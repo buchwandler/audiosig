@@ -228,6 +228,24 @@ still_silent = peak_normalize(silent)
 
 ---
 
+### Loudness Measurement
+
+#### `integrated_loudness(audio, *, sample_rate, axis=-1)`
+
+Return BS.1770-style integrated programme loudness in LUFS. Audio is K-weighted, divided into complete 400 ms blocks with a 100 ms hop, then processed with the -70 LUFS absolute gate and -10 LU relative gate. Signals shorter than one complete block return `-math.inf` without invented padding. V1 accepts one-dimensional mono `float32`/`float64` arrays; the mandatory sample rate is 24,000 Hz, and 44,100 and 48,000 Hz are also supported. Digital silence returns `-math.inf`.
+
+#### `sample_peak_dbfs(audio, *, axis=-1)`
+
+Return `20 * log10(max(abs(audio)))` in dBFS. Digital silence returns `-math.inf`. This is a sample peak measurement, not a loudness normalization operation.
+
+#### `true_peak_dbtp(audio, *, sample_rate, axis=-1, oversample=4)`
+
+Estimate inter-sample peak in dBTP using AudioSig's NumPy windowed-sinc resampler. `oversample` must be a positive integer; `1` is equivalent to sample peak. The function never clips, limits, or modifies the source audio. Digital silence returns `-math.inf`.
+
+#### `LoudnessMetrics` and `measure_loudness(audio, *, sample_rate, axis=-1, true_peak_oversample=4)`
+
+`LoudnessMetrics` is an immutable dataclass containing `integrated_lufs`, `sample_peak_dbfs`, and `true_peak_dbtp`. `measure_loudness` composes the three measurements without applying policy or changing the input. Stable imports are available from `audiosig`; the PyKokoro minimum release is `0.1.3`.
+
 ## Silence Detection
 
 ### Voice Activity Detection

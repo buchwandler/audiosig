@@ -116,6 +116,23 @@ print(f"Round: {len(result_round)}")
 print(f"Ceil: {len(result_ceil)}")
 ```
 
+## Loudness measurement
+
+Loudness and peak metrics are deliberately separate from amplitude transforms. `peak_normalize` sets the largest discrete sample, RMS/short-time energy describes a chosen window, integrated loudness reports gated BS.1770-style LUFS, and true peak estimates inter-sample dBTP. Equal sample peaks do not imply equal perceived loudness.
+
+The v1 meter accepts finite one-dimensional mono arrays and uses float64 calculation paths. It analyzes complete 400 ms blocks with a 100 ms hop, applies K-weighting, then uses the -70 LUFS absolute gate and -10 LU relative gate. It returns `-math.inf` for silence and for audio shorter than one complete block; it never pads, clips, limits, or automatically normalizes. The default true-peak oversampling factor is 4, configurable for callers that need a different cost/accuracy trade-off.
+
+```python
+import audiosig
+
+metrics = audiosig.measure_loudness(audio, sample_rate=24_000)
+print(metrics.integrated_lufs)  # LUFS
+print(metrics.sample_peak_dbfs)  # dBFS
+print(metrics.true_peak_dbtp)   # dBTP
+```
+
+The stable release contract for downstream PyKokoro code is `audiosig>=0.1.3` for `LoudnessMetrics`, `integrated_loudness`, `sample_peak_dbfs`, `true_peak_dbtp`, and `measure_loudness`, plus the existing `apply_gain_db`. AudioSig supplies measurements and generic gain only; target LUFS and voice calibration remain application policy.
+
 ## VAD Algorithm Details
 
 ### Normalized Energy VAD

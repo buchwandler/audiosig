@@ -26,7 +26,7 @@ def _aggregate_lanes(values: np.ndarray) -> np.ndarray:
     """Take the conservative maximum over all non-candidate dimensions."""
     if values.ndim == 1:
         return values
-    return np.max(values, axis=tuple(range(values.ndim - 1)))
+    return np.asarray(np.max(values, axis=tuple(range(values.ndim - 1))), dtype=values.dtype)
 
 
 def find_smooth_cut_point(

@@ -82,6 +82,34 @@ mono_channels = downmix_to_mono(channels, channel_axis=0)
 Both operations are NumPy-array primitives only. They do not decode or encode
 WAV/FLAC/MP3 files, resolve URLs, play audio, or compose audiobook chapters.
 
+## Loudness and peak measurement
+
+AudioSig provides measurement primitives for comparing audio levels without modifying the waveform:
+
+- `sample_peak_dbfs` reports the largest discrete sample in dBFS.
+- `peak_normalize` scales to a requested sample peak; it is not perceived-loudness normalization.
+- RMS and short-time energy describe signal energy over a selected window, but are not LUFS.
+- `integrated_loudness` applies BS.1770-style K-weighting and absolute/relative gating to report LUFS.
+- `true_peak_dbtp` oversamples to estimate inter-sample peak in dBTP.
+
+The v1 loudness meter accepts finite one-dimensional mono `float32` or `float64` arrays. It uses 400 ms blocks with a 100 ms hop, returns `-math.inf` for digital silence, and does not pad signals shorter than one complete block:
+
+```python
+import audiosig
+
+metrics = audiosig.measure_loudness(audio, sample_rate=24_000)
+print(metrics.integrated_lufs)
+print(metrics.sample_peak_dbfs)
+print(metrics.true_peak_dbtp)
+
+before = audiosig.integrated_loudness(audio, sample_rate=24_000)
+louder = audiosig.apply_gain_db(audio, 3.0)
+after = audiosig.integrated_loudness(louder, sample_rate=24_000)
+assert abs((after - before) - 3.0) < 0.05
+```
+
+The stable PyKokoro handoff imports are `LoudnessMetrics`, `integrated_loudness`, `sample_peak_dbfs`, `true_peak_dbtp`, and `measure_loudness` from `audiosig`; the minimum release containing this API is `0.1.3`. AudioSig only measures and applies generic gain. It does not choose a target LUFS, normalize every segment, or implement voice calibration.
+
 ## Silence trimming and VAD
 
 ```python

@@ -18,6 +18,13 @@ from .basic import downmix_to_mono, generate_silence
 from .boundaries import find_smooth_cut_point
 from .effects import PitchShiftMethod, TimeStretchMethod, pitch_shift, time_stretch
 from .exceptions import AudioShapeError, AudioSignalError, InvalidParameterError
+from .loudness import (
+    LoudnessMetrics,
+    integrated_loudness,
+    measure_loudness,
+    sample_peak_dbfs,
+    true_peak_dbtp,
+)
 from .silence import (
     abs2,
     activity_to_intervals,
@@ -47,6 +54,7 @@ __all__ = [
     "AudioShapeError",
     "AudioSignalError",
     "InvalidParameterError",
+    "LoudnessMetrics",
     "PitchShiftMethod",
     "SpeechEffectsMethod",
     "TimeStretchMethod",
@@ -65,6 +73,8 @@ __all__ = [
     "frame_signal",
     "frames_to_samples",
     "generate_silence",
+    "integrated_loudness",
+    "measure_loudness",
     "median_filter_numpy",
     "minmax_normalize",
     "non_silent_frames",
@@ -77,10 +87,12 @@ __all__ = [
     "resample_speed",
     "resample_to_length",
     "rms",
+    "sample_peak_dbfs",
     "short_time_energy",
     "spectral_flux",
     "split",
     "time_stretch",
     "trim",
+    "true_peak_dbtp",
     "zero_crossing_rate",
 ]

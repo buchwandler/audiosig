@@ -120,6 +120,25 @@ louder = apply_gain_db(audio, db=6.0)
 normalized = peak_normalize(audio, peak=0.9)
 ```
 
+### Loudness Measurement
+
+Use integrated loudness when comparing perceived programme level, rather than treating peak normalization or full-file RMS as a loudness meter:
+
+```python
+import audiosig
+
+metrics = audiosig.measure_loudness(audio, sample_rate=24_000)
+print(metrics.integrated_lufs, metrics.sample_peak_dbfs, metrics.true_peak_dbtp)
+
+before = audiosig.integrated_loudness(audio, sample_rate=24_000)
+after = audiosig.integrated_loudness(
+    audiosig.apply_gain_db(audio, 3.0), sample_rate=24_000
+)
+assert abs((after - before) - 3.0) < 0.05
+```
+
+`integrated_loudness` follows BS.1770-style K-weighting and gated 400 ms blocks. `sample_peak_dbfs` is the discrete sample maximum; `true_peak_dbtp` uses configurable oversampling (4x by default) to estimate inter-sample overshoot. These functions measure only: they do not clip, limit, or normalize audio. V1 accepts mono one-dimensional arrays and validates the mandatory 24 kHz case, plus 44.1 and 48 kHz. Silence returns `-math.inf`; empty, non-finite, and inputs shorter than 400 ms have explicit validation/deterministic behavior documented in the API reference.
+
 ## Understanding the API
 
 ### Array Shapes
