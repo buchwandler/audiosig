@@ -3,11 +3,12 @@ schema_version: 2
 object_type: release
 versioning:
   schema_version: 1
-  revision: 2
+  revision: 3
 version: 0.1.1
-status: planned
+status: released
+history_state: curated
 title: Audio primitives release
-released_at: null
+released_at: "2026-08-01"
 previous_version: 0.1.0
 cancel_reason: null
 superseded_by: null

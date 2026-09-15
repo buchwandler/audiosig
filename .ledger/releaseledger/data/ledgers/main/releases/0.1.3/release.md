@@ -3,12 +3,12 @@ schema_version: 2
 object_type: release
 versioning:
   schema_version: 1
-  revision: 7
+  revision: 11
 version: 0.1.3
-status: planned
+status: released
 history_state: curated
 title: AudioSig Smooth Cut-Point Primitive
-released_at: null
+released_at: "2026-09-14"
 previous_version: 0.1.2
 cancel_reason: null
 superseded_by: null
@@ -16,7 +16,7 @@ changelog_file: null
 boundary_ref: null
 source_refs: []
 source_count: null
-entry_count: 6
+entry_count: 3
 artifact_count: 0
 git_base_ref: null
 git_base_sha: null

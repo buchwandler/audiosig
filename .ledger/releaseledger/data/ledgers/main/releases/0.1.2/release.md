@@ -3,11 +3,12 @@ schema_version: 2
 object_type: release
 versioning:
   schema_version: 1
-  revision: 2
+  revision: 3
 version: 0.1.2
-status: planned
+status: released
+history_state: curated
 title: AudioSig TTSForge compatibility API
-released_at: null
+released_at: "2026-08-01"
 previous_version: 0.1.1
 cancel_reason: null
 superseded_by: null

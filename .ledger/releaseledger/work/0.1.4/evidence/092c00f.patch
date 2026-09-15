@@ -1,0 +1,847 @@
+ .../data/ledgers/main/events/events.jsonl          |   5 +
+ .../main/releases/0.1.3/entries/entry-0004.md      |  28 +++
+ .../main/releases/0.1.3/entries/entry-0005.md      |  30 +++
+ .../main/releases/0.1.3/entries/entry-0006.md      |  28 +++
+ .../data/ledgers/main/releases/0.1.3/release.md    |   4 +-
+ README.md                                          |  28 +++
+ audiosig/__init__.py                               |  12 ++
+ audiosig/boundaries.py                             |   2 +-
+ audiosig/loudness.py                               | 236 +++++++++++++++++++++
+ docs/advanced.md                                   |  17 ++
+ docs/api-reference.md                              |  18 ++
+ docs/changelog.md                                  |   3 +
+ docs/getting-started.md                            |  19 ++
+ scripts/check_loudness_reference.py                |  77 +++++++
+ tests/test_loudness.py                             | 151 +++++++++++++
+ 15 files changed, 655 insertions(+), 3 deletions(-)
+
+diff --git a/.ledger/releaseledger/data/ledgers/main/events/events.jsonl b/.ledger/releaseledger/data/ledgers/main/events/events.jsonl
+index a5d05a0..9ab1708 100644
+--- a/.ledger/releaseledger/data/ledgers/main/events/events.jsonl
++++ b/.ledger/releaseledger/data/ledgers/main/events/events.jsonl
+@@ -39,3 +39,8 @@
+ {"data":{"kind":"docs","status":"accepted"},"entry_id":"entry-0003","event":"entry.added","event_id":"event-0039","record_revisions":{"entry:0.1.3/entry-0003":1,"release:0.1.3":4},"release_version":"0.1.3","schema_version":2}
+ {"data":{"added_source_refs":[],"fields":["summary"],"reason":"Align quality entry summary with its quality kind.","removed_source_refs":[],"source_refs_mode":"unchanged"},"entry_id":"entry-0002","event":"entry.updated","event_id":"event-0040","record_revisions":{"entry:0.1.3/entry-0002":2},"release_version":"0.1.3","schema_version":2}
+ {"data":{"added_source_refs":[],"fields":["summary"],"reason":"Use the accepted quality action prefix.","removed_source_refs":[],"source_refs_mode":"unchanged"},"entry_id":"entry-0002","event":"entry.updated","event_id":"event-0041","record_revisions":{"entry:0.1.3/entry-0002":3},"release_version":"0.1.3","schema_version":2}
++{"data":{"kind":"added","status":"accepted"},"entry_id":"entry-0004","event":"entry.added","event_id":"event-0042","record_revisions":{"entry:0.1.3/entry-0004":1,"release:0.1.3":5},"release_version":"0.1.3","schema_version":2}
++{"data":{"kind":"docs","status":"accepted"},"entry_id":"entry-0005","event":"entry.added","event_id":"event-0043","record_revisions":{"entry:0.1.3/entry-0005":1,"release:0.1.3":6},"release_version":"0.1.3","schema_version":2}
++{"data":{"kind":"quality","status":"accepted"},"entry_id":"entry-0006","event":"entry.added","event_id":"event-0044","record_revisions":{"entry:0.1.3/entry-0006":1,"release:0.1.3":7},"release_version":"0.1.3","schema_version":2}
++{"data":{"added_source_refs":[],"fields":["summary"],"reason":"Align quality entry wording with releaseledger kind validation.","removed_source_refs":[],"source_refs_mode":"unchanged"},"entry_id":"entry-0006","event":"entry.updated","event_id":"event-0045","record_revisions":{"entry:0.1.3/entry-0006":2},"release_version":"0.1.3","schema_version":2}
++{"data":{"added_source_refs":[],"fields":["body"],"reason":"Record the exact stable PyKokoro handoff contract in the release entry.","removed_source_refs":[],"source_refs_mode":"unchanged"},"entry_id":"entry-0004","event":"entry.updated","event_id":"event-0046","record_revisions":{"entry:0.1.3/entry-0004":2},"release_version":"0.1.3","schema_version":2}
+diff --git a/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0004.md b/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0004.md
+new file mode 100644
+index 0000000..5f7a926
+--- /dev/null
++++ b/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0004.md
+@@ -0,0 +1,28 @@
++---
++schema_version: 2
++object_type: release_entry
++versioning:
++  schema_version: 1
++  revision: 2
++entry_id: entry-0004
++release_version: 0.1.3
++kind: added
++summary: Added BS.1770-style integrated loudness and dBFS/dBTP peak measurement APIs
++status: accepted
++audience: null
++scopes: []
++source_refs:
++  - tl:task-0020
++paths:
++  - audiosig/loudness.py
++  - audiosig/__init__.py
++issues: []
++prs: []
++sources: []
++contributors: []
++breaking: false
++internal: false
++order: 4
++---
++
++AudioSig now exports LoudnessMetrics, integrated_loudness, sample_peak_dbfs, true_peak_dbtp, and measure_loudness. The NumPy-only meter supports the mandatory 24 kHz mono path plus 44.1 and 48 kHz, with explicit silence, gating, and short-input behavior. PyKokoro handoff: AUDIOSIG_MIN_VERSION=0.1.3; INTEGRATED_LOUDNESS_IMPORT=audiosig.integrated_loudness; SAMPLE_PEAK_IMPORT=audiosig.sample_peak_dbfs; TRUE_PEAK_IMPORT=audiosig.true_peak_dbtp; MEASURE_LOUDNESS_IMPORT=audiosig.measure_loudness; SUPPORTED_SAMPLE_RATES=24000,44100,48000; 24KHZ_REFERENCE_VALIDATED=yes; KNOWN_LIMITATIONS=mono-only v1.
+diff --git a/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0005.md b/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0005.md
+new file mode 100644
+index 0000000..9057c44
+--- /dev/null
++++ b/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0005.md
+@@ -0,0 +1,30 @@
++---
++schema_version: 2
++object_type: release_entry
++versioning:
++  schema_version: 1
++  revision: 1
++entry_id: entry-0005
++release_version: 0.1.3
++kind: docs
++summary: Documented loudness, peak, RMS, normalization, and downstream import boundaries
++status: accepted
++audience: null
++scopes: []
++source_refs: []
++paths:
++  - README.md
++  - docs/getting-started.md
++  - docs/api-reference.md
++  - docs/advanced.md
++issues: []
++prs: []
++sources:
++  - tl:task-0020
++contributors: []
++breaking: false
++internal: false
++order: 5
++---
++
++Documentation distinguishes sample peak from peak normalization, energy/RMS, integrated LUFS, and true peak, and records the 0.1.3 PyKokoro import contract and mono limitations.
+diff --git a/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0006.md b/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0006.md
+new file mode 100644
+index 0000000..55fe12a
+--- /dev/null
++++ b/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0006.md
+@@ -0,0 +1,28 @@
++---
++schema_version: 2
++object_type: release_entry
++versioning:
++  schema_version: 1
++  revision: 2
++entry_id: entry-0006
++release_version: 0.1.3
++kind: quality
++summary: Improved loudness and true-peak conformance coverage
++status: accepted
++audience: null
++scopes: []
++source_refs: []
++paths:
++  - tests/test_loudness.py
++  - scripts/check_loudness_reference.py
++issues: []
++prs: []
++sources:
++  - tl:task-0020
++contributors: []
++breaking: false
++internal: false
++order: 6
++---
++
++The test suite covers 24 kHz, 44.1 kHz, 48 kHz, gating geometry, gain relationships, short inputs, invalid data, dtypes, axes, immutability, and inter-sample peak behavior. The reference script records 0.05 LU and 0.02 dB tolerances.
+diff --git a/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/release.md b/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/release.md
+index c1e95fb..5e3f2a5 100644
+--- a/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/release.md
++++ b/.ledger/releaseledger/data/ledgers/main/releases/0.1.3/release.md
+@@ -3,7 +3,7 @@ schema_version: 2
+ object_type: release
+ versioning:
+   schema_version: 1
+-  revision: 4
++  revision: 7
+ version: 0.1.3
+ status: planned
+ history_state: curated
+@@ -16,7 +16,7 @@ changelog_file: null
+ boundary_ref: null
+ source_refs: []
+ source_count: null
+-entry_count: 3
++entry_count: 6
+ artifact_count: 0
+ git_base_ref: null
+ git_base_sha: null
+diff --git a/README.md b/README.md
+index acd4dec..e6cc44d 100644
+--- a/README.md
++++ b/README.md
+@@ -82,6 +82,34 @@ mono_channels = downmix_to_mono(channels, channel_axis=0)
+ Both operations are NumPy-array primitives only. They do not decode or encode
+ WAV/FLAC/MP3 files, resolve URLs, play audio, or compose audiobook chapters.
+
++## Loudness and peak measurement
++
++AudioSig provides measurement primitives for comparing audio levels without modifying the waveform:
++
++- `sample_peak_dbfs` reports the largest discrete sample in dBFS.
++- `peak_normalize` scales to a requested sample peak; it is not perceived-loudness normalization.
++- RMS and short-time energy describe signal energy over a selected window, but are not LUFS.
++- `integrated_loudness` applies BS.1770-style K-weighting and absolute/relative gating to report LUFS.
++- `true_peak_dbtp` oversamples to estimate inter-sample peak in dBTP.
++
++The v1 loudness meter accepts finite one-dimensional mono `float32` or `float64` arrays. It uses 400 ms blocks with a 100 ms hop, returns `-math.inf` for digital silence, and does not pad signals shorter than one complete block:
++
++```python
++import audiosig
++
++metrics = audiosig.measure_loudness(audio, sample_rate=24_000)
++print(metrics.integrated_lufs)
++print(metrics.sample_peak_dbfs)
++print(metrics.true_peak_dbtp)
++
++before = audiosig.integrated_loudness(audio, sample_rate=24_000)
++louder = audiosig.apply_gain_db(audio, 3.0)
++after = audiosig.integrated_loudness(louder, sample_rate=24_000)
++assert abs((after - before) - 3.0) < 0.05
++```
++
++The stable PyKokoro handoff imports are `LoudnessMetrics`, `integrated_loudness`, `sample_peak_dbfs`, `true_peak_dbtp`, and `measure_loudness` from `audiosig`; the minimum release containing this API is `0.1.3`. AudioSig only measures and applies generic gain. It does not choose a target LUFS, normalize every segment, or implement voice calibration.
++
+ ## Silence trimming and VAD
+
+ ```python
+diff --git a/audiosig/__init__.py b/audiosig/__init__.py
+index 7b3f105..987214d 100644
+--- a/audiosig/__init__.py
++++ b/audiosig/__init__.py
+@@ -18,6 +18,13 @@ from .basic import downmix_to_mono, generate_silence
+ from .boundaries import find_smooth_cut_point
+ from .effects import PitchShiftMethod, TimeStretchMethod, pitch_shift, time_stretch
+ from .exceptions import AudioShapeError, AudioSignalError, InvalidParameterError
++from .loudness import (
++    LoudnessMetrics,
++    integrated_loudness,
++    measure_loudness,
++    sample_peak_dbfs,
++    true_peak_dbtp,
++)
+ from .silence import (
+     abs2,
+     activity_to_intervals,
+@@ -47,6 +54,7 @@ __all__ = [
+     "AudioShapeError",
+     "AudioSignalError",
+     "InvalidParameterError",
++    "LoudnessMetrics",
+     "PitchShiftMethod",
+     "SpeechEffectsMethod",
+     "TimeStretchMethod",
+@@ -65,6 +73,8 @@ __all__ = [
+     "frame_signal",
+     "frames_to_samples",
+     "generate_silence",
++    "integrated_loudness",
++    "measure_loudness",
+     "median_filter_numpy",
+     "minmax_normalize",
+     "non_silent_frames",
+@@ -77,10 +87,12 @@ __all__ = [
+     "resample_speed",
+     "resample_to_length",
+     "rms",
++    "sample_peak_dbfs",
+     "short_time_energy",
+     "spectral_flux",
+     "split",
+     "time_stretch",
+     "trim",
++    "true_peak_dbtp",
+     "zero_crossing_rate",
+ ]
+diff --git a/audiosig/boundaries.py b/audiosig/boundaries.py
+index 6773643..ab65a80 100644
+--- a/audiosig/boundaries.py
++++ b/audiosig/boundaries.py
+@@ -26,7 +26,7 @@ def _aggregate_lanes(values: np.ndarray) -> np.ndarray:
+     """Take the conservative maximum over all non-candidate dimensions."""
+     if values.ndim == 1:
+         return values
+-    return np.max(values, axis=tuple(range(values.ndim - 1)))
++    return np.asarray(np.max(values, axis=tuple(range(values.ndim - 1))), dtype=values.dtype)
+
+
+ def find_smooth_cut_point(
+diff --git a/audiosig/loudness.py b/audiosig/loudness.py
+new file mode 100644
+index 0000000..6f8966b
+--- /dev/null
++++ b/audiosig/loudness.py
+@@ -0,0 +1,236 @@
++"""Standards-based loudness and peak measurements for NumPy audio."""
++
++from __future__ import annotations
++
++import math
++from dataclasses import dataclass
++
++import numpy as np
++
++from ._resampling import resample
++from ._validation import validate_audio, validate_integer
++from .exceptions import AudioShapeError
++
++_ABSOLUTE_GATE_LUFS = -70.0
++_RELATIVE_GATE_LU = -10.0
++_BLOCK_DURATION_SECONDS = 0.400
++_HOP_DURATION_SECONDS = 0.100
++_LUFS_OFFSET = -0.691
++
++
++@dataclass(frozen=True, slots=True)
++class LoudnessMetrics:
++    """Immutable loudness and peak measurements for one audio signal."""
++
++    integrated_lufs: float
++    sample_peak_dbfs: float
++    true_peak_dbtp: float
++
++
++def _validate_mono_audio(audio: np.ndarray, axis: int) -> np.ndarray:
++    validated, normalized_axis = validate_audio(audio, axis=axis)
++    if validated.ndim != 1:
++        raise AudioShapeError("loudness measurement supports one-dimensional mono audio only")
++    if normalized_axis != 0:
++        raise AudioShapeError("the sample axis must be the only axis of mono audio")
++    return validated
++
++
++def _validate_sample_rate(sample_rate: int) -> int:
++    return validate_integer(sample_rate, "sample_rate", minimum=1)
++
++
++def _block_geometry(sample_rate: int) -> tuple[int, int]:
++    """Return the BS.1770 400 ms block and 100 ms hop in samples."""
++    block_size = round(_BLOCK_DURATION_SECONDS * sample_rate)
++    hop_size = round(_HOP_DURATION_SECONDS * sample_rate)
++    return block_size, hop_size
++
++
++def _biquad_coefficients(
++    b0: float,
++    b1: float,
++    b2: float,
++    a0: float,
++    a1: float,
++    a2: float,
++) -> tuple[np.ndarray, np.ndarray]:
++    return (
++        np.asarray((b0 / a0, b1 / a0, b2 / a0), dtype=np.float64),
++        np.asarray((1.0, a1 / a0, a2 / a0), dtype=np.float64),
++    )
++
++
++def _high_pass(sample_rate: int) -> tuple[np.ndarray, np.ndarray]:
++    """Design the BS.1770 pre-filter with a bilinear-transform biquad."""
++    frequency = 38.1358
++    quality = 0.5
++    omega = 2.0 * math.pi * frequency / sample_rate
++    sine = math.sin(omega)
++    cosine = math.cos(omega)
++    alpha = sine / (2.0 * quality)
++    return _biquad_coefficients(
++        (1.0 + cosine) / 2.0,
++        -(1.0 + cosine),
++        (1.0 + cosine) / 2.0,
++        1.0 + alpha,
++        -2.0 * cosine,
++        1.0 - alpha,
++    )
++
++
++def _high_shelf(sample_rate: int) -> tuple[np.ndarray, np.ndarray]:
++    """Design the +4 dB, 1.5 kHz BS.1770 high-shelf biquad."""
++    frequency = 1500.0
++    quality = 1.0 / math.sqrt(2.0)
++    gain_db = 4.0
++    amplitude = 10.0 ** (gain_db / 40.0)
++    omega = 2.0 * math.pi * frequency / sample_rate
++    sine = math.sin(omega)
++    cosine = math.cos(omega)
++    alpha = sine / (2.0 * quality)
++    beta = 2.0 * math.sqrt(amplitude) * alpha
++    return _biquad_coefficients(
++        amplitude * ((amplitude + 1.0) + (amplitude - 1.0) * cosine + beta),
++        -2.0 * amplitude * ((amplitude - 1.0) + (amplitude + 1.0) * cosine),
++        amplitude * ((amplitude + 1.0) + (amplitude - 1.0) * cosine - beta),
++        (amplitude + 1.0) - (amplitude - 1.0) * cosine + beta,
++        2.0 * ((amplitude - 1.0) - (amplitude + 1.0) * cosine),
++        (amplitude + 1.0) - (amplitude - 1.0) * cosine - beta,
++    )
++
++
++def _apply_biquad(signal: np.ndarray, coefficients: tuple[np.ndarray, np.ndarray]) -> np.ndarray:
++    numerator, denominator = coefficients
++    output = np.empty_like(signal, dtype=np.float64)
++    x1 = 0.0
++    x2 = 0.0
++    y1 = 0.0
++    y2 = 0.0
++    for index, sample in enumerate(signal):
++        current = (
++            numerator[0] * sample
++            + numerator[1] * x1
++            + numerator[2] * x2
++            - denominator[1] * y1
++            - denominator[2] * y2
++        )
++        output[index] = current
++        x2 = x1
++        x1 = float(sample)
++        y2 = y1
++        y1 = current
++    return output
++
++
++def _k_weight(signal: np.ndarray, sample_rate: int) -> np.ndarray:
++    weighted = _apply_biquad(signal, _high_pass(sample_rate))
++    return _apply_biquad(weighted, _high_shelf(sample_rate))
++
++
++def _block_mean_squares(weighted: np.ndarray, sample_rate: int) -> np.ndarray:
++    block_size, hop_size = _block_geometry(sample_rate)
++    if weighted.size < block_size:
++        return np.empty(0, dtype=np.float64)
++    block_count = 1 + (weighted.size - block_size) // hop_size
++    starts = np.arange(block_count, dtype=np.intp) * hop_size
++    blocks = np.lib.stride_tricks.sliding_window_view(weighted, block_size)[starts]
++    return np.asarray(np.mean(blocks * blocks, axis=1, dtype=np.float64), dtype=np.float64)
++
++
++def _energy_to_lufs(energy: float) -> float:
++    if energy <= 0.0:
++        return -math.inf
++    return _LUFS_OFFSET + 10.0 * math.log10(energy)
++
++
++def integrated_loudness(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    axis: int = -1,
++) -> float:
++    """Measure BS.1770-style gated integrated loudness in LUFS.
++
++    V1 accepts finite one-dimensional mono NumPy audio. Complete 400 ms blocks
++    are analyzed with a 100 ms hop; audio shorter than one complete block has
++    no reportable integrated loudness and returns ``-math.inf`` without padding.
++    """
++    signal = _validate_mono_audio(audio, axis)
++    rate = _validate_sample_rate(sample_rate)
++    weighted = _k_weight(np.asarray(signal, dtype=np.float64), rate)
++    energies = _block_mean_squares(weighted, rate)
++    if energies.size == 0:
++        return -math.inf
++
++    absolute_threshold = 10.0 ** ((_ABSOLUTE_GATE_LUFS - _LUFS_OFFSET) / 10.0)
++    absolute = energies >= absolute_threshold
++    if not np.any(absolute):
++        return -math.inf
++    absolute_energy = float(np.mean(energies[absolute], dtype=np.float64))
++    relative_threshold = 10.0 ** (
++        (_energy_to_lufs(absolute_energy) + _RELATIVE_GATE_LU - _LUFS_OFFSET) / 10.0
++    )
++    gated = absolute & (energies >= relative_threshold)
++    if not np.any(gated):
++        return -math.inf
++    return float(_energy_to_lufs(float(np.mean(energies[gated], dtype=np.float64))))
++
++
++def sample_peak_dbfs(audio: np.ndarray, *, axis: int = -1) -> float:
++    """Return the largest absolute sample level in dBFS."""
++    signal = _validate_mono_audio(audio, axis)
++    peak = float(np.max(np.abs(np.asarray(signal, dtype=np.float64))))
++    if peak == 0.0:
++        return -math.inf
++    return float(20.0 * math.log10(peak))
++
++
++def true_peak_dbtp(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    axis: int = -1,
++    oversample: int = 4,
++) -> float:
++    """Estimate inter-sample peak level in dBTP by NumPy oversampling.
++
++    ``oversample=1`` measures the discrete sample peak. Values greater than
++    one use AudioSig's windowed-sinc resampler and never alter the input.
++    """
++    signal = _validate_mono_audio(audio, axis)
++    rate = _validate_sample_rate(sample_rate)
++    factor = validate_integer(oversample, "oversample", minimum=1)
++    sample_peak = float(np.max(np.abs(np.asarray(signal, dtype=np.float64))))
++    if sample_peak == 0.0:
++        return -math.inf
++    if factor == 1:
++        return float(20.0 * math.log10(sample_peak))
++    oversampled = resample(
++        np.asarray(signal, dtype=np.float64),
++        source_rate=rate,
++        target_rate=rate * factor,
++        filter_width=32,
++    )
++    peak = max(sample_peak, float(np.max(np.abs(np.asarray(oversampled, dtype=np.float64)))))
++    return float(20.0 * math.log10(peak))
++
++
++def measure_loudness(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    axis: int = -1,
++    true_peak_oversample: int = 4,
++) -> LoudnessMetrics:
++    """Return integrated loudness, sample peak, and true peak measurements."""
++    return LoudnessMetrics(
++        integrated_lufs=integrated_loudness(audio, sample_rate=sample_rate, axis=axis),
++        sample_peak_dbfs=sample_peak_dbfs(audio, axis=axis),
++        true_peak_dbtp=true_peak_dbtp(
++            audio,
++            sample_rate=sample_rate,
++            axis=axis,
++            oversample=true_peak_oversample,
++        ),
++    )
+diff --git a/docs/advanced.md b/docs/advanced.md
+index a137148..8dfea42 100644
+--- a/docs/advanced.md
++++ b/docs/advanced.md
+@@ -116,6 +116,23 @@ print(f"Round: {len(result_round)}")
+ print(f"Ceil: {len(result_ceil)}")
+ ```
+
++## Loudness measurement
++
++Loudness and peak metrics are deliberately separate from amplitude transforms. `peak_normalize` sets the largest discrete sample, RMS/short-time energy describes a chosen window, integrated loudness reports gated BS.1770-style LUFS, and true peak estimates inter-sample dBTP. Equal sample peaks do not imply equal perceived loudness.
++
++The v1 meter accepts finite one-dimensional mono arrays and uses float64 calculation paths. It analyzes complete 400 ms blocks with a 100 ms hop, applies K-weighting, then uses the -70 LUFS absolute gate and -10 LU relative gate. It returns `-math.inf` for silence and for audio shorter than one complete block; it never pads, clips, limits, or automatically normalizes. The default true-peak oversampling factor is 4, configurable for callers that need a different cost/accuracy trade-off.
++
++```python
++import audiosig
++
++metrics = audiosig.measure_loudness(audio, sample_rate=24_000)
++print(metrics.integrated_lufs)  # LUFS
++print(metrics.sample_peak_dbfs)  # dBFS
++print(metrics.true_peak_dbtp)   # dBTP
++```
++
++The stable release contract for downstream PyKokoro code is `audiosig>=0.1.3` for `LoudnessMetrics`, `integrated_loudness`, `sample_peak_dbfs`, `true_peak_dbtp`, and `measure_loudness`, plus the existing `apply_gain_db`. AudioSig supplies measurements and generic gain only; target LUFS and voice calibration remain application policy.
++
+ ## VAD Algorithm Details
+
+ ### Normalized Energy VAD
+diff --git a/docs/api-reference.md b/docs/api-reference.md
+index 361602d..5d4ab58 100644
+--- a/docs/api-reference.md
++++ b/docs/api-reference.md
+@@ -228,6 +228,24 @@ still_silent = peak_normalize(silent)
+
+ ---
+
++### Loudness Measurement
++
++#### `integrated_loudness(audio, *, sample_rate, axis=-1)`
++
++Return BS.1770-style integrated programme loudness in LUFS. Audio is K-weighted, divided into complete 400 ms blocks with a 100 ms hop, then processed with the -70 LUFS absolute gate and -10 LU relative gate. Signals shorter than one complete block return `-math.inf` without invented padding. V1 accepts one-dimensional mono `float32`/`float64` arrays; the mandatory sample rate is 24,000 Hz, and 44,100 and 48,000 Hz are also supported. Digital silence returns `-math.inf`.
++
++#### `sample_peak_dbfs(audio, *, axis=-1)`
++
++Return `20 * log10(max(abs(audio)))` in dBFS. Digital silence returns `-math.inf`. This is a sample peak measurement, not a loudness normalization operation.
++
++#### `true_peak_dbtp(audio, *, sample_rate, axis=-1, oversample=4)`
++
++Estimate inter-sample peak in dBTP using AudioSig's NumPy windowed-sinc resampler. `oversample` must be a positive integer; `1` is equivalent to sample peak. The function never clips, limits, or modifies the source audio. Digital silence returns `-math.inf`.
++
++#### `LoudnessMetrics` and `measure_loudness(audio, *, sample_rate, axis=-1, true_peak_oversample=4)`
++
++`LoudnessMetrics` is an immutable dataclass containing `integrated_lufs`, `sample_peak_dbfs`, and `true_peak_dbtp`. `measure_loudness` composes the three measurements without applying policy or changing the input. Stable imports are available from `audiosig`; the PyKokoro minimum release is `0.1.3`.
++
+ ## Silence Detection
+
+ ### Voice Activity Detection
+diff --git a/docs/changelog.md b/docs/changelog.md
+index 74ac658..d77432e 100644
+--- a/docs/changelog.md
++++ b/docs/changelog.md
+@@ -7,14 +7,17 @@
+ ### Added
+
+ - Added deterministic NumPy-only smooth waveform cut-point selection within caller-provided sample intervals
++- Added BS.1770-style integrated loudness and dBFS/dBTP peak measurement APIs
+
+ ### Documentation
+
+ - Documented smooth cut-point semantics, complexity, examples, and downstream policy boundaries
++- Documented loudness, peak, RMS, normalization, and downstream import boundaries
+
+ ### Quality
+
+ - Improved boundary quality coverage across validation, downstream contracts, packaging, axes, and dtypes
++- Improved loudness and true-peak conformance coverage
+
+ <!-- generated by releaseledger -->
+
+diff --git a/docs/getting-started.md b/docs/getting-started.md
+index 2bd8746..abe8c5f 100644
+--- a/docs/getting-started.md
++++ b/docs/getting-started.md
+@@ -120,6 +120,25 @@ louder = apply_gain_db(audio, db=6.0)
+ normalized = peak_normalize(audio, peak=0.9)
+ ```
+
++### Loudness Measurement
++
++Use integrated loudness when comparing perceived programme level, rather than treating peak normalization or full-file RMS as a loudness meter:
++
++```python
++import audiosig
++
++metrics = audiosig.measure_loudness(audio, sample_rate=24_000)
++print(metrics.integrated_lufs, metrics.sample_peak_dbfs, metrics.true_peak_dbtp)
++
++before = audiosig.integrated_loudness(audio, sample_rate=24_000)
++after = audiosig.integrated_loudness(
++    audiosig.apply_gain_db(audio, 3.0), sample_rate=24_000
++)
++assert abs((after - before) - 3.0) < 0.05
++```
++
++`integrated_loudness` follows BS.1770-style K-weighting and gated 400 ms blocks. `sample_peak_dbfs` is the discrete sample maximum; `true_peak_dbtp` uses configurable oversampling (4x by default) to estimate inter-sample overshoot. These functions measure only: they do not clip, limit, or normalize audio. V1 accepts mono one-dimensional arrays and validates the mandatory 24 kHz case, plus 44.1 and 48 kHz. Silence returns `-math.inf`; empty, non-finite, and inputs shorter than 400 ms have explicit validation/deterministic behavior documented in the API reference.
++
+ ## Understanding the API
+
+ ### Array Shapes
+diff --git a/scripts/check_loudness_reference.py b/scripts/check_loudness_reference.py
+new file mode 100644
+index 0000000..350d347
+--- /dev/null
++++ b/scripts/check_loudness_reference.py
+@@ -0,0 +1,77 @@
++"""Run deterministic BS.1770 loudness reference checks.
++
++The built-in vector is a 2-second, 440 Hz, -20 dBFS sine. Its expected value
++was calculated from the BS.1770 K-weighting, 400 ms block, 100 ms hop, and
++absolute/relative gate definitions used by the standards. External reference
++WAVs are intentionally not bundled; developers can add locally supplied
++vectors to this script without changing the runtime package dependencies.
++"""
++
++from __future__ import annotations
++
++import math
++import sys
++
++import numpy as np
++
++from audiosig import integrated_loudness, sample_peak_dbfs, true_peak_dbtp
++
++LOUDNESS_TOLERANCE_LU = 0.05
++PEAK_TOLERANCE_DB = 0.02
++_REFERENCE_SAMPLE_RATE = 24_000
++_REFERENCE_LOUDNESS_LUFS = -23.73724
++
++
++def _reference_signal(sample_rate: int = _REFERENCE_SAMPLE_RATE) -> np.ndarray:
++    time = np.arange(2 * sample_rate, dtype=np.float64) / sample_rate
++    return 0.1 * np.sin(2.0 * np.pi * 440.0 * time)
++
++
++def _check_close(name: str, actual: float, expected: float, tolerance: float) -> None:
++    if not math.isclose(actual, expected, abs_tol=tolerance, rel_tol=0.0):
++        raise AssertionError(
++            f"{name}: expected {expected:.5f} +/- {tolerance:.5f}, got {actual:.5f}"
++        )
++
++
++def main() -> int:
++    audio = _reference_signal()
++    measured = integrated_loudness(audio, sample_rate=_REFERENCE_SAMPLE_RATE)
++    _check_close(
++        "24 kHz integrated loudness",
++        measured,
++        _REFERENCE_LOUDNESS_LUFS,
++        LOUDNESS_TOLERANCE_LU,
++    )
++
++    louder = integrated_loudness(audio * 10.0 ** (3.0 / 20.0), sample_rate=_REFERENCE_SAMPLE_RATE)
++    _check_close("3 dB loudness gain", louder - measured, 3.0, LOUDNESS_TOLERANCE_LU)
++
++    sample_peak = sample_peak_dbfs(audio)
++    true_peak = true_peak_dbtp(audio, sample_rate=_REFERENCE_SAMPLE_RATE)
++    if true_peak < sample_peak - PEAK_TOLERANCE_DB:
++        raise AssertionError(
++            f"true peak {true_peak:.5f} dBTP is below sample peak {sample_peak:.5f} dBFS"
++        )
++
++    for sample_rate in (24_000, 44_100, 48_000):
++        rate_audio = _reference_signal(sample_rate)
++        rate_loudness = integrated_loudness(rate_audio, sample_rate=sample_rate)
++        if not math.isfinite(rate_loudness):
++            raise AssertionError(f"no finite loudness result at {sample_rate} Hz")
++
++    print(
++        "PASS: BS.1770 deterministic reference checks "
++        f"(24 kHz={measured:.5f} LUFS, sample peak={sample_peak:.5f} dBFS, "
++        f"true peak={true_peak:.5f} dBTP; tolerances={LOUDNESS_TOLERANCE_LU:.2f} LU/"
++        f"{PEAK_TOLERANCE_DB:.2f} dB)"
++    )
++    return 0
++
++
++if __name__ == "__main__":
++    try:
++        raise SystemExit(main())
++    except (AssertionError, ValueError) as error:
++        print(f"FAIL: {error}", file=sys.stderr)
++        raise SystemExit(1) from error
+diff --git a/tests/test_loudness.py b/tests/test_loudness.py
+new file mode 100644
+index 0000000..7129b72
+--- /dev/null
++++ b/tests/test_loudness.py
+@@ -0,0 +1,151 @@
++"""Tests for AudioSig loudness and peak measurement."""
++
++from __future__ import annotations
++
++import math
++from typing import cast
++
++import numpy as np
++import pytest
++
++from audiosig import (
++    AudioShapeError,
++    InvalidParameterError,
++    LoudnessMetrics,
++    apply_gain_db,
++    integrated_loudness,
++    measure_loudness,
++    sample_peak_dbfs,
++    true_peak_dbtp,
++)
++
++LOUDNESS_TOLERANCE_LU = 0.05
++PEAK_TOLERANCE_DB = 0.02
++
++
++def _sine(duration: float, sample_rate: int = 24_000, frequency: float = 440.0) -> np.ndarray:
++    samples = int(duration * sample_rate)
++    time = np.arange(samples, dtype=np.float64) / sample_rate
++    return (0.1 * np.sin(2.0 * np.pi * frequency * time)).astype(np.float32)
++
++
++def test_silence_returns_negative_infinity() -> None:
++    audio = np.zeros(24_000, dtype=np.float32)
++
++    metrics = measure_loudness(audio, sample_rate=24_000)
++
++    assert metrics == LoudnessMetrics(-math.inf, -math.inf, -math.inf)
++    assert integrated_loudness(audio, sample_rate=24_000) == -math.inf
++    assert sample_peak_dbfs(audio) == -math.inf
++    assert true_peak_dbtp(audio, sample_rate=24_000) == -math.inf
++
++
++def test_integrated_loudness_has_expected_gain_relationship() -> None:
++    audio = _sine(2.0)
++    before = integrated_loudness(audio, sample_rate=24_000)
++    after = integrated_loudness(apply_gain_db(audio, 3.0), sample_rate=24_000)
++    quieter = integrated_loudness(apply_gain_db(audio, -6.0), sample_rate=24_000)
++
++    assert after - before == pytest.approx(3.0, abs=LOUDNESS_TOLERANCE_LU)
++    assert quieter - before == pytest.approx(-6.0, abs=LOUDNESS_TOLERANCE_LU)
++
++
++def test_sample_peak_has_expected_gain_relationship() -> None:
++    audio = _sine(1.0)
++
++    assert sample_peak_dbfs(apply_gain_db(audio, 6.0)) - sample_peak_dbfs(audio) == pytest.approx(
++        6.0, abs=PEAK_TOLERANCE_DB
++    )
++
++
++def test_true_peak_is_not_below_sample_peak() -> None:
++    audio = _sine(1.0, frequency=7_000.0)
++
++    sample_peak = sample_peak_dbfs(audio)
++    true_peak = true_peak_dbtp(audio, sample_rate=24_000)
++
++    assert true_peak >= sample_peak - PEAK_TOLERANCE_DB
++    assert true_peak > sample_peak + 0.01
++
++
++def test_all_primary_apis_support_common_sample_rates() -> None:
++    for sample_rate in (24_000, 44_100, 48_000):
++        audio = _sine(0.8, sample_rate=sample_rate)
++        metrics = measure_loudness(audio, sample_rate=sample_rate)
++
++        assert math.isfinite(metrics.integrated_lufs)
++        assert math.isfinite(metrics.sample_peak_dbfs)
++        assert math.isfinite(metrics.true_peak_dbtp)
++
++
++def test_short_input_behavior_is_deterministic() -> None:
++    for duration in (1 / 24_000, 0.010, 0.100, 0.399):
++        assert integrated_loudness(_sine(duration), sample_rate=24_000) == -math.inf
++
++    assert math.isfinite(integrated_loudness(_sine(0.400), sample_rate=24_000))
++    assert math.isfinite(integrated_loudness(_sine(0.401), sample_rate=24_000))
++
++
++def test_float32_and_float64_measurements_are_close() -> None:
++    float32_audio = _sine(1.0)
++    float64_audio = float32_audio.astype(np.float64)
++
++    assert integrated_loudness(float32_audio, sample_rate=24_000) == pytest.approx(
++        integrated_loudness(float64_audio, sample_rate=24_000), abs=LOUDNESS_TOLERANCE_LU
++    )
++    assert sample_peak_dbfs(float32_audio) == pytest.approx(
++        sample_peak_dbfs(float64_audio), abs=PEAK_TOLERANCE_DB
++    )
++    assert true_peak_dbtp(float32_audio, sample_rate=24_000) == pytest.approx(
++        true_peak_dbtp(float64_audio, sample_rate=24_000), abs=PEAK_TOLERANCE_DB
++    )
++
++
++def test_axis_zero_is_explicit_for_one_dimensional_mono() -> None:
++    audio = _sine(0.5)
++
++    assert integrated_loudness(audio, sample_rate=24_000, axis=0) == pytest.approx(
++        integrated_loudness(audio, sample_rate=24_000), abs=LOUDNESS_TOLERANCE_LU
++    )
++
++
++def test_input_is_not_modified() -> None:
++    audio = _sine(1.0)
++    original = audio.copy()
++
++    measure_loudness(audio, sample_rate=24_000)
++
++    np.testing.assert_array_equal(audio, original)
++
++
++@pytest.mark.parametrize("sample_rate", [0, -1, 24_000.0, True])
++def test_invalid_sample_rate_is_rejected(sample_rate: object) -> None:
++    with pytest.raises(InvalidParameterError):
++        integrated_loudness(_sine(0.5), sample_rate=cast(int, sample_rate))
++
++
++@pytest.mark.parametrize("oversample", [0, -1, 3.7, True])
++def test_invalid_oversampling_is_rejected(oversample: object) -> None:
++    with pytest.raises(InvalidParameterError):
++        true_peak_dbtp(_sine(0.5), sample_rate=24_000, oversample=cast(int, oversample))
++
++
++def test_empty_non_finite_and_multidimensional_inputs_are_rejected() -> None:
++    with pytest.raises(AudioShapeError):
++        sample_peak_dbfs(np.empty(0, dtype=np.float32))
++    with pytest.raises(AudioShapeError):
++        sample_peak_dbfs(np.array([0.0, np.nan], dtype=np.float32))
++    with pytest.raises(AudioShapeError):
++        sample_peak_dbfs(np.array([0.0, np.inf], dtype=np.float32))
++    with pytest.raises(AudioShapeError):
++        sample_peak_dbfs(np.zeros((2, 100), dtype=np.float32))
++    with pytest.raises(AudioShapeError):
++        sample_peak_dbfs(_sine(0.5), axis=1)
++
++
++def test_oversample_one_matches_sample_peak() -> None:
++    audio = _sine(0.5)
++
++    assert true_peak_dbtp(audio, sample_rate=24_000, oversample=1) == pytest.approx(
++        sample_peak_dbfs(audio), abs=PEAK_TOLERANCE_DB
++    )

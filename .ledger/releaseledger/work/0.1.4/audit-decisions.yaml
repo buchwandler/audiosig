@@ -1,0 +1,26 @@
+rows:
+  - sha: 092c00f2355a5b15b1aaafb6cebf419960ea287f
+    inspected: true
+    inspected_paths:
+      - README.md
+      - audiosig/__init__.py
+      - audiosig/boundaries.py
+      - audiosig/loudness.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - docs/changelog.md
+      - docs/getting-started.md
+      - scripts/check_loudness_reference.py
+      - tests/test_loudness.py
+      - .ledger/releaseledger/data/ledgers/main/events/events.jsonl
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0004.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0005.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.3/entries/entry-0006.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.3/release.md
+    observed_behavior: "Added NumPy-only loudness and peak measurement APIs, exported the public symbols, documented the supported contract, and added conformance tests and a reference check; the releaseledger files record the corresponding release-note metadata."
+    public_impact: public
+    decision: accepted
+    target_entry_key: null
+    target_entry_id: entry-0004
+    notes: "Reviewed the implementation, public exports, documentation, tests, and release-note bookkeeping in this commit; entry-0004 is the coverage owner for the commit."
+    stale: false
