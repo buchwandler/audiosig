@@ -1,0 +1,44 @@
+schema_version: 1
+object_type: commit_audit_sheet
+versioning:
+  schema_version: 1
+  revision: 1
+release_version: 0.1.5
+git_base_ref: v0.1.4
+git_base_sha: c264b5c94e3adcb91b7c3bd09554c4db1300e0b7
+git_head_ref: HEAD
+git_head_sha: 0f579ce8a2431121bbf77e009244d45b6409db21
+git_range: c264b5c94e3adcb91b7c3bd09554c4db1300e0b7..0f579ce8a2431121bbf77e009244d45b6409db21
+commit_count: 1
+rows:
+  - sha: 0f579ce8a2431121bbf77e009244d45b6409db21
+    source_ref: git:0f579ce8a2431121bbf77e009244d45b6409db21
+    short_sha: 0f579ce
+    changed_paths:
+      - audiosig/__init__.py
+      - audiosig/_automation.py
+      - audiosig/_td_psola.py
+      - audiosig/_wsola.py
+      - audiosig/speech.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - docs/envelope-listening-evaluation.md
+      - docs/examples.md
+      - docs/quality-evaluation.md
+      - scripts/benchmark_speech_envelopes.py
+      - scripts/compare_speech_effects.py
+      - tests/test_automation.py
+      - tests/test_packaging.py
+      - tests/test_speech_envelope.py
+      - tests/test_speech_envelope_quality.py
+    stats:
+      files_changed: 16
+      insertions: 1541
+      deletions: 5
+    inspected: false
+    inspected_paths: []
+    observed_behavior: ""
+    public_impact: unknown
+    decision: needs_review
+    stale: false
+    evidence_subject: "feat: add envelope algorithm to have an change in pitch and rate"

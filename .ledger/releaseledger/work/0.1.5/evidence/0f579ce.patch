@@ -1,0 +1,1817 @@
+ audiosig/__init__.py                  |  11 +-
+ audiosig/_automation.py               | 200 +++++++++++++++++++++
+ audiosig/_td_psola.py                 | 191 +++++++++++++++++++-
+ audiosig/_wsola.py                    |  81 ++++++++-
+ audiosig/speech.py                    | 100 +++++++++++
+ docs/advanced.md                      |  10 ++
+ docs/api-reference.md                 |  37 ++++
+ docs/envelope-listening-evaluation.md |  70 ++++++++
+ docs/examples.md                      |  25 +++
+ docs/quality-evaluation.md            |  36 ++++
+ scripts/benchmark_speech_envelopes.py | 184 +++++++++++++++++++
+ scripts/compare_speech_effects.py     |  92 +++++++++-
+ tests/test_automation.py              | 134 ++++++++++++++
+ tests/test_packaging.py               |   3 +
+ tests/test_speech_envelope.py         | 320 ++++++++++++++++++++++++++++++++++
+ tests/test_speech_envelope_quality.py |  52 ++++++
+ 16 files changed, 1541 insertions(+), 5 deletions(-)
+
+diff --git a/audiosig/__init__.py b/audiosig/__init__.py
+index 987214d..4119399 100644
+--- a/audiosig/__init__.py
++++ b/audiosig/__init__.py
+@@ -48,7 +48,13 @@ from .silence import (
+     trim,
+     zero_crossing_rate,
+ )
+-from .speech import SpeechEffectsMethod, apply_speech_effects
++from .speech import (
++    SpeechEffectsEnvelopeMethod,
++    SpeechEffectsMethod,
++    apply_speech_effects,
++    apply_speech_effects_envelope,
++    speech_effects_output_frames,
++)
+
+ __all__ = [
+     "AudioShapeError",
+@@ -56,6 +62,7 @@ __all__ = [
+     "InvalidParameterError",
+     "LoudnessMetrics",
+     "PitchShiftMethod",
++    "SpeechEffectsEnvelopeMethod",
+     "SpeechEffectsMethod",
+     "TimeStretchMethod",
+     "__version__",
+@@ -64,6 +71,7 @@ __all__ = [
+     "amplitude_to_db",
+     "apply_gain_db",
+     "apply_speech_effects",
++    "apply_speech_effects_envelope",
+     "downmix_to_mono",
+     "energy_based_vad",
+     "find_smooth_cut_point",
+@@ -90,6 +98,7 @@ __all__ = [
+     "sample_peak_dbfs",
+     "short_time_energy",
+     "spectral_flux",
++    "speech_effects_output_frames",
+     "split",
+     "time_stretch",
+     "trim",
+diff --git a/audiosig/_automation.py b/audiosig/_automation.py
+new file mode 100644
+index 0000000..e887518
+--- /dev/null
++++ b/audiosig/_automation.py
+@@ -0,0 +1,200 @@
++"""Pure output-time envelope and speech rate-map calculations."""
++
++from __future__ import annotations
++
++from collections.abc import Iterable
++
++import numpy as np
++
++from ._validation import validate_finite, validate_integer
++from .exceptions import InvalidParameterError
++
++ControlPoints = Iterable[tuple[float, float]]
++
++
++def _validate_points(
++    points: ControlPoints,
++    *,
++    name: str,
++    positive_values: bool = False,
++    allow_empty: bool = True,
++) -> tuple[tuple[float, float], ...]:
++    """Validate ordered ``(output_seconds, value)`` control points."""
++    try:
++        raw_points = tuple(points)
++    except TypeError as exc:
++        raise InvalidParameterError(f"{name} must be an iterable of control points") from exc
++    if not raw_points and not allow_empty:
++        raise InvalidParameterError(f"{name} must contain at least one control point")
++
++    validated: list[tuple[float, float]] = []
++    for index, raw_point in enumerate(raw_points):
++        try:
++            point = tuple(raw_point)
++        except TypeError as exc:
++            raise InvalidParameterError(f"{name}[{index}] must contain a time and value") from exc
++        if len(point) != 2:
++            raise InvalidParameterError(f"{name}[{index}] must contain a time and value")
++        try:
++            time = validate_finite(point[0], f"{name}[{index}] time")
++            value = validate_finite(point[1], f"{name}[{index}] value")
++        except InvalidParameterError:
++            raise
++        except (TypeError, ValueError, OverflowError) as exc:
++            raise InvalidParameterError(
++                f"{name}[{index}] time and value must be finite numbers"
++            ) from exc
++        if time < 0.0:
++            raise InvalidParameterError(f"{name}[{index}] time must be non-negative")
++        if positive_values and value <= 0.0:
++            raise InvalidParameterError(f"{name}[{index}] value must be positive")
++        if index == 0 and time != 0.0:
++            raise InvalidParameterError(f"the first {name} point must be at 0.0 seconds")
++        if validated and time <= validated[-1][0]:
++            raise InvalidParameterError(f"{name} times must be strictly increasing")
++        validated.append((time, value))
++    return tuple(validated)
++
++
++class _LinearEnvelope:
++    """Validated piecewise-linear envelope with a held final value."""
++
++    __slots__ = ("_default", "_times", "_values")
++
++    def __init__(
++        self,
++        points: ControlPoints = (),
++        *,
++        default: float = 0.0,
++        name: str = "control_points",
++        positive_values: bool = False,
++    ) -> None:
++        validated = _validate_points(
++            points, name=name, positive_values=positive_values, allow_empty=True
++        )
++        self._default = validate_finite(default, f"{name} default")
++        self._times = np.asarray([point[0] for point in validated], dtype=np.float64)
++        self._values = np.asarray([point[1] for point in validated], dtype=np.float64)
++
++    @property
++    def points(self) -> tuple[tuple[float, float], ...]:
++        """Return the validated points as immutable Python floats."""
++        return tuple(zip(self._times.tolist(), self._values.tolist(), strict=True))
++
++    def value_at(self, output_seconds: float) -> float:
++        """Evaluate the envelope at a non-negative output time."""
++        time = validate_finite(output_seconds, "output_seconds")
++        if time < 0.0:
++            raise InvalidParameterError("output_seconds must be non-negative")
++        if self._times.size == 0:
++            return self._default
++        index = int(np.searchsorted(self._times, time, side="right")) - 1
++        if index < 0:
++            return float(self._values[0])
++        if index >= self._times.size - 1:
++            return float(self._values[-1])
++        fraction = (time - self._times[index]) / (self._times[index + 1] - self._times[index])
++        return float((1.0 - fraction) * self._values[index] + fraction * self._values[index + 1])
++
++
++class _RateMap:
++    """Map output seconds to source seconds using a linear rate envelope."""
++
++    __slots__ = ("_rates", "_source_knots", "_times")
++
++    def __init__(self, rate_points: ControlPoints = ()) -> None:
++        points = _validate_points(
++            rate_points,
++            name="rate_points",
++            positive_values=True,
++            allow_empty=True,
++        )
++        if not points:
++            points = ((0.0, 1.0),)
++        self._times = np.asarray([point[0] for point in points], dtype=np.float64)
++        self._rates = np.asarray([point[1] for point in points], dtype=np.float64)
++        self._source_knots = np.zeros(self._times.size, dtype=np.float64)
++        for index in range(self._times.size - 1):
++            duration = self._times[index + 1] - self._times[index]
++            average_rate = 0.5 * self._rates[index] + 0.5 * self._rates[index + 1]
++            source_duration = duration * average_rate
++            source_time = self._source_knots[index] + source_duration
++            if not np.isfinite(source_time):
++                raise InvalidParameterError("rate map exceeds the finite timing range")
++            self._source_knots[index + 1] = source_time
++
++    @property
++    def rate_points(self) -> tuple[tuple[float, float], ...]:
++        """Return the effective validated rate points."""
++        return tuple(zip(self._times.tolist(), self._rates.tolist(), strict=True))
++
++    def rate_at(self, output_seconds: float) -> float:
++        """Evaluate the rate factor at an output time."""
++        time = validate_finite(output_seconds, "output_seconds")
++        if time < 0.0:
++            raise InvalidParameterError("output_seconds must be non-negative")
++        index = int(np.searchsorted(self._times, time, side="right")) - 1
++        if index < 0:
++            return float(self._rates[0])
++        if index >= self._times.size - 1:
++            return float(self._rates[-1])
++        fraction = (time - self._times[index]) / (self._times[index + 1] - self._times[index])
++        return float((1.0 - fraction) * self._rates[index] + fraction * self._rates[index + 1])
++
++    def source_time_at(self, output_seconds: float) -> float:
++        """Return the source time consumed by an output time."""
++        time = validate_finite(output_seconds, "output_seconds")
++        if time < 0.0:
++            raise InvalidParameterError("output_seconds must be non-negative")
++        index = int(np.searchsorted(self._times, time, side="right")) - 1
++        if index >= self._times.size - 1:
++            source_time = self._source_knots[-1] + (time - self._times[-1]) * self._rates[-1]
++        else:
++            duration = self._times[index + 1] - self._times[index]
++            elapsed = time - self._times[index]
++            fraction = elapsed / duration
++            weighted_rate = (1.0 - 0.5 * fraction) * self._rates[
++                index
++            ] + 0.5 * fraction * self._rates[index + 1]
++            source_time = self._source_knots[index] + elapsed * weighted_rate
++        if not np.isfinite(source_time):
++            raise InvalidParameterError("rate map exceeds the finite timing range")
++        return float(source_time)
++
++    def output_time_for_source_time(self, source_seconds: float) -> float:
++        """Invert the rate map for a non-negative source time."""
++        source_time = validate_finite(source_seconds, "source_seconds")
++        if source_time < 0.0:
++            raise InvalidParameterError("source_seconds must be non-negative")
++        index = int(np.searchsorted(self._source_knots, source_time, side="right")) - 1
++        if index >= self._times.size - 1:
++            output_time = self._times[-1] + (source_time - self._source_knots[-1]) / self._rates[-1]
++        else:
++            duration = self._times[index + 1] - self._times[index]
++            source_delta = source_time - self._source_knots[index]
++            scale = max(self._rates[index], self._rates[index + 1])
++            normalized_start = self._rates[index] / scale
++            normalized_end = self._rates[index + 1] / scale
++            normalized_delta = (source_delta / scale) / duration
++            discriminant = (
++                normalized_start * normalized_start
++                + 2.0 * (normalized_end - normalized_start) * normalized_delta
++            )
++            if discriminant < 0.0 or not np.isfinite(discriminant):
++                raise InvalidParameterError("rate map inverse exceeds the finite timing range")
++            denominator = normalized_start + float(np.sqrt(discriminant))
++            fraction = 2.0 * normalized_delta / denominator
++            output_time = self._times[index] + duration * fraction
++        if not np.isfinite(output_time):
++            raise InvalidParameterError("rate map inverse exceeds the finite timing range")
++        return float(output_time)
++
++    def output_frames_for_input_frames(self, input_frames: int, sample_rate: int) -> int:
++        """Return the deterministic rounded output-frame count."""
++        frames = validate_integer(input_frames, "input_frames", minimum=0)
++        rate = validate_integer(sample_rate, "sample_rate")
++        output_seconds = self.output_time_for_source_time(frames / rate)
++        output_frames = output_seconds * rate
++        if not np.isfinite(output_frames) or output_frames > np.iinfo(np.intp).max:
++            raise InvalidParameterError("requested output length is too large")
++        return round(output_frames)
+diff --git a/audiosig/_td_psola.py b/audiosig/_td_psola.py
+index 072f06e..005771d 100644
+--- a/audiosig/_td_psola.py
++++ b/audiosig/_td_psola.py
+@@ -6,9 +6,15 @@ from typing import cast
+
+ import numpy as np
+
++from ._automation import _LinearEnvelope, _RateMap
+ from ._pitch import PitchTrack, estimate_pitch_track_lane
+ from ._resampling import resample_to_length
+-from ._validation import validate_audio, validate_finite, validate_positive
++from ._validation import (
++    validate_audio,
++    validate_finite,
++    validate_integer,
++    validate_positive,
++)
+ from .exceptions import InvalidParameterError
+
+ _MIN_RATE = 0.75
+@@ -357,3 +363,186 @@ def td_psola_prosody(
+         )
+     reshaped = output.reshape((*moved.shape[:-1], target_length))
+     return np.moveaxis(reshaped, -1, normalized_axis).astype(source.dtype, copy=False)
++
++
++def _target_marks_with_envelopes(
++    source_marks: np.ndarray,
++    *,
++    source_length: int,
++    target_length: int,
++    sample_rate: int,
++    rate_map: _RateMap,
++    pitch_envelope: _LinearEnvelope,
++) -> tuple[np.ndarray, np.ndarray]:
++    if source_marks.size == 0:
++        return np.empty(0, dtype=np.int64), np.empty(0, dtype=np.float64)
++    first = rate_map.output_time_for_source_time(float(source_marks[0]) / sample_rate) * sample_rate
++    last = min(
++        float(target_length - 1),
++        rate_map.output_time_for_source_time(float(source_marks[-1]) / sample_rate) * sample_rate,
++    )
++    output_positions: list[int] = []
++    source_positions: list[float] = []
++    position = first
++    while position <= last + 1.0:
++        source_position = rate_map.source_time_at(position / sample_rate) * sample_rate
++        nearest = int(np.searchsorted(source_marks, source_position, side="left"))
++        nearest = min(nearest, source_marks.size - 1)
++        if nearest > 0 and abs(source_marks[nearest - 1] - source_position) < abs(
++            source_marks[nearest] - source_position
++        ):
++            nearest -= 1
++        if 0.0 <= source_position < source_length:
++            output_positions.append(round(position))
++            source_positions.append(float(source_marks[nearest]))
++        if nearest + 1 < source_marks.size:
++            local_period = float(source_marks[nearest + 1] - source_marks[nearest])
++        elif nearest > 0:
++            local_period = float(source_marks[nearest] - source_marks[nearest - 1])
++        else:
++            local_period = 1.0
++        semitones = pitch_envelope.value_at(position / sample_rate)
++        pitch_ratio = float(np.exp2(semitones / 12.0))
++        position += max(1.0, local_period / pitch_ratio)
++    if not output_positions:
++        return np.empty(0, dtype=np.int64), np.empty(0, dtype=np.float64)
++    positions = np.asarray(output_positions, dtype=np.int64)
++    mapped_sources = np.asarray(source_positions, dtype=np.float64)
++    keep = np.r_[True, np.diff(positions) > 0]
++    return positions[keep], mapped_sources[keep]
++
++
++def _voiced_output_mask_with_rate_map(
++    track: PitchTrack,
++    *,
++    sample_rate: int,
++    rate_map: _RateMap,
++    target_length: int,
++    normalization: np.ndarray,
++) -> np.ndarray:
++    mask = np.zeros(target_length, dtype=np.float64)
++    for source_start, source_end in track.voiced_intervals:
++        start = max(
++            0, round(rate_map.output_time_for_source_time(source_start / sample_rate) * sample_rate)
++        )
++        end = min(
++            target_length,
++            round(rate_map.output_time_for_source_time(source_end / sample_rate) * sample_rate),
++        )
++        mask[start:end] = 1.0
++    mask *= normalization > 0.25
++    fade = max(1, round(sample_rate * 0.004))
++    if fade > 1 and np.any(mask):
++        kernel = np.hanning(2 * fade + 1)
++        kernel /= np.sum(kernel)
++        mask = np.convolve(mask, kernel, mode="same")
++        mask = np.clip(mask * 1.8, 0.0, 1.0)
++    return mask
++
++
++def _voiced_td_psola_lane_with_envelopes(
++    signal: np.ndarray,
++    track: PitchTrack,
++    *,
++    sample_rate: int,
++    target_length: int,
++    rate_map: _RateMap,
++    pitch_envelope: _LinearEnvelope,
++) -> tuple[np.ndarray, np.ndarray]:
++    target_marks, mapped_source_marks = _target_marks_with_envelopes(
++        track.pitch_marks,
++        source_length=signal.size,
++        target_length=target_length,
++        sample_rate=sample_rate,
++        rate_map=rate_map,
++        pitch_envelope=pitch_envelope,
++    )
++    output, normalization = _overlap_add_grains(
++        signal,
++        track.pitch_marks,
++        target_marks,
++        mapped_source_marks,
++        target_length,
++    )
++    output /= np.maximum(normalization, _EPSILON)
++    mask = _voiced_output_mask_with_rate_map(
++        track,
++        sample_rate=sample_rate,
++        rate_map=rate_map,
++        target_length=target_length,
++        normalization=normalization,
++    )
++    return output, mask
++
++
++def _duration_fallback_with_rate_map(
++    signal: np.ndarray,
++    *,
++    sample_rate: int,
++    rate_map: _RateMap,
++    target_length: int,
++) -> np.ndarray:
++    from ._wsola import wsola_time_stretch_rate_map
++
++    result = wsola_time_stretch_rate_map(
++        signal[None, :],
++        rate_map=rate_map,
++        target_length=target_length,
++        sample_rate=sample_rate,
++        axis=-1,
++    )
++    return np.asarray(result[0], dtype=np.float64)
++
++
++def td_psola_prosody_envelope(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    target_length: int,
++    rate_map: _RateMap,
++    pitch_envelope: _LinearEnvelope,
++    axis: int = -1,
++    pitch_floor: float = 60.0,
++    pitch_ceiling: float = 500.0,
++) -> np.ndarray:
++    """Apply coordinated variable-rate and variable-pitch TD-PSOLA."""
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    sample_hz = validate_integer(sample_rate, "sample_rate")
++    output_length = validate_integer(target_length, "target_length", minimum=0)
++    floor = validate_positive(pitch_floor, "pitch_floor")
++    ceiling = validate_positive(pitch_ceiling, "pitch_ceiling")
++    if ceiling <= floor or ceiling >= sample_hz / 2.0:
++        raise InvalidParameterError(
++            "pitch_ceiling must be greater than pitch_floor and below Nyquist"
++        )
++    input_length = source.shape[normalized_axis]
++    moved = np.moveaxis(source, normalized_axis, -1)
++    if input_length == 0 or output_length == 0:
++        result = np.zeros((*moved.shape[:-1], output_length), dtype=source.dtype)
++        return np.moveaxis(result, -1, normalized_axis)
++    flat = moved.reshape((-1, input_length))
++    output = np.empty((flat.shape[0], output_length), dtype=np.float64)
++    for lane_index, lane in enumerate(flat):
++        track = estimate_pitch_track_lane(
++            lane, sample_rate=sample_hz, pitch_floor=floor, pitch_ceiling=ceiling
++        )
++        fallback = _duration_fallback_with_rate_map(
++            lane,
++            sample_rate=sample_hz,
++            rate_map=rate_map,
++            target_length=output_length,
++        )
++        if track.pitch_marks.size < 3:
++            output[lane_index] = fallback
++            continue
++        direct, mask = _voiced_td_psola_lane_with_envelopes(
++            lane,
++            track,
++            sample_rate=sample_hz,
++            target_length=output_length,
++            rate_map=rate_map,
++            pitch_envelope=pitch_envelope,
++        )
++        output[lane_index] = direct * mask + fallback * (1.0 - mask)
++    reshaped = output.reshape((*moved.shape[:-1], output_length))
++    return np.moveaxis(reshaped, -1, normalized_axis).astype(source.dtype, copy=False)
+diff --git a/audiosig/_wsola.py b/audiosig/_wsola.py
+index 048f9a2..5788e76 100644
+--- a/audiosig/_wsola.py
++++ b/audiosig/_wsola.py
+@@ -4,7 +4,13 @@ from __future__ import annotations
+
+ import numpy as np
+
+-from ._validation import validate_audio, validate_finite, validate_positive
++from ._automation import _RateMap
++from ._validation import (
++    validate_audio,
++    validate_finite,
++    validate_integer,
++    validate_positive,
++)
+ from .exceptions import InvalidParameterError
+
+ _MAX_SEARCH_CANDIDATES = 4097
+@@ -157,3 +163,76 @@ def wsola_time_stretch(
+     output /= np.maximum(normalization, np.finfo(np.float64).eps)
+     reshaped = output.reshape((*moved.shape[:-1], target_length))
+     return np.moveaxis(reshaped, -1, normalized_axis).astype(source.dtype, copy=False)
++
++
++def wsola_time_stretch_rate_map(
++    audio: np.ndarray,
++    *,
++    rate_map: _RateMap,
++    target_length: int,
++    sample_rate: int,
++    axis: int = -1,
++    frame_length_ms: float = 30.0,
++    overlap_ms: float = 10.0,
++    search_ms: float = 10.0,
++) -> np.ndarray:
++    """Stretch audio using absolute source positions from a rate map."""
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    sample_hz = validate_positive(sample_rate, "sample_rate")
++    output_length = validate_integer(target_length, "target_length", minimum=0)
++    frame_ms = validate_finite(frame_length_ms, "frame_length_ms")
++    overlap_ms_value = validate_finite(overlap_ms, "overlap_ms")
++    search_ms_value = validate_finite(search_ms, "search_ms")
++    if frame_ms <= 0.0:
++        raise InvalidParameterError("frame_length_ms must be finite and positive")
++    if overlap_ms_value <= 0.0:
++        raise InvalidParameterError("overlap_ms must be finite and positive")
++    if search_ms_value < 0.0:
++        raise InvalidParameterError("search_ms must be finite and non-negative")
++    frame_length = max(2, round(sample_hz * frame_ms / 1000.0))
++    overlap_length = max(1, round(sample_hz * overlap_ms_value / 1000.0))
++    search_radius = max(0, round(sample_hz * search_ms_value / 1000.0))
++    if overlap_length >= frame_length:
++        raise InvalidParameterError("overlap_ms must produce less than one frame")
++    input_length = source.shape[normalized_axis]
++    if input_length == 0 or output_length == 0:
++        moved = np.moveaxis(source, normalized_axis, -1)
++        result = np.zeros((*moved.shape[:-1], output_length), dtype=source.dtype)
++        return np.moveaxis(result, -1, normalized_axis)
++    synthesis_hop = frame_length - overlap_length
++    frame_count = max(1, int(np.ceil(max(0, output_length - frame_length) / synthesis_hop)) + 1)
++    if search_radius * 2 + 1 > _MAX_SEARCH_CANDIDATES:
++        search_radius = (_MAX_SEARCH_CANDIDATES - 1) // 2
++    moved = np.moveaxis(source, normalized_axis, -1)
++    flat = moved.reshape((-1, input_length))
++    output = np.zeros((flat.shape[0], output_length), dtype=np.float64)
++    normalization = np.zeros((flat.shape[0], output_length), dtype=np.float64)
++    window = np.sin(np.pi * (np.arange(frame_length, dtype=np.float64) + 0.5) / frame_length)
++    for lane_index, lane in enumerate(flat):
++        analysis_source = _analysis_source(lane, frame_length)
++        max_start = analysis_source.size - frame_length
++        lane_output = output[lane_index]
++        for frame_index in range(frame_count):
++            synthesis_start = frame_index * synthesis_hop
++            if synthesis_start >= output_length:
++                break
++            output_time = synthesis_start / sample_hz
++            expected = round(rate_map.source_time_at(output_time) * sample_hz)
++            expected = int(np.clip(expected, 0, max_start))
++            if frame_index == 0:
++                chosen_start = expected
++            else:
++                search_start = max(0, expected - search_radius)
++                search_stop = min(max_start, expected + search_radius)
++                candidates = np.arange(search_start, search_stop + 1, dtype=np.int64)
++                reference_end = min(output_length, synthesis_start + overlap_length)
++                reference = lane_output[synthesis_start:reference_end]
++                chosen_start = _choose_candidate(analysis_source, reference, candidates, expected)
++            frame = _complete_slice(analysis_source, chosen_start, frame_length)
++            output_end = min(output_length, synthesis_start + frame_length)
++            frame_size = output_end - synthesis_start
++            lane_output[synthesis_start:output_end] += frame[:frame_size] * window[:frame_size]
++            normalization[lane_index, synthesis_start:output_end] += window[:frame_size]
++    output /= np.maximum(normalization, np.finfo(np.float64).eps)
++    reshaped = output.reshape((*moved.shape[:-1], output_length))
++    return np.moveaxis(reshaped, -1, normalized_axis).astype(source.dtype, copy=False)
+diff --git a/audiosig/speech.py b/audiosig/speech.py
+index fae880f..cf609df 100644
+--- a/audiosig/speech.py
++++ b/audiosig/speech.py
+@@ -2,14 +2,17 @@
+
+ from __future__ import annotations
+
++from collections.abc import Sequence
+ from typing import Literal
+
+ import numpy as np
+
++from ._automation import _LinearEnvelope, _RateMap, _validate_points
+ from ._resampling import resample_to_length
+ from ._validation import (
+     validate_audio,
+     validate_boolean,
++    validate_choices,
+     validate_filter,
+     validate_finite,
+     validate_gain_db,
+@@ -20,6 +23,7 @@ from .amplitude import apply_gain_db
+ from .effects import time_stretch
+ from .exceptions import InvalidParameterError
+
++SpeechEffectsEnvelopeMethod = Literal["wsola", "td_psola"]
+ SpeechEffectsMethod = Literal["phase_vocoder", "wsola", "esola", "td_psola"]
+
+
+@@ -118,3 +122,99 @@ def apply_speech_effects(
+     elif clip_value:
+         result = np.clip(result, -1.0, 1.0).astype(source.dtype, copy=False)
+     return np.array(result, dtype=source.dtype, copy=True)
++
++
++def speech_effects_output_frames(
++    input_frames: int,
++    *,
++    sample_rate: int,
++    rate_points: Sequence[tuple[float, float]] = (),
++) -> int:
++    """Return exact rounded output frames for a speech rate envelope.
++
++    Control-point times are measured in output seconds. An omitted rate curve
++    means a constant rate of 1.0.
++    """
++    return _RateMap(rate_points).output_frames_for_input_frames(input_frames, sample_rate)
++
++
++def apply_speech_effects_envelope(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    rate_points: Sequence[tuple[float, float]] = (),
++    pitch_points: Sequence[tuple[float, float]] = (),
++    time_base: Literal["output"] = "output",
++    interpolation: Literal["linear"] = "linear",
++    method: SpeechEffectsEnvelopeMethod = "wsola",
++    axis: int = -1,
++) -> np.ndarray:
++    """Apply numeric output-time rate and semitone pitch envelopes to speech.
++
++    Each supplied curve starts at output time zero, interpolates linearly, and
++    holds its final value. Rate values are positive playback factors. Pitch
++    values are semitone offsets. Downstream applications own semantic policy.
++    """
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    sample_hz = validate_integer(sample_rate, "sample_rate")
++    validate_choices(time_base, ("output",), "time_base")
++    validate_choices(interpolation, ("linear",), "interpolation")
++    validate_choices(method, ("wsola", "td_psola"), "method")
++    rates = _validate_points(
++        rate_points, name="rate_points", positive_values=True, allow_empty=True
++    )
++    pitches = _validate_points(pitch_points, name="pitch_points", allow_empty=True)
++    max_octaves = np.log2(np.finfo(np.float64).max)
++    min_octaves = np.log2(np.nextafter(0.0, 1.0))
++    if any(not min_octaves <= semitones / 12.0 < max_octaves for _, semitones in pitches):
++        raise InvalidParameterError("pitch points produce an unrepresentable pitch ratio")
++    if not rates and not pitches:
++        raise InvalidParameterError("at least one of rate_points or pitch_points is required")
++
++    rate_envelope = _LinearEnvelope(rates, default=1.0, name="rate_points", positive_values=True)
++    pitch_envelope = _LinearEnvelope(pitches, default=0.0, name="pitch_points")
++    rate_value = (
++        rate_envelope.value_at(0.0)
++        if not rates or all(point[1] == rates[0][1] for point in rates)
++        else None
++    )
++    pitch_value = (
++        pitch_envelope.value_at(0.0)
++        if not pitches or all(point[1] == pitches[0][1] for point in pitches)
++        else None
++    )
++    input_frames = source.shape[normalized_axis]
++    rate_map = _RateMap(rates)
++    target_frames = rate_map.output_frames_for_input_frames(input_frames, sample_hz)
++    if input_frames == 0:
++        return np.array(source, copy=True)
++    if rate_value is not None and pitch_value is not None:
++        return apply_speech_effects(
++            source,
++            sample_rate=sample_hz,
++            rate=rate_value,
++            semitones=pitch_value,
++            method=method,
++            axis=normalized_axis,
++        )
++    if rate_value is None and pitch_value == 0.0 and method == "wsola":
++        from ._wsola import wsola_time_stretch_rate_map
++
++        result = wsola_time_stretch_rate_map(
++            source,
++            rate_map=rate_map,
++            target_length=target_frames,
++            sample_rate=sample_hz,
++            axis=normalized_axis,
++        )
++        return np.array(result, dtype=source.dtype, copy=True)
++    from ._td_psola import td_psola_prosody_envelope
++
++    return td_psola_prosody_envelope(
++        source,
++        sample_rate=sample_hz,
++        target_length=target_frames,
++        rate_map=rate_map,
++        pitch_envelope=pitch_envelope,
++        axis=normalized_axis,
++    )
+diff --git a/docs/advanced.md b/docs/advanced.md
+index 8dfea42..e25056a 100644
+--- a/docs/advanced.md
++++ b/docs/advanced.md
+@@ -82,6 +82,16 @@ or polyphonic pitch-shifting backend.
+ TD-PSOLA remains experimental until objective, runtime, and real-speech
+ listening gates pass. See the [evaluation protocol](td-psola-listening-evaluation-2026-07-31.md).
+
++## Time-varying speech envelopes
++
++`apply_speech_effects_envelope` is available since AudioSig 0.1.5. It accepts only numeric control points and leaves higher-level meaning to calling applications. Rate values are positive playback factors; pitch values are semitones. Control-point times use output seconds, both curves interpolate linearly, the first point is at zero, and the final point is held. No repeated calls to static effects or chunk stitching are used.
++
++For output time `y`, the rate map consumes source time `x(y) = integral(0, y, r(u) du)`. Linear segments are integrated analytically in float64. AudioSig solves the inverse map at the input duration and rounds `output_seconds * sample_rate` once to determine the output frame count. `speech_effects_output_frames` exposes that same calculation for downstream timing prediction. Pitch-only envelopes preserve exact input length.
++
++Variable rate-only processing defaults to mapped WSOLA, where each expected source frame is computed from the absolute integrated map and overlap search remains local and deterministic. Selecting `method="td_psola"` uses voiced pulse synthesis with mapped WSOLA fallback for rate-only curves. When pitch varies, TD-PSOLA controls voiced pulse spacing from output-time semitone values, while unvoiced spans use the same mapped WSOLA rate trajectory. This coordinated path is speech-oriented and does not claim vocal-formant preservation.
++
++Omitted rate and pitch curves mean `1.0` and `0.0`. Clips shorter than the requested transition duration evaluate only the output-time portion that exists; they do not compress the curve. Digital silence remains digital silence. The same timing map and control points apply to all channels. Identical inputs and parameters are deterministic within an AudioSig version, but bit-identical output across versions is not promised.
++
+ ## Resampling Internals
+
+ AudioSig uses windowed-sinc interpolation:
+diff --git a/docs/api-reference.md b/docs/api-reference.md
+index 5d4ab58..4102b36 100644
+--- a/docs/api-reference.md
++++ b/docs/api-reference.md
+@@ -117,6 +117,43 @@ TD-PSOLA supports `0.75 <= rate <= 1.5` and `-6 <= semitones <= 6`; it does not
+ guarantee vocal-formant preservation. This compositor does not parse SSMD strings and raises typed
+ AudioSig exceptions for invalid input or parameters.
+
++#### `apply_speech_effects_envelope(audio, *, sample_rate, rate_points=(), pitch_points=(), time_base='output', interpolation='linear', method='wsola', axis=-1)`
++
++Apply continuously varying playback rate and pitch controls in one speech-processing operation. AudioSig 0.1.5 is the minimum version containing this API.
++
++**Control points:**
++
++- `rate_points`: `(output_seconds, rate_factor)` pairs. Factors must be finite and positive. `1.0` is unchanged, values below `1.0` slow playback, and values above `1.0` speed it up.
++- `pitch_points`: `(output_seconds, semitones)` pairs. Values are finite semitone offsets, where `0.0` is unchanged and positive values raise pitch.
++- At least one curve must be non-empty. Omitted rate and pitch curves mean constant `1.0` and `0.0`, respectively.
++- Every non-empty curve starts exactly at `0.0` seconds. Times increase strictly. `interpolation='linear'` interpolates rate factors and semitones; the last value is held after the final point.
++- `time_base='output'` is the supported time base. Point times refer to the transformed output, so a transition ending at `0.3` seconds lasts 0.3 seconds in the result regardless of rate changes.
++- `method` accepts `'wsola'` or `'td_psola'`. For nonconstant rate with neutral pitch, WSOLA selects mapped WSOLA and TD-PSOLA selects voiced pulse synthesis with mapped WSOLA fallback. Any nonconstant pitch uses the coordinated TD-PSOLA voiced path and mapped WSOLA fallback for unvoiced spans.
++- `axis` selects the sample dimension. Every channel uses the same timing curves and frame count.
++
++The rate map integrates `r(y)` to obtain source time `x(y)`. The output duration is the inverse-map time satisfying `x(y) = input_frames / sample_rate`, and the returned frame count is `round(y * sample_rate)` using float64 timing calculations. Pitch-only automation preserves the input frame count. A short clip evaluates only the portion of each curve reached by its output; AudioSig does not compress the curve to force its final value.
++
++Constant curves agree with `apply_speech_effects`. Identity curves return an independent copy. Silence remains zero. The operation is deterministic for the same input and AudioSig version, but exact PCM is not promised across versions.
++
++```python
++from audiosig import apply_speech_effects_envelope, speech_effects_output_frames
++
++out = apply_speech_effects_envelope(
++    audio,
++    sample_rate=24_000,
++    rate_points=((0.0, 1.0), (0.45, 0.85)),
++    pitch_points=((0.0, 0.0), (0.30, 2.0)),
++)
++predicted_frames = speech_effects_output_frames(
++    audio.shape[-1],
++    sample_rate=24_000,
++    rate_points=((0.0, 1.0), (0.45, 0.85)),
++)
++assert out.shape[-1] == predicted_frames
++```
++
++Malformed points, unsupported method/options, and invalid sample rates raise `InvalidParameterError`; malformed audio shapes use `AudioShapeError`.
++
+ ---
+
+ ### Resampling
+diff --git a/docs/envelope-listening-evaluation.md b/docs/envelope-listening-evaluation.md
+new file mode 100644
+index 0000000..3e37b33
+--- /dev/null
++++ b/docs/envelope-listening-evaluation.md
+@@ -0,0 +1,70 @@
++# Speech envelope listening evaluation
++
++## Status
++
++**Corrected user listening result received. After redoing all comparisons, the user could not hear a clear difference and considered the static and envelope renders the same.** This is a subjective result from one listener and one source, not a general claim of equivalence. The user-provided source and renders remain local and are not included in release materials. AudioSig 0.1.5 is the minimum version containing the envelope API.
++
++## Prepare A/B renders
++
++Use a PCM WAV that you have permission to process. Record its license or consent basis, sample rate, channel count, and source identifier. Do not commit private speech recordings or renders without permission.
++
++For a focused comparison at rate 0.9 and pitch +2 semitones, run:
++
++```bash
++python scripts/compare_speech_effects.py INPUT.wav OUTPUT_DIR \
++  --rates 0.9 --semitones 2 --envelopes
++```
++
++The relevant static and envelope pairs are:
++
++| Effect   | Static render                              | Envelope render                            | Control points                                      |
++| -------- | ------------------------------------------ | ------------------------------------------ | --------------------------------------------------- |
++| Rate     | `wsola_rate-0p9.wav`                       | `envelope_rate-0p9.wav`                    | rate `1.0` at 0 s to `0.9` at 0.45 output s         |
++| Pitch    | `td_psola_pitch-2st.wav`                   | `envelope_pitch-2st.wav`                   | pitch `0` at 0 s to `+2` semitones at 0.30 output s |
++| Combined | `combined_td_psola_rate-0p9_pitch-2st.wav` | `envelope_combined_rate-0p9_pitch-2st.wav` | both curves above                                   |
++
++`metrics.json` and `metrics.csv` include output length, exact-length error, finite status, runtime, and the numeric envelope points. The envelope rate and static rate renders are configured for different instantaneous trajectories, so judge their intended timing behavior as well as audible artifacts. Randomize or hide filenames during listening if practical.
++
++## Listening checklist
++
++Listen to the unmodified source and each pair at a comfortable, consistent playback level. Note clicks at transitions, pitch wobble, phasiness or warbling, metallic/buzzy quality, transient smearing, changes to breath or fricatives, timbre/formant shifts, rhythm discontinuities, and intelligibility. Include the timestamps and the affected output where possible.
++
++## User-reported result
++
++- Evaluation date: Not provided
++- Listener: User
++- Source: User-created `audio.wav`, 24 kHz, mono, 16-bit PCM, 60.288 seconds
++- Render command: `python scripts/compare_speech_effects.py audio.wav /tmp/audiosig-envelope-ab --rates 0.9 --semitones 2 --envelopes`
++- Render directory: `/tmp/audiosig-envelope-ab`
++- Technical metrics: all 10 WAV renders were finite and had zero frame-count error.
++
++| Comparison | User findings                                                                                           | Preference |
++| ---------- | ------------------------------------------------------------------------------------------------------- | ---------- |
++| Rate       | On repeat listening, no clear difference; the user considered the static and envelope renders the same. | Equal      |
++| Pitch      | On repeat listening, no clear difference; the user considered the static and envelope renders the same. | Equal      |
++| Combined   | On repeat listening, no clear difference; the user considered the static and envelope renders the same. | Equal      |
++
++No numerical ratings or timestamps were provided. This corrected result supersedes the earlier notes after the user repeated all three A/B comparisons. It records the user's perception of this source and these settings only.
++
++## Reusable evaluation template
++
++Use this template for any additional listeners or sources. Record one result for every listener and comparison.
++
++- Evaluation date:
++- Listener identifier:
++- Source identifier and permission basis:
++- Sample rate and channels:
++- Command and AudioSig version:
++- Output directory or retained artifact identifiers:
++
++| Comparison | Naturalness (1 to 5) | Intelligibility (1 to 5) | Timing/pitch accuracy (1 to 5) | Artifact severity (1 to 5) | Preference (static/envelope/equal) | Notes and timestamps |
++| ---------- | -------------------: | -----------------------: | -----------------------------: | -------------------------: | ---------------------------------- | -------------------- |
++| Rate       |                      |                          |                                |                            |                                    |                      |
++| Pitch      |                      |                          |                                |                            |                                    |                      |
++| Combined   |                      |                          |                                |                            |                                    |                      |
++
++- Severe artifact heard (yes/no):
++- Overall findings:
++- Recommendation and rationale:
++
++The corrected listening report is recorded. The user heard no clear difference across these three pairs and judged the envelope versions equivalent for this sample. This does not authorize a release, tag, push, or publication.
+diff --git a/docs/examples.md b/docs/examples.md
+index d4208f6..01b5a61 100644
+--- a/docs/examples.md
++++ b/docs/examples.md
+@@ -115,6 +115,31 @@ speech_up = apply_speech_effects(
+ TD-PSOLA does not guarantee formant preservation, does not pitch unvoiced
+ regions, and is not intended for music or polyphonic material.
+
++### Time-varying Speech Effects
++
++Available since AudioSig 0.1.5, `apply_speech_effects_envelope` accepts numeric curves in output seconds. Rate is a positive playback factor; pitch is a semitone offset. Both curves interpolate linearly and hold their final values.
++
++```python
++from audiosig import apply_speech_effects_envelope, speech_effects_output_frames
++
++out = apply_speech_effects_envelope(
++    audio,
++    sample_rate=24_000,
++    rate_points=[(0.0, 1.0), (0.45, 0.85)],
++    pitch_points=[(0.0, 0.0), (0.30, 2.0)],
++)
++frames = speech_effects_output_frames(
++    audio.shape[-1],
++    sample_rate=24_000,
++    rate_points=[(0.0, 1.0), (0.45, 0.85)],
++)
++assert out.shape[-1] == frames
++```
++
++Control-point times are measured on the transformed output timeline. Omit either curve to use its neutral value, rate `1.0` or pitch `0.0`. A short clip does not compress the requested envelope. Variable pitch uses TD-PSOLA on voiced material and WSOLA rate mapping for unvoiced fallback; it is intended for speech, not general music or formant-preserving pitch shifting.
++
++Envelope output is deterministic for identical input and parameters within one AudioSig version. Exact PCM is not promised across versions.
++
+ ### Resampling Examples
+
+ ```python
+diff --git a/docs/quality-evaluation.md b/docs/quality-evaluation.md
+index 85d4ff6..8f818c3 100644
+--- a/docs/quality-evaluation.md
++++ b/docs/quality-evaluation.md
+@@ -21,6 +21,14 @@ runtime, real-time factor, peak, RMS, exact-length error, and continuity
+ diagnostics. Use `--rates` and `--semitones` to narrow a run. The harness does not install,
+ invoke, or require Rubber Band, SoundTouch, WORLD, or another external backend.
+
++For envelope A/B renders, add `--envelopes`. It adds rate transitions from `1.0` to each requested rate over 0.45 output seconds, pitch transitions from `0.0` to each requested semitone target over 0.30 seconds, and combined transitions. For a focused run on a permitted speech WAV:
++
++```bash
++python scripts/compare_speech_effects.py input.wav comparison-output --rates 0.9 --semitones 2 --envelopes
++```
++
++The generated `envelope_*.wav` files and metrics record the numeric control points and exact expected frame count. No speech recording is distributed with AudioSig.
++
+ The required performance and robustness matrix is reproducible with:
+
+ ```bash
+@@ -41,6 +49,34 @@ trend-window behavior, approximately-two-period TD-PSOLA grains, local-F0
+ pitch marks, fallback behavior, and exact output contracts. They do not replace
+ the real-speech listening protocol below.
+
++## Time-varying envelope evaluation
++
++The envelope regression tests live in `tests/test_automation.py`, `tests/test_speech_envelope.py`, and `tests/test_speech_envelope_quality.py`. They cover analytical integration and inverse-map round trips, exact output sizing, amplitude-coded source landmarks, local pitch trajectories, combined automation, voiced/unvoiced fallback, output-knot jumps, and high-frequency burst guards. These objective tests are diagnostics, not a substitute for listening.
++
++Reproduce the 1, 10, and 60 second envelope benchmark with:
++
++```bash
++python scripts/benchmark_speech_envelopes.py --output /tmp/speech-envelope-benchmark.json
++```
++
++The script runs static rate, static pitch, static combined, variable-rate, variable-pitch, and combined-variable cases on a deterministic 16 kHz harmonic fixture. Constant-rate baselines are chosen to match the variable-rate output frame count. It records runtime, real-time factor, expected/output frames, length error, finite status, environment, and variable/static runtime ratio. A ratio above `1.0` means the envelope case took longer. This is a single sequential run without warm-up, so treat timings as indicative rather than a performance guarantee.
++
++Recorded on Python 3.13.14, NumPy 2.5.3, AudioSig working-tree metadata 0.1.4, Linux 6.18.33.2 under WSL2, Intel Core Ultra 7 355, 8 logical CPUs. All 18 outputs were finite and had zero frame error. Relative elapsed-time ratios were:
++
++| Input | Variable rate / static rate | Variable pitch / static pitch | Combined variable / static combined |
++| ----: | --------------------------: | ----------------------------: | ----------------------------------: |
++|   1 s |                       1.277 |                         1.054 |                               0.948 |
++|  10 s |                       1.205 |                         1.133 |                               0.929 |
++|  60 s |                       0.950 |                         0.866 |                               0.968 |
++
++The fixture is synthetic and fully voiced. These timings do not establish perceptual quality or predict every speech input.
++
++The feature is available since AudioSig 0.1.5. After redoing all three A/B comparisons on a permitted user-created PCM WAV, the user could not hear a clear difference and considered the static and envelope renders the same. This is one listener's subjective result for this source and these settings, not a general claim of equivalence. Findings are in the [listening report](envelope-listening-evaluation.md). The source and rendered files remain local and are not part of release materials.
++
++Variable-rate-only runs use the absolute integrated rate map with WSOLA. Any variable pitch uses TD-PSOLA on voiced regions and mapped WSOLA for unvoiced fallback; the speech path is not formant-preserving and larger shifts can sound more artifact-prone. Results are deterministic within an AudioSig version but are not promised to be bit-identical across versions.
++
++The listening report records the corrected result and can capture further listeners or samples. This listening step is complete for the current sample; overall release acceptance still depends on remaining technical validation.
++
+ ## Listening protocol
+
+ For the TD-PSOLA release check, use the corpus categories, randomized A/B or
+diff --git a/scripts/benchmark_speech_envelopes.py b/scripts/benchmark_speech_envelopes.py
+new file mode 100644
+index 0000000..3f262d1
+--- /dev/null
++++ b/scripts/benchmark_speech_envelopes.py
+@@ -0,0 +1,184 @@
++#!/usr/bin/env python3
++"""Measure static and time-varying speech effects on deterministic audio."""
++
++from __future__ import annotations
++
++import argparse
++import json
++import platform
++from collections.abc import Callable
++from time import perf_counter
++
++import numpy as np
++
++import audiosig
++from audiosig import (
++    apply_speech_effects,
++    apply_speech_effects_envelope,
++    speech_effects_output_frames,
++)
++
++
++def _speech_like(sample_rate: int, seconds: float) -> np.ndarray:
++    sample_count = max(1, round(sample_rate * seconds))
++    time = np.arange(sample_count, dtype=np.float64) / sample_rate
++    f0 = 140.0 + 12.0 * np.sin(2.0 * np.pi * 0.7 * time)
++    phase = 2.0 * np.pi * np.cumsum(f0) / sample_rate
++    voiced = (
++        0.18 * np.sin(phase)
++        + 0.08 * np.sin(2.0 * phase)
++        + 0.04 * np.sin(3.0 * phase)
++        + 0.02 * np.sin(4.0 * phase)
++    )
++    envelope = np.minimum(1.0, time * 40.0) * np.minimum(1.0, (seconds - time) * 40.0)
++    return (voiced * envelope).astype(np.float32)
++
++
++def _measure(
++    source: np.ndarray,
++    sample_rate: int,
++    duration: float,
++    mode: str,
++    operation: Callable[[np.ndarray], np.ndarray],
++) -> dict[str, object]:
++    started = perf_counter()
++    result = operation(source)
++    elapsed = perf_counter() - started
++    output_frames = result.shape[-1]
++    output_seconds = output_frames / sample_rate
++    return {
++        "input_seconds": duration,
++        "input_frames": source.shape[-1],
++        "sample_rate": sample_rate,
++        "mode": mode,
++        "output_frames": output_frames,
++        "output_seconds": output_seconds,
++        "runtime_seconds": elapsed,
++        "real_time_factor": output_seconds / elapsed if elapsed else float("inf"),
++        "finite": bool(np.isfinite(result).all()),
++        "peak": float(np.max(np.abs(result))) if result.size else 0.0,
++    }
++
++
++def benchmark(durations: tuple[float, ...], sample_rate: int) -> list[dict[str, object]]:
++    rate_points = ((0.0, 1.0), (0.45, 0.85))
++    pitch_points = ((0.0, 0.0), (0.3, 2.0))
++    records: list[dict[str, object]] = []
++    for duration in durations:
++        source = _speech_like(sample_rate, duration)
++        input_frames = source.shape[-1]
++        rate_frames = speech_effects_output_frames(
++            input_frames, sample_rate=sample_rate, rate_points=rate_points
++        )
++        comparison_rate = input_frames / rate_frames
++        operations = (
++            (
++                "static_rate",
++                lambda audio, rate=comparison_rate: apply_speech_effects(
++                    audio, sample_rate=sample_rate, rate=rate, method="wsola"
++                ),
++            ),
++            (
++                "variable_rate",
++                lambda audio: apply_speech_effects_envelope(
++                    audio, sample_rate=sample_rate, rate_points=rate_points
++                ),
++            ),
++            (
++                "static_pitch",
++                lambda audio: apply_speech_effects(
++                    audio, sample_rate=sample_rate, semitones=2.0, method="td_psola"
++                ),
++            ),
++            (
++                "variable_pitch",
++                lambda audio: apply_speech_effects_envelope(
++                    audio, sample_rate=sample_rate, pitch_points=pitch_points
++                ),
++            ),
++            (
++                "static_combined",
++                lambda audio, rate=comparison_rate: apply_speech_effects(
++                    audio,
++                    sample_rate=sample_rate,
++                    rate=rate,
++                    semitones=2.0,
++                    method="td_psola",
++                ),
++            ),
++            (
++                "combined_variable",
++                lambda audio: apply_speech_effects_envelope(
++                    audio,
++                    sample_rate=sample_rate,
++                    rate_points=rate_points,
++                    pitch_points=pitch_points,
++                ),
++            ),
++        )
++        duration_records = [
++            _measure(source, sample_rate, duration, mode, operation)
++            for mode, operation in operations
++        ]
++        static_rate_frames = max(1, round(input_frames / comparison_rate))
++        expected_by_mode = {
++            "static_rate": static_rate_frames,
++            "variable_rate": rate_frames,
++            "static_pitch": input_frames,
++            "variable_pitch": input_frames,
++            "static_combined": static_rate_frames,
++            "combined_variable": rate_frames,
++        }
++        for record in duration_records:
++            expected_frames = expected_by_mode[str(record["mode"])]
++            record["constant_comparison_rate"] = comparison_rate
++            record["expected_output_frames"] = expected_frames
++            record["length_error"] = int(record["output_frames"]) - expected_frames
++        runtime_by_mode = {
++            str(record["mode"]): float(record["runtime_seconds"]) for record in duration_records
++        }
++        for record in duration_records:
++            mode = str(record["mode"])
++            baseline = {
++                "variable_rate": "static_rate",
++                "variable_pitch": "static_pitch",
++                "combined_variable": "static_combined",
++            }.get(mode)
++            record["baseline_mode"] = baseline
++            record["relative_overhead"] = (
++                float(record["runtime_seconds"]) / runtime_by_mode[baseline]
++                if baseline is not None and runtime_by_mode[baseline] > 0.0
++                else None
++            )
++        records.extend(duration_records)
++    return records
++
++
++def main() -> int:
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--durations", type=float, nargs="+", default=(1.0, 10.0, 60.0))
++    parser.add_argument("--sample-rate", type=int, default=16_000)
++    parser.add_argument("--output")
++    args = parser.parse_args()
++    records = benchmark(tuple(args.durations), args.sample_rate)
++    payload = {
++        "environment": {
++            "python": platform.python_version(),
++            "numpy": np.__version__,
++            "audiosig": audiosig.__version__,
++            "platform": platform.platform(),
++        },
++        "records": records,
++    }
++    text = json.dumps(payload, indent=2, allow_nan=False) + "\n"
++    if args.output:
++        with open(args.output, "w", encoding="utf-8") as handle:
++            handle.write(text)
++        print(f"wrote {len(records)} benchmark records to {args.output}")
++    else:
++        print(text, end="")
++    return 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/scripts/compare_speech_effects.py b/scripts/compare_speech_effects.py
+index a201ddb..d3db21f 100644
+--- a/scripts/compare_speech_effects.py
++++ b/scripts/compare_speech_effects.py
+@@ -12,7 +12,13 @@ from time import perf_counter
+
+ import numpy as np
+
+-from audiosig import apply_speech_effects, pitch_shift, time_stretch
++from audiosig import (
++    apply_speech_effects,
++    apply_speech_effects_envelope,
++    pitch_shift,
++    speech_effects_output_frames,
++    time_stretch,
++)
+ from audiosig._pitch import estimate_pitch_track
+
+ DEFAULT_RATES = (0.75, 0.85, 1.15, 1.30, 1.50)
+@@ -88,6 +94,7 @@ def _metric(
+         "duration_seconds": samples / sample_rate,
+         "rms": float(np.sqrt(np.mean(np.square(values), dtype=np.float64))),
+         "peak": float(np.max(np.abs(values))) if values.size else 0.0,
++        "expected_samples": requested_length,
+         "length_error": samples - requested_length if requested_length is not None else 0,
+         "continuity_max_jump": float(np.max(np.abs(differences))) if differences.size else 0.0,
+         "continuity_rms_jump": (
+@@ -135,6 +142,7 @@ def compare(
+     output_dir: Path,
+     rates: tuple[float, ...],
+     semitones: tuple[float, ...],
++    envelopes: bool = False,
+ ) -> list[dict[str, object]]:
+     audio, sample_rate = _read_pcm(input_path)
+     records: list[dict[str, object]] = []
+@@ -165,6 +173,29 @@ def compare(
+                     runtime_seconds=elapsed,
+                 )
+             )
++        if envelopes:
++            rate_points = ((0.0, 1.0), (0.45, rate))
++            envelope_length = speech_effects_output_frames(
++                audio.shape[-1], sample_rate=sample_rate, rate_points=rate_points
++            )
++            started = perf_counter()
++            rendered = apply_speech_effects_envelope(
++                audio, sample_rate=sample_rate, rate_points=rate_points
++            )
++            elapsed = perf_counter() - started
++            filename = f"envelope_rate-{_number(rate)}.wav"
++            _write_pcm(output_dir / filename, rendered, sample_rate)
++            record = _metric(
++                rendered,
++                sample_rate,
++                method="envelope_rate",
++                rate=rate,
++                semitones=0.0,
++                requested_length=envelope_length,
++                runtime_seconds=elapsed,
++            )
++            record["rate_points"] = rate_points
++            records.append(record)
+         for pitch in semitones:
+             started = perf_counter()
+             rendered = pitch_shift(
+@@ -188,6 +219,27 @@ def compare(
+                     tracker_stats=tracker_stats,
+                 )
+             )
++            if envelopes and rate == rates[0]:
++                pitch_points = ((0.0, 0.0), (0.3, pitch))
++                started = perf_counter()
++                rendered = apply_speech_effects_envelope(
++                    audio, sample_rate=sample_rate, pitch_points=pitch_points
++                )
++                elapsed = perf_counter() - started
++                filename = f"envelope_pitch-{_number(pitch)}st.wav"
++                _write_pcm(output_dir / filename, rendered, sample_rate)
++                record = _metric(
++                    rendered,
++                    sample_rate,
++                    method="envelope_pitch",
++                    rate=1.0,
++                    semitones=pitch,
++                    requested_length=audio.shape[-1],
++                    runtime_seconds=elapsed,
++                    tracker_stats=tracker_stats,
++                )
++                record["pitch_points"] = pitch_points
++                records.append(record)
+             pitch_ratio = float(np.exp2(pitch / 12.0))
+             backend_rate = rate / pitch_ratio
+             combined_methods = [("wsola", True)]
+@@ -219,6 +271,35 @@ def compare(
+                         tracker_stats=tracker_stats if method == "td_psola" else None,
+                     )
+                 )
++            if envelopes:
++                rate_points = ((0.0, 1.0), (0.45, rate))
++                pitch_points = ((0.0, 0.0), (0.3, pitch))
++                envelope_length = speech_effects_output_frames(
++                    audio.shape[-1], sample_rate=sample_rate, rate_points=rate_points
++                )
++                started = perf_counter()
++                rendered = apply_speech_effects_envelope(
++                    audio,
++                    sample_rate=sample_rate,
++                    rate_points=rate_points,
++                    pitch_points=pitch_points,
++                )
++                elapsed = perf_counter() - started
++                filename = f"envelope_combined_rate-{_number(rate)}_pitch-{_number(pitch)}st.wav"
++                _write_pcm(output_dir / filename, rendered, sample_rate)
++                record = _metric(
++                    rendered,
++                    sample_rate,
++                    method="envelope_combined",
++                    rate=rate,
++                    semitones=pitch,
++                    requested_length=envelope_length,
++                    runtime_seconds=elapsed,
++                    tracker_stats=tracker_stats,
++                )
++                record["rate_points"] = rate_points
++                record["pitch_points"] = pitch_points
++                records.append(record)
+     return records
+
+
+@@ -228,8 +309,15 @@ def main() -> int:
+     parser.add_argument("output_dir", type=Path, help="directory for rendered WAVs and metrics")
+     parser.add_argument("--rates", nargs="+", type=float, default=DEFAULT_RATES)
+     parser.add_argument("--semitones", nargs="+", type=float, default=DEFAULT_SEMITONES)
++    parser.add_argument(
++        "--envelopes",
++        action="store_true",
++        help="render linear rate/pitch envelope A/B examples alongside static cases",
++    )
+     args = parser.parse_args()
+-    records = compare(args.input, args.output_dir, tuple(args.rates), tuple(args.semitones))
++    records = compare(
++        args.input, args.output_dir, tuple(args.rates), tuple(args.semitones), args.envelopes
++    )
+     json_path = args.output_dir / "metrics.json"
+     csv_path = args.output_dir / "metrics.csv"
+     args.output_dir.mkdir(parents=True, exist_ok=True)
+diff --git a/tests/test_automation.py b/tests/test_automation.py
+new file mode 100644
+index 0000000..cb18694
+--- /dev/null
++++ b/tests/test_automation.py
+@@ -0,0 +1,134 @@
++from __future__ import annotations
++
++import numpy as np
++import pytest
++
++from audiosig._automation import _LinearEnvelope, _RateMap, _validate_points
++from audiosig.exceptions import InvalidParameterError
++
++
++@pytest.mark.parametrize(
++    ("points", "expected"),
++    [
++        (((0.0, 3.0),), [3.0, 3.0, 3.0]),
++        (((0.0, 1.0), (2.0, 5.0)), [1.0, 3.0, 5.0]),
++        (((0.0, -2.0), (1.0, 0.0), (3.0, 4.0)), [-2.0, 1.0, 4.0]),
++    ],
++)
++def test_linear_envelope_interpolates_and_holds_final_value(
++    points: tuple[tuple[float, float], ...], expected: list[float]
++) -> None:
++    envelope = _LinearEnvelope(points)
++    times = (0.0, points[-1][0] / 2.0, points[-1][0] + 10.0)
++    np.testing.assert_allclose([envelope.value_at(time) for time in times], expected)
++
++
++def test_omitted_envelope_uses_its_constant_default() -> None:
++    assert _LinearEnvelope(default=1.0).value_at(5.0) == 1.0
++
++
++@pytest.mark.parametrize(
++    "points",
++    [
++        ((1.0, 2.0),),
++        ((0.0, 1.0), (0.0, 2.0)),
++        ((0.0, 1.0), (2.0, 2.0), (1.0, 3.0)),
++        ((-0.1, 1.0),),
++        ((np.nan, 1.0),),
++        ((np.inf, 1.0),),
++        ((0.0, np.nan),),
++        ((0.0, np.inf),),
++        ((0.0, 0.0),),
++        ((0.0, -1.0),),
++    ],
++)
++def test_rate_points_reject_invalid_times_and_values(
++    points: tuple[tuple[float, float], ...],
++) -> None:
++    with pytest.raises(InvalidParameterError):
++        _validate_points(points, name="rate_points", positive_values=True)
++
++
++@pytest.mark.parametrize("points", [((0.5, 1.0),), ((0.0, 1.0, 2.0),), ((0.0,),)])
++def test_control_points_require_zero_start_and_two_values(
++    points: tuple[tuple[float, ...], ...],
++) -> None:
++    with pytest.raises(InvalidParameterError):
++        _validate_points(points, name="control_points")
++
++
++def test_linear_envelope_rejects_nonfinite_or_negative_evaluation_time() -> None:
++    envelope = _LinearEnvelope(((0.0, 1.0),))
++    for time in (np.nan, np.inf, -1.0):
++        with pytest.raises(InvalidParameterError):
++            envelope.value_at(time)
++
++
++@pytest.mark.parametrize(
++    ("points", "times", "expected"),
++    [
++        (((0.0, 1.0),), (0.0, 1.0, 2.0), (0.0, 1.0, 2.0)),
++        (((0.0, 0.5),), (0.0, 1.0, 2.0), (0.0, 0.5, 1.0)),
++        (((0.0, 2.0),), (0.0, 1.0, 2.0), (0.0, 2.0, 4.0)),
++        (((0.0, 1.0), (2.0, 0.5)), (0.0, 1.0, 2.0), (0.0, 0.875, 1.5)),
++        (((0.0, 0.5), (2.0, 1.0)), (0.0, 1.0, 2.0), (0.0, 0.625, 1.5)),
++    ],
++)
++def test_rate_map_integrates_constant_and_linear_segments(
++    points: tuple[tuple[float, float], ...],
++    times: tuple[float, ...],
++    expected: tuple[float, ...],
++) -> None:
++    rate_map = _RateMap(points)
++    np.testing.assert_allclose(
++        [rate_map.source_time_at(time) for time in times], expected, rtol=0.0, atol=1e-14
++    )
++
++
++def test_rate_map_integrates_multiple_segments_and_holds_final_rate() -> None:
++    rate_map = _RateMap(((0.0, 1.0), (2.0, 0.5), (3.0, 2.0)))
++    np.testing.assert_allclose(
++        [rate_map.source_time_at(time) for time in (0.0, 2.0, 3.0, 4.0)],
++        (0.0, 1.5, 2.75, 4.75),
++        rtol=0.0,
++        atol=1e-14,
++    )
++
++
++def test_rate_map_inverts_constant_linear_and_multi_segment_times() -> None:
++    rate_map = _RateMap(((0.0, 1.0), (2.0, 0.5), (3.0, 2.0)))
++    for output_time in (0.0, 0.2, 1.0, 2.0, 2.5, 3.0, 4.0, 12.0):
++        source_time = rate_map.source_time_at(output_time)
++        assert rate_map.output_time_for_source_time(source_time) == pytest.approx(
++            output_time, rel=1e-13, abs=1e-13
++        )
++
++
++def test_rate_map_inverse_at_exact_control_point_source_times() -> None:
++    rate_map = _RateMap(((0.0, 1.0), (2.0, 0.5), (3.0, 2.0)))
++    assert rate_map.output_time_for_source_time(1.5) == pytest.approx(2.0)
++    assert rate_map.output_time_for_source_time(2.75) == pytest.approx(3.0)
++
++
++def test_rate_map_output_frame_count_uses_inverse_map_and_rounding() -> None:
++    assert _RateMap(((0.0, 0.5),)).output_frames_for_input_frames(24_000, 24_000) == 48_000
++    assert _RateMap(((0.0, 2.0),)).output_frames_for_input_frames(24_000, 24_000) == 12_000
++
++    rate_map = _RateMap(((0.0, 1.0), (2.0, 0.5)))
++    expected_seconds = 4.0 - np.sqrt(8.0)
++    assert rate_map.output_frames_for_input_frames(24_000, 24_000) == round(
++        expected_seconds * 24_000
++    )
++    assert rate_map.output_frames_for_input_frames(0, 24_000) == 0
++
++
++def test_rate_map_rejects_invalid_times_and_frame_arguments() -> None:
++    rate_map = _RateMap()
++    for value in (np.nan, np.inf, -1.0):
++        with pytest.raises(InvalidParameterError):
++            rate_map.source_time_at(value)
++        with pytest.raises(InvalidParameterError):
++            rate_map.output_time_for_source_time(value)
++    for frames, sample_rate in ((-1, 24_000), (1.5, 24_000), (1, 0), (1, 24_000.5)):
++        with pytest.raises(InvalidParameterError):
++            rate_map.output_frames_for_input_frames(frames, sample_rate)
+diff --git a/tests/test_packaging.py b/tests/test_packaging.py
+index 1390e4e..5a77219 100644
+--- a/tests/test_packaging.py
++++ b/tests/test_packaging.py
+@@ -74,6 +74,7 @@ def test_wheel_contains_typing_marker_and_required_modules() -> None:
+         "audiosig/silence.py",
+         "audiosig/effects.py",
+         "audiosig/speech.py",
++        "audiosig/_automation.py",
+         "audiosig/_esola.py",
+         "audiosig/_resampling.py",
+         "audiosig/_spectral.py",
+@@ -138,6 +139,8 @@ assert callable(audiosig.resample_to_length)
+ assert callable(audiosig.resample_speed)
+ assert callable(audiosig.minmax_normalize)
+ assert callable(audiosig.apply_speech_effects)
++assert callable(audiosig.apply_speech_effects_envelope)
++assert callable(audiosig.speech_effects_output_frames)
+ assert callable(audiosig.downmix_to_mono)
+ assert callable(audiosig.generate_silence)
+ assert callable(audiosig.find_smooth_cut_point)
+diff --git a/tests/test_speech_envelope.py b/tests/test_speech_envelope.py
+new file mode 100644
+index 0000000..b9449d1
+--- /dev/null
++++ b/tests/test_speech_envelope.py
+@@ -0,0 +1,320 @@
++from __future__ import annotations
++
++import numpy as np
++import pytest
++
++import audiosig
++from audiosig import InvalidParameterError
++from audiosig._automation import _RateMap
++from audiosig._pitch import estimate_pitch_track_lane
++from tests._quality_helpers import dominant_frequency
++
++
++def test_public_envelope_api_matches_static_constant_effects() -> None:
++    sample_rate = 24_000
++    time = np.arange(sample_rate, dtype=np.float64) / sample_rate
++    source = np.sin(2.0 * np.pi * 220.0 * time)
++
++    constant_rate = audiosig.apply_speech_effects_envelope(
++        source,
++        sample_rate=sample_rate,
++        rate_points=((0.0, 0.85),),
++    )
++    static_rate = audiosig.apply_speech_effects(source, sample_rate=sample_rate, rate=0.85)
++    np.testing.assert_array_equal(constant_rate, static_rate)
++
++    constant_pitch = audiosig.apply_speech_effects_envelope(
++        source,
++        sample_rate=sample_rate,
++        pitch_points=((0.0, 2.0),),
++    )
++    static_pitch = audiosig.apply_speech_effects(source, sample_rate=sample_rate, semitones=2.0)
++    np.testing.assert_array_equal(constant_pitch, static_pitch)
++    identity = audiosig.apply_speech_effects_envelope(
++        source, sample_rate=sample_rate, rate_points=((0.0, 1.0),)
++    )
++    np.testing.assert_array_equal(identity, source)
++    assert not np.shares_memory(identity, source)
++
++    combined = audiosig.apply_speech_effects_envelope(
++        source,
++        sample_rate=sample_rate,
++        rate_points=((0.0, 0.85),),
++        pitch_points=((0.0, 2.0),),
++    )
++    static_combined = audiosig.apply_speech_effects(
++        source, sample_rate=sample_rate, rate=0.85, semitones=2.0
++    )
++    np.testing.assert_array_equal(combined, static_combined)
++
++
++def test_variable_rate_wsola_preserves_landmark_timing_and_exact_length() -> None:
++    sample_rate = 4_000
++    source = np.random.default_rng(71).normal(0.0, 0.02, 2 * sample_rate)
++    marker = np.array([0.0, 5.0, -5.0, 3.0, -3.0, 0.0])
++    source_markers = (0.15, 0.55, 1.2, 1.75)
++    marker_frames = [round(time * sample_rate) for time in source_markers]
++    for frame in marker_frames:
++        source[frame : frame + marker.size] += marker
++    points = ((0.0, 1.0), (0.4, 0.7), (0.8, 1.15))
++    expected_length = audiosig.speech_effects_output_frames(
++        source.size, sample_rate=sample_rate, rate_points=points
++    )
++    result = audiosig.apply_speech_effects_envelope(
++        source, sample_rate=sample_rate, rate_points=points
++    )
++    assert result.size == expected_length
++
++    timing = _RateMap(points)
++    for source_frame in marker_frames:
++        expected = round(
++            timing.output_time_for_source_time(source_frame / sample_rate) * sample_rate
++        )
++        radius = round(0.1 * sample_rate)
++        start = max(0, expected - radius)
++        stop = min(result.size, expected + radius + marker.size)
++        observed = start + int(np.argmax(np.abs(result[start:stop])))
++        assert abs(observed - expected) <= round(0.06 * sample_rate)
++
++
++def test_variable_pitch_tracks_linear_semitone_envelope_in_output_time() -> None:
++    sample_rate = 16_000
++    time = np.arange(sample_rate, dtype=np.float64) / sample_rate
++    source = (
++        0.16 * np.sin(2.0 * np.pi * 180.0 * time)
++        + 0.08 * np.sin(2.0 * np.pi * 360.0 * time)
++        + 0.04 * np.sin(2.0 * np.pi * 540.0 * time)
++    ).astype(np.float32)
++    result = audiosig.apply_speech_effects_envelope(
++        source,
++        sample_rate=sample_rate,
++        pitch_points=((0.0, 0.0), (0.4, 4.0)),
++    )
++    assert result.shape == source.shape
++    for center in (0.05, 0.15, 0.25, 0.35, 0.5):
++        start = round((center - 0.04) * sample_rate)
++        end = round((center + 0.04) * sample_rate)
++        observed = dominant_frequency(result[start:end], sample_rate)
++        semitones = 4.0 * min(center, 0.4) / 0.4
++        expected = 180.0 * 2.0 ** (semitones / 12.0)
++        assert observed == pytest.approx(expected, rel=0.06)
++
++
++def test_combined_variable_rate_and_pitch_uses_one_coordinated_call() -> None:
++    sample_rate = 16_000
++    time = np.arange(sample_rate, dtype=np.float64) / sample_rate
++    source = (
++        0.16 * np.sin(2.0 * np.pi * 180.0 * time)
++        + 0.08 * np.sin(2.0 * np.pi * 360.0 * time)
++        + 0.04 * np.sin(2.0 * np.pi * 540.0 * time)
++    ).astype(np.float32)
++    rate_points = ((0.0, 1.0), (0.45, 0.85))
++    result = audiosig.apply_speech_effects_envelope(
++        source,
++        sample_rate=sample_rate,
++        rate_points=rate_points,
++        pitch_points=((0.0, 0.0), (0.3, 2.0)),
++    )
++    assert result.size == audiosig.speech_effects_output_frames(
++        source.size, sample_rate=sample_rate, rate_points=rate_points
++    )
++    assert np.isfinite(result).all()
++    for center in (0.15, 0.45):
++        start = round((center - 0.04) * sample_rate)
++        end = round((center + 0.04) * sample_rate)
++        observed = dominant_frequency(result[start:end], sample_rate)
++        semitones = 2.0 * min(center, 0.3) / 0.3
++        expected = 180.0 * 2.0 ** (semitones / 12.0)
++        assert observed == pytest.approx(expected, rel=0.07)
++
++
++def test_combined_envelopes_keep_voiced_to_unvoiced_fallback_on_rate_map() -> None:
++    sample_rate = 16_000
++    time = np.arange(sample_rate // 2, dtype=np.float64) / sample_rate
++    voiced = (0.15 * np.sin(2.0 * np.pi * 180.0 * time)).astype(np.float32)
++    unvoiced = np.random.default_rng(57).normal(0.0, 0.025, sample_rate // 2)
++    marker = np.array([0.0, 2.0, -2.0, 1.5, -1.5, 0.0])
++    marker_frame = round(0.8 * sample_rate) - sample_rate // 2
++    unvoiced[marker_frame : marker_frame + marker.size] += marker
++    source = np.concatenate([voiced, unvoiced]).astype(np.float32)
++    rate_points = ((0.0, 1.0), (0.4, 0.95), (0.42, 0.9), (0.45, 0.85))
++    result = audiosig.apply_speech_effects_envelope(
++        source,
++        sample_rate=sample_rate,
++        rate_points=rate_points,
++        pitch_points=((0.0, 0.0), (0.3, 2.0), (0.32, 2.5)),
++    )
++    assert result.size == audiosig.speech_effects_output_frames(
++        source.size, sample_rate=sample_rate, rate_points=rate_points
++    )
++    assert np.isfinite(result).all()
++    expected_marker = round(_RateMap(rate_points).output_time_for_source_time(0.8) * sample_rate)
++    radius = round(0.08 * sample_rate)
++    start = max(0, expected_marker - radius)
++    stop = min(result.size, expected_marker + radius + marker.size)
++    observed_marker = start + int(np.argmax(np.abs(result[start:stop])))
++    assert abs(observed_marker - expected_marker) <= radius
++    boundary = round(_RateMap(rate_points).output_time_for_source_time(0.5) * sample_rate)
++    jumps = np.abs(np.diff(result[boundary - 100 : boundary + 100]))
++    assert float(np.max(jumps)) < 0.5
++
++
++def test_envelope_api_preserves_silence_for_all_automation_modes() -> None:
++    sample_rate = 16_000
++    silence = np.zeros(round(0.2 * sample_rate), dtype=np.float32)
++    curves = (
++        {"rate_points": ((0.0, 1.0), (0.3, 0.8))},
++        {"pitch_points": ((0.0, 0.0), (0.3, 3.0))},
++        {
++            "rate_points": ((0.0, 1.0), (0.3, 0.8)),
++            "pitch_points": ((0.0, 0.0), (0.3, 3.0)),
++        },
++    )
++    for envelope in curves:
++        result = audiosig.apply_speech_effects_envelope(
++            silence, sample_rate=sample_rate, **envelope
++        )
++        assert result.size == audiosig.speech_effects_output_frames(
++            silence.size,
++            sample_rate=sample_rate,
++            rate_points=envelope.get("rate_points", ()),
++        )
++        np.testing.assert_array_equal(result, 0.0)
++
++
++def test_short_clip_does_not_compress_a_long_pitch_envelope() -> None:
++    sample_rate = 16_000
++    time = np.arange(round(0.12 * sample_rate), dtype=np.float64) / sample_rate
++    source = (
++        0.16 * np.sin(2.0 * np.pi * 180.0 * time)
++        + 0.08 * np.sin(2.0 * np.pi * 360.0 * time)
++        + 0.04 * np.sin(2.0 * np.pi * 540.0 * time)
++    ).astype(np.float32)
++    result = audiosig.apply_speech_effects_envelope(
++        source, sample_rate=sample_rate, pitch_points=((0.0, 0.0), (0.3, 4.0))
++    )
++    assert result.shape == source.shape
++    track = estimate_pitch_track_lane(result, sample_rate=sample_rate)
++    late_voiced = track.voiced & (track.frame_times >= 0.07)
++    measured = float(np.median(track.frequencies[late_voiced]))
++    measured_time = float(np.median(track.frame_times[late_voiced]))
++    expected = 180.0 * 2.0 ** ((4.0 * measured_time / 0.3) / 12.0)
++    assert measured == pytest.approx(expected, rel=0.025)
++
++
++def test_envelope_api_preserves_dtype_axis_and_shared_channel_timing() -> None:
++    sample_rate = 16_000
++    time = np.arange(round(0.4 * sample_rate), dtype=np.float64) / sample_rate
++    first = (0.16 * np.sin(2.0 * np.pi * 180.0 * time)).astype(np.float32)
++    second = (0.16 * np.sin(2.0 * np.pi * 220.0 * time)).astype(np.float32)
++    frames_first = np.column_stack((first, second))
++    rate_points = ((0.0, 1.0), (0.3, 0.8))
++    result = audiosig.apply_speech_effects_envelope(
++        frames_first,
++        sample_rate=sample_rate,
++        rate_points=rate_points,
++        axis=0,
++    )
++    expected_frames = audiosig.speech_effects_output_frames(
++        frames_first.shape[0], sample_rate=sample_rate, rate_points=rate_points
++    )
++    assert result.shape == (expected_frames, 2)
++    assert result.dtype == frames_first.dtype
++    np.testing.assert_array_equal(
++        result,
++        audiosig.apply_speech_effects_envelope(
++            frames_first,
++            sample_rate=sample_rate,
++            rate_points=rate_points,
++            axis=0,
++        ),
++    )
++    np.testing.assert_array_equal(
++        result[:, 0],
++        audiosig.apply_speech_effects_envelope(
++            first, sample_rate=sample_rate, rate_points=rate_points
++        ),
++    )
++    np.testing.assert_array_equal(
++        result[:, 1],
++        audiosig.apply_speech_effects_envelope(
++            second, sample_rate=sample_rate, rate_points=rate_points
++        ),
++    )
++
++
++def test_envelope_api_preserves_empty_shape_and_dtype() -> None:
++    empty = np.empty((2, 0, 3), dtype=np.float64)
++    result = audiosig.apply_speech_effects_envelope(
++        empty,
++        sample_rate=16_000,
++        rate_points=((0.0, 1.0), (0.3, 0.8)),
++        axis=1,
++    )
++    assert result.shape == empty.shape
++    assert result.dtype == empty.dtype
++    assert not np.shares_memory(result, empty)
++
++
++def test_public_output_frame_helper_uses_rate_map() -> None:
++    assert (
++        audiosig.speech_effects_output_frames(
++            24_000,
++            sample_rate=24_000,
++            rate_points=((0.0, 0.5),),
++        )
++        == 48_000
++    )
++    assert audiosig.speech_effects_output_frames(24_000, sample_rate=24_000) == 24_000
++
++
++def test_public_envelope_api_rejects_missing_curves_and_bad_points() -> None:
++    audio = np.ones(32, dtype=np.float32)
++    with pytest.raises(InvalidParameterError, match="at least one"):
++        audiosig.apply_speech_effects_envelope(audio, sample_rate=24_000)
++    with pytest.raises(InvalidParameterError):
++        audiosig.apply_speech_effects_envelope(
++            audio,
++            sample_rate=24_000,
++            rate_points=((0.1, 1.0),),
++        )
++    with pytest.raises(InvalidParameterError):
++        audiosig.apply_speech_effects_envelope(
++            audio,
++            sample_rate=24_000,
++            pitch_points=((0.0, np.inf),),
++        )
++
++
++@pytest.mark.parametrize("semitones", [12.0 * 1024.0, -12.0 * 1075.0])
++def test_public_api_rejects_unrepresentable_pitch_ratios(semitones: float) -> None:
++    with pytest.raises(InvalidParameterError, match="unrepresentable"):
++        audiosig.apply_speech_effects_envelope(
++            np.ones(32, dtype=np.float32),
++            sample_rate=24_000,
++            pitch_points=((0.0, semitones),),
++        )
++
++
++@pytest.mark.parametrize(
++    ("argument", "value"),
++    [("time_base", "source"), ("interpolation", "cubic"), ("method", "esola")],
++)
++def test_public_envelope_api_rejects_unsupported_options(argument: str, value: str) -> None:
++    kwargs: dict[str, object] = {
++        "rate_points": ((0.0, 1.0),),
++        argument: value,
++    }
++    with pytest.raises(InvalidParameterError):
++        audiosig.apply_speech_effects_envelope(
++            np.ones(32, dtype=np.float32), sample_rate=24_000, **kwargs
++        )
++
++
++def test_public_envelope_api_validates_sample_rate_before_empty_return() -> None:
++    with pytest.raises(InvalidParameterError):
++        audiosig.apply_speech_effects_envelope(
++            np.empty(0, dtype=np.float32),
++            sample_rate=0,
++            pitch_points=((0.0, 0.0),),
++        )
+diff --git a/tests/test_speech_envelope_quality.py b/tests/test_speech_envelope_quality.py
+new file mode 100644
+index 0000000..858532e
+--- /dev/null
++++ b/tests/test_speech_envelope_quality.py
+@@ -0,0 +1,52 @@
++from __future__ import annotations
++
++import numpy as np
++
++from audiosig import apply_speech_effects_envelope
++
++
++def _voiced_tone(sample_rate: int = 16_000, duration: float = 1.2) -> np.ndarray:
++    time = np.arange(round(sample_rate * duration), dtype=np.float64) / sample_rate
++    signal = (
++        0.2 * np.sin(2.0 * np.pi * 180.0 * time)
++        + 0.1 * np.sin(2.0 * np.pi * 360.0 * time)
++        + 0.05 * np.sin(2.0 * np.pi * 540.0 * time)
++    )
++    return signal.astype(np.float32)
++
++
++def test_control_point_jumps_stay_within_local_difference_distribution() -> None:
++    sample_rate = 16_000
++    result = apply_speech_effects_envelope(
++        _voiced_tone(sample_rate),
++        sample_rate=sample_rate,
++        rate_points=((0.0, 1.0), (0.45, 0.85)),
++        pitch_points=((0.0, 0.0), (0.3, 2.0)),
++    )
++    for point in (0.3, 0.45):
++        boundary = round(point * sample_rate)
++        local = result[max(0, boundary - 400) : boundary + 400]
++        differences = np.abs(np.diff(local))
++        typical_jump = float(np.percentile(differences, 95.0))
++        boundary_jump = abs(float(result[boundary] - result[boundary - 1]))
++        assert boundary_jump <= 8.0 * typical_jump
++
++
++def test_automation_knots_do_not_create_high_frequency_bursts() -> None:
++    sample_rate = 16_000
++    result = apply_speech_effects_envelope(
++        _voiced_tone(sample_rate),
++        sample_rate=sample_rate,
++        rate_points=((0.0, 1.0), (0.45, 0.85)),
++        pitch_points=((0.0, 0.0), (0.3, 2.0)),
++    )
++    window_length = 640
++    window = np.hanning(window_length)
++    frequencies = np.fft.rfftfreq(window_length, d=1.0 / sample_rate)
++    high_frequency_bins = frequencies >= 3_000.0
++    for point in (0.3, 0.45):
++        boundary = round(point * sample_rate)
++        frame = np.asarray(result[boundary - window_length // 2 : boundary + window_length // 2])
++        power = np.abs(np.fft.rfft(frame * window)) ** 2
++        high_frequency_ratio = float(np.sum(power[high_frequency_bins]) / np.sum(power))
++        assert high_frequency_ratio < 0.05

@@ -1,0 +1,28 @@
+rows:
+  - sha: 0f579ce8a2431121bbf77e009244d45b6409db21
+    inspected: true
+    inspected_paths:
+      - audiosig/__init__.py
+      - audiosig/_automation.py
+      - audiosig/_td_psola.py
+      - audiosig/_wsola.py
+      - audiosig/speech.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - docs/envelope-listening-evaluation.md
+      - docs/examples.md
+      - docs/quality-evaluation.md
+      - scripts/benchmark_speech_envelopes.py
+      - scripts/compare_speech_effects.py
+      - tests/test_automation.py
+      - tests/test_packaging.py
+      - tests/test_speech_envelope.py
+      - tests/test_speech_envelope_quality.py
+    observed_behavior: >-
+      Added public output-time rate and semitone-envelope APIs with analytic rate-map timing and exact frame prediction. Variable-rate processing uses mapped WSOLA; variable-pitch processing coordinates voiced TD-PSOLA with mapped WSOLA fallback. Tests verify trajectories, exact lengths, validation, silence, channel/dtype preservation, transition continuity, and package exports. Documentation records that one listener heard no clear difference on one source, so no general perceptual-quality claim is made.
+    public_impact: public
+    decision: accepted
+    target_entry_key: null
+    target_entry_id: null
+    notes: Envelopes are deterministic within a version; exact PCM across versions and formant preservation are not promised.
+    stale: false
