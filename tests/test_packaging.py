@@ -74,6 +74,7 @@ def test_wheel_contains_typing_marker_and_required_modules() -> None:
         "audiosig/silence.py",
         "audiosig/effects.py",
         "audiosig/speech.py",
+        "audiosig/_automation.py",
         "audiosig/_esola.py",
         "audiosig/_resampling.py",
         "audiosig/_spectral.py",
@@ -138,6 +139,8 @@ assert callable(audiosig.resample_to_length)
 assert callable(audiosig.resample_speed)
 assert callable(audiosig.minmax_normalize)
 assert callable(audiosig.apply_speech_effects)
+assert callable(audiosig.apply_speech_effects_envelope)
+assert callable(audiosig.speech_effects_output_frames)
 assert callable(audiosig.downmix_to_mono)
 assert callable(audiosig.generate_silence)
 assert callable(audiosig.find_smooth_cut_point)

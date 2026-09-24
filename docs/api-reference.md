@@ -117,6 +117,43 @@ TD-PSOLA supports `0.75 <= rate <= 1.5` and `-6 <= semitones <= 6`; it does not
 guarantee vocal-formant preservation. This compositor does not parse SSMD strings and raises typed
 AudioSig exceptions for invalid input or parameters.
 
+#### `apply_speech_effects_envelope(audio, *, sample_rate, rate_points=(), pitch_points=(), time_base='output', interpolation='linear', method='wsola', axis=-1)`
+
+Apply continuously varying playback rate and pitch controls in one speech-processing operation. AudioSig 0.1.5 is the minimum version containing this API.
+
+**Control points:**
+
+- `rate_points`: `(output_seconds, rate_factor)` pairs. Factors must be finite and positive. `1.0` is unchanged, values below `1.0` slow playback, and values above `1.0` speed it up.
+- `pitch_points`: `(output_seconds, semitones)` pairs. Values are finite semitone offsets, where `0.0` is unchanged and positive values raise pitch.
+- At least one curve must be non-empty. Omitted rate and pitch curves mean constant `1.0` and `0.0`, respectively.
+- Every non-empty curve starts exactly at `0.0` seconds. Times increase strictly. `interpolation='linear'` interpolates rate factors and semitones; the last value is held after the final point.
+- `time_base='output'` is the supported time base. Point times refer to the transformed output, so a transition ending at `0.3` seconds lasts 0.3 seconds in the result regardless of rate changes.
+- `method` accepts `'wsola'` or `'td_psola'`. For nonconstant rate with neutral pitch, WSOLA selects mapped WSOLA and TD-PSOLA selects voiced pulse synthesis with mapped WSOLA fallback. Any nonconstant pitch uses the coordinated TD-PSOLA voiced path and mapped WSOLA fallback for unvoiced spans.
+- `axis` selects the sample dimension. Every channel uses the same timing curves and frame count.
+
+The rate map integrates `r(y)` to obtain source time `x(y)`. The output duration is the inverse-map time satisfying `x(y) = input_frames / sample_rate`, and the returned frame count is `round(y * sample_rate)` using float64 timing calculations. Pitch-only automation preserves the input frame count. A short clip evaluates only the portion of each curve reached by its output; AudioSig does not compress the curve to force its final value.
+
+Constant curves agree with `apply_speech_effects`. Identity curves return an independent copy. Silence remains zero. The operation is deterministic for the same input and AudioSig version, but exact PCM is not promised across versions.
+
+```python
+from audiosig import apply_speech_effects_envelope, speech_effects_output_frames
+
+out = apply_speech_effects_envelope(
+    audio,
+    sample_rate=24_000,
+    rate_points=((0.0, 1.0), (0.45, 0.85)),
+    pitch_points=((0.0, 0.0), (0.30, 2.0)),
+)
+predicted_frames = speech_effects_output_frames(
+    audio.shape[-1],
+    sample_rate=24_000,
+    rate_points=((0.0, 1.0), (0.45, 0.85)),
+)
+assert out.shape[-1] == predicted_frames
+```
+
+Malformed points, unsupported method/options, and invalid sample rates raise `InvalidParameterError`; malformed audio shapes use `AudioShapeError`.
+
 ---
 
 ### Resampling

@@ -4,7 +4,13 @@ from __future__ import annotations
 
 import numpy as np
 
-from ._validation import validate_audio, validate_finite, validate_positive
+from ._automation import _RateMap
+from ._validation import (
+    validate_audio,
+    validate_finite,
+    validate_integer,
+    validate_positive,
+)
 from .exceptions import InvalidParameterError
 
 _MAX_SEARCH_CANDIDATES = 4097
@@ -156,4 +162,77 @@ def wsola_time_stretch(
 
     output /= np.maximum(normalization, np.finfo(np.float64).eps)
     reshaped = output.reshape((*moved.shape[:-1], target_length))
+    return np.moveaxis(reshaped, -1, normalized_axis).astype(source.dtype, copy=False)
+
+
+def wsola_time_stretch_rate_map(
+    audio: np.ndarray,
+    *,
+    rate_map: _RateMap,
+    target_length: int,
+    sample_rate: int,
+    axis: int = -1,
+    frame_length_ms: float = 30.0,
+    overlap_ms: float = 10.0,
+    search_ms: float = 10.0,
+) -> np.ndarray:
+    """Stretch audio using absolute source positions from a rate map."""
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
+    sample_hz = validate_positive(sample_rate, "sample_rate")
+    output_length = validate_integer(target_length, "target_length", minimum=0)
+    frame_ms = validate_finite(frame_length_ms, "frame_length_ms")
+    overlap_ms_value = validate_finite(overlap_ms, "overlap_ms")
+    search_ms_value = validate_finite(search_ms, "search_ms")
+    if frame_ms <= 0.0:
+        raise InvalidParameterError("frame_length_ms must be finite and positive")
+    if overlap_ms_value <= 0.0:
+        raise InvalidParameterError("overlap_ms must be finite and positive")
+    if search_ms_value < 0.0:
+        raise InvalidParameterError("search_ms must be finite and non-negative")
+    frame_length = max(2, round(sample_hz * frame_ms / 1000.0))
+    overlap_length = max(1, round(sample_hz * overlap_ms_value / 1000.0))
+    search_radius = max(0, round(sample_hz * search_ms_value / 1000.0))
+    if overlap_length >= frame_length:
+        raise InvalidParameterError("overlap_ms must produce less than one frame")
+    input_length = source.shape[normalized_axis]
+    if input_length == 0 or output_length == 0:
+        moved = np.moveaxis(source, normalized_axis, -1)
+        result = np.zeros((*moved.shape[:-1], output_length), dtype=source.dtype)
+        return np.moveaxis(result, -1, normalized_axis)
+    synthesis_hop = frame_length - overlap_length
+    frame_count = max(1, int(np.ceil(max(0, output_length - frame_length) / synthesis_hop)) + 1)
+    if search_radius * 2 + 1 > _MAX_SEARCH_CANDIDATES:
+        search_radius = (_MAX_SEARCH_CANDIDATES - 1) // 2
+    moved = np.moveaxis(source, normalized_axis, -1)
+    flat = moved.reshape((-1, input_length))
+    output = np.zeros((flat.shape[0], output_length), dtype=np.float64)
+    normalization = np.zeros((flat.shape[0], output_length), dtype=np.float64)
+    window = np.sin(np.pi * (np.arange(frame_length, dtype=np.float64) + 0.5) / frame_length)
+    for lane_index, lane in enumerate(flat):
+        analysis_source = _analysis_source(lane, frame_length)
+        max_start = analysis_source.size - frame_length
+        lane_output = output[lane_index]
+        for frame_index in range(frame_count):
+            synthesis_start = frame_index * synthesis_hop
+            if synthesis_start >= output_length:
+                break
+            output_time = synthesis_start / sample_hz
+            expected = round(rate_map.source_time_at(output_time) * sample_hz)
+            expected = int(np.clip(expected, 0, max_start))
+            if frame_index == 0:
+                chosen_start = expected
+            else:
+                search_start = max(0, expected - search_radius)
+                search_stop = min(max_start, expected + search_radius)
+                candidates = np.arange(search_start, search_stop + 1, dtype=np.int64)
+                reference_end = min(output_length, synthesis_start + overlap_length)
+                reference = lane_output[synthesis_start:reference_end]
+                chosen_start = _choose_candidate(analysis_source, reference, candidates, expected)
+            frame = _complete_slice(analysis_source, chosen_start, frame_length)
+            output_end = min(output_length, synthesis_start + frame_length)
+            frame_size = output_end - synthesis_start
+            lane_output[synthesis_start:output_end] += frame[:frame_size] * window[:frame_size]
+            normalization[lane_index, synthesis_start:output_end] += window[:frame_size]
+    output /= np.maximum(normalization, np.finfo(np.float64).eps)
+    reshaped = output.reshape((*moved.shape[:-1], output_length))
     return np.moveaxis(reshaped, -1, normalized_axis).astype(source.dtype, copy=False)

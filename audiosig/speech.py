@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Literal
 
 import numpy as np
 
+from ._automation import _LinearEnvelope, _RateMap, _validate_points
 from ._resampling import resample_to_length
 from ._validation import (
     validate_audio,
     validate_boolean,
+    validate_choices,
     validate_filter,
     validate_finite,
     validate_gain_db,
@@ -20,6 +23,7 @@ from .amplitude import apply_gain_db
 from .effects import time_stretch
 from .exceptions import InvalidParameterError
 
+SpeechEffectsEnvelopeMethod = Literal["wsola", "td_psola"]
 SpeechEffectsMethod = Literal["phase_vocoder", "wsola", "esola", "td_psola"]
 
 
@@ -118,3 +122,99 @@ def apply_speech_effects(
     elif clip_value:
         result = np.clip(result, -1.0, 1.0).astype(source.dtype, copy=False)
     return np.array(result, dtype=source.dtype, copy=True)
+
+
+def speech_effects_output_frames(
+    input_frames: int,
+    *,
+    sample_rate: int,
+    rate_points: Sequence[tuple[float, float]] = (),
+) -> int:
+    """Return exact rounded output frames for a speech rate envelope.
+
+    Control-point times are measured in output seconds. An omitted rate curve
+    means a constant rate of 1.0.
+    """
+    return _RateMap(rate_points).output_frames_for_input_frames(input_frames, sample_rate)
+
+
+def apply_speech_effects_envelope(
+    audio: np.ndarray,
+    *,
+    sample_rate: int,
+    rate_points: Sequence[tuple[float, float]] = (),
+    pitch_points: Sequence[tuple[float, float]] = (),
+    time_base: Literal["output"] = "output",
+    interpolation: Literal["linear"] = "linear",
+    method: SpeechEffectsEnvelopeMethod = "wsola",
+    axis: int = -1,
+) -> np.ndarray:
+    """Apply numeric output-time rate and semitone pitch envelopes to speech.
+
+    Each supplied curve starts at output time zero, interpolates linearly, and
+    holds its final value. Rate values are positive playback factors. Pitch
+    values are semitone offsets. Downstream applications own semantic policy.
+    """
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
+    sample_hz = validate_integer(sample_rate, "sample_rate")
+    validate_choices(time_base, ("output",), "time_base")
+    validate_choices(interpolation, ("linear",), "interpolation")
+    validate_choices(method, ("wsola", "td_psola"), "method")
+    rates = _validate_points(
+        rate_points, name="rate_points", positive_values=True, allow_empty=True
+    )
+    pitches = _validate_points(pitch_points, name="pitch_points", allow_empty=True)
+    max_octaves = np.log2(np.finfo(np.float64).max)
+    min_octaves = np.log2(np.nextafter(0.0, 1.0))
+    if any(not min_octaves <= semitones / 12.0 < max_octaves for _, semitones in pitches):
+        raise InvalidParameterError("pitch points produce an unrepresentable pitch ratio")
+    if not rates and not pitches:
+        raise InvalidParameterError("at least one of rate_points or pitch_points is required")
+
+    rate_envelope = _LinearEnvelope(rates, default=1.0, name="rate_points", positive_values=True)
+    pitch_envelope = _LinearEnvelope(pitches, default=0.0, name="pitch_points")
+    rate_value = (
+        rate_envelope.value_at(0.0)
+        if not rates or all(point[1] == rates[0][1] for point in rates)
+        else None
+    )
+    pitch_value = (
+        pitch_envelope.value_at(0.0)
+        if not pitches or all(point[1] == pitches[0][1] for point in pitches)
+        else None
+    )
+    input_frames = source.shape[normalized_axis]
+    rate_map = _RateMap(rates)
+    target_frames = rate_map.output_frames_for_input_frames(input_frames, sample_hz)
+    if input_frames == 0:
+        return np.array(source, copy=True)
+    if rate_value is not None and pitch_value is not None:
+        return apply_speech_effects(
+            source,
+            sample_rate=sample_hz,
+            rate=rate_value,
+            semitones=pitch_value,
+            method=method,
+            axis=normalized_axis,
+        )
+    if rate_value is None and pitch_value == 0.0 and method == "wsola":
+        from ._wsola import wsola_time_stretch_rate_map
+
+        result = wsola_time_stretch_rate_map(
+            source,
+            rate_map=rate_map,
+            target_length=target_frames,
+            sample_rate=sample_hz,
+            axis=normalized_axis,
+        )
+        return np.array(result, dtype=source.dtype, copy=True)
+    from ._td_psola import td_psola_prosody_envelope
+
+    return td_psola_prosody_envelope(
+        source,
+        sample_rate=sample_hz,
+        target_length=target_frames,
+        rate_map=rate_map,
+        pitch_envelope=pitch_envelope,
+        axis=normalized_axis,
+    )

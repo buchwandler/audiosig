@@ -82,6 +82,16 @@ or polyphonic pitch-shifting backend.
 TD-PSOLA remains experimental until objective, runtime, and real-speech
 listening gates pass. See the [evaluation protocol](td-psola-listening-evaluation-2026-07-31.md).
 
+## Time-varying speech envelopes
+
+`apply_speech_effects_envelope` is available since AudioSig 0.1.5. It accepts only numeric control points and leaves higher-level meaning to calling applications. Rate values are positive playback factors; pitch values are semitones. Control-point times use output seconds, both curves interpolate linearly, the first point is at zero, and the final point is held. No repeated calls to static effects or chunk stitching are used.
+
+For output time `y`, the rate map consumes source time `x(y) = integral(0, y, r(u) du)`. Linear segments are integrated analytically in float64. AudioSig solves the inverse map at the input duration and rounds `output_seconds * sample_rate` once to determine the output frame count. `speech_effects_output_frames` exposes that same calculation for downstream timing prediction. Pitch-only envelopes preserve exact input length.
+
+Variable rate-only processing defaults to mapped WSOLA, where each expected source frame is computed from the absolute integrated map and overlap search remains local and deterministic. Selecting `method="td_psola"` uses voiced pulse synthesis with mapped WSOLA fallback for rate-only curves. When pitch varies, TD-PSOLA controls voiced pulse spacing from output-time semitone values, while unvoiced spans use the same mapped WSOLA rate trajectory. This coordinated path is speech-oriented and does not claim vocal-formant preservation.
+
+Omitted rate and pitch curves mean `1.0` and `0.0`. Clips shorter than the requested transition duration evaluate only the output-time portion that exists; they do not compress the curve. Digital silence remains digital silence. The same timing map and control points apply to all channels. Identical inputs and parameters are deterministic within an AudioSig version, but bit-identical output across versions is not promised.
+
 ## Resampling Internals
 
 AudioSig uses windowed-sinc interpolation:

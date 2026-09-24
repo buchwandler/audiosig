@@ -48,7 +48,13 @@ from .silence import (
     trim,
     zero_crossing_rate,
 )
-from .speech import SpeechEffectsMethod, apply_speech_effects
+from .speech import (
+    SpeechEffectsEnvelopeMethod,
+    SpeechEffectsMethod,
+    apply_speech_effects,
+    apply_speech_effects_envelope,
+    speech_effects_output_frames,
+)
 
 __all__ = [
     "AudioShapeError",
@@ -56,6 +62,7 @@ __all__ = [
     "InvalidParameterError",
     "LoudnessMetrics",
     "PitchShiftMethod",
+    "SpeechEffectsEnvelopeMethod",
     "SpeechEffectsMethod",
     "TimeStretchMethod",
     "__version__",
@@ -64,6 +71,7 @@ __all__ = [
     "amplitude_to_db",
     "apply_gain_db",
     "apply_speech_effects",
+    "apply_speech_effects_envelope",
     "downmix_to_mono",
     "energy_based_vad",
     "find_smooth_cut_point",
@@ -90,6 +98,7 @@ __all__ = [
     "sample_peak_dbfs",
     "short_time_energy",
     "spectral_flux",
+    "speech_effects_output_frames",
     "split",
     "time_stretch",
     "trim",

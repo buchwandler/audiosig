@@ -115,6 +115,31 @@ speech_up = apply_speech_effects(
 TD-PSOLA does not guarantee formant preservation, does not pitch unvoiced
 regions, and is not intended for music or polyphonic material.
 
+### Time-varying Speech Effects
+
+Available since AudioSig 0.1.5, `apply_speech_effects_envelope` accepts numeric curves in output seconds. Rate is a positive playback factor; pitch is a semitone offset. Both curves interpolate linearly and hold their final values.
+
+```python
+from audiosig import apply_speech_effects_envelope, speech_effects_output_frames
+
+out = apply_speech_effects_envelope(
+    audio,
+    sample_rate=24_000,
+    rate_points=[(0.0, 1.0), (0.45, 0.85)],
+    pitch_points=[(0.0, 0.0), (0.30, 2.0)],
+)
+frames = speech_effects_output_frames(
+    audio.shape[-1],
+    sample_rate=24_000,
+    rate_points=[(0.0, 1.0), (0.45, 0.85)],
+)
+assert out.shape[-1] == frames
+```
+
+Control-point times are measured on the transformed output timeline. Omit either curve to use its neutral value, rate `1.0` or pitch `0.0`. A short clip does not compress the requested envelope. Variable pitch uses TD-PSOLA on voiced material and WSOLA rate mapping for unvoiced fallback; it is intended for speech, not general music or formant-preserving pitch shifting.
+
+Envelope output is deterministic for identical input and parameters within one AudioSig version. Exact PCM is not promised across versions.
+
 ### Resampling Examples
 
 ```python

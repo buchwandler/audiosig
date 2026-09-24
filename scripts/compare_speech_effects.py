@@ -12,7 +12,13 @@ from time import perf_counter
 
 import numpy as np
 
-from audiosig import apply_speech_effects, pitch_shift, time_stretch
+from audiosig import (
+    apply_speech_effects,
+    apply_speech_effects_envelope,
+    pitch_shift,
+    speech_effects_output_frames,
+    time_stretch,
+)
 from audiosig._pitch import estimate_pitch_track
 
 DEFAULT_RATES = (0.75, 0.85, 1.15, 1.30, 1.50)
@@ -88,6 +94,7 @@ def _metric(
         "duration_seconds": samples / sample_rate,
         "rms": float(np.sqrt(np.mean(np.square(values), dtype=np.float64))),
         "peak": float(np.max(np.abs(values))) if values.size else 0.0,
+        "expected_samples": requested_length,
         "length_error": samples - requested_length if requested_length is not None else 0,
         "continuity_max_jump": float(np.max(np.abs(differences))) if differences.size else 0.0,
         "continuity_rms_jump": (
@@ -135,6 +142,7 @@ def compare(
     output_dir: Path,
     rates: tuple[float, ...],
     semitones: tuple[float, ...],
+    envelopes: bool = False,
 ) -> list[dict[str, object]]:
     audio, sample_rate = _read_pcm(input_path)
     records: list[dict[str, object]] = []
@@ -165,6 +173,29 @@ def compare(
                     runtime_seconds=elapsed,
                 )
             )
+        if envelopes:
+            rate_points = ((0.0, 1.0), (0.45, rate))
+            envelope_length = speech_effects_output_frames(
+                audio.shape[-1], sample_rate=sample_rate, rate_points=rate_points
+            )
+            started = perf_counter()
+            rendered = apply_speech_effects_envelope(
+                audio, sample_rate=sample_rate, rate_points=rate_points
+            )
+            elapsed = perf_counter() - started
+            filename = f"envelope_rate-{_number(rate)}.wav"
+            _write_pcm(output_dir / filename, rendered, sample_rate)
+            record = _metric(
+                rendered,
+                sample_rate,
+                method="envelope_rate",
+                rate=rate,
+                semitones=0.0,
+                requested_length=envelope_length,
+                runtime_seconds=elapsed,
+            )
+            record["rate_points"] = rate_points
+            records.append(record)
         for pitch in semitones:
             started = perf_counter()
             rendered = pitch_shift(
@@ -188,6 +219,27 @@ def compare(
                     tracker_stats=tracker_stats,
                 )
             )
+            if envelopes and rate == rates[0]:
+                pitch_points = ((0.0, 0.0), (0.3, pitch))
+                started = perf_counter()
+                rendered = apply_speech_effects_envelope(
+                    audio, sample_rate=sample_rate, pitch_points=pitch_points
+                )
+                elapsed = perf_counter() - started
+                filename = f"envelope_pitch-{_number(pitch)}st.wav"
+                _write_pcm(output_dir / filename, rendered, sample_rate)
+                record = _metric(
+                    rendered,
+                    sample_rate,
+                    method="envelope_pitch",
+                    rate=1.0,
+                    semitones=pitch,
+                    requested_length=audio.shape[-1],
+                    runtime_seconds=elapsed,
+                    tracker_stats=tracker_stats,
+                )
+                record["pitch_points"] = pitch_points
+                records.append(record)
             pitch_ratio = float(np.exp2(pitch / 12.0))
             backend_rate = rate / pitch_ratio
             combined_methods = [("wsola", True)]
@@ -219,6 +271,35 @@ def compare(
                         tracker_stats=tracker_stats if method == "td_psola" else None,
                     )
                 )
+            if envelopes:
+                rate_points = ((0.0, 1.0), (0.45, rate))
+                pitch_points = ((0.0, 0.0), (0.3, pitch))
+                envelope_length = speech_effects_output_frames(
+                    audio.shape[-1], sample_rate=sample_rate, rate_points=rate_points
+                )
+                started = perf_counter()
+                rendered = apply_speech_effects_envelope(
+                    audio,
+                    sample_rate=sample_rate,
+                    rate_points=rate_points,
+                    pitch_points=pitch_points,
+                )
+                elapsed = perf_counter() - started
+                filename = f"envelope_combined_rate-{_number(rate)}_pitch-{_number(pitch)}st.wav"
+                _write_pcm(output_dir / filename, rendered, sample_rate)
+                record = _metric(
+                    rendered,
+                    sample_rate,
+                    method="envelope_combined",
+                    rate=rate,
+                    semitones=pitch,
+                    requested_length=envelope_length,
+                    runtime_seconds=elapsed,
+                    tracker_stats=tracker_stats,
+                )
+                record["rate_points"] = rate_points
+                record["pitch_points"] = pitch_points
+                records.append(record)
     return records
 
 
@@ -228,8 +309,15 @@ def main() -> int:
     parser.add_argument("output_dir", type=Path, help="directory for rendered WAVs and metrics")
     parser.add_argument("--rates", nargs="+", type=float, default=DEFAULT_RATES)
     parser.add_argument("--semitones", nargs="+", type=float, default=DEFAULT_SEMITONES)
+    parser.add_argument(
+        "--envelopes",
+        action="store_true",
+        help="render linear rate/pitch envelope A/B examples alongside static cases",
+    )
     args = parser.parse_args()
-    records = compare(args.input, args.output_dir, tuple(args.rates), tuple(args.semitones))
+    records = compare(
+        args.input, args.output_dir, tuple(args.rates), tuple(args.semitones), args.envelopes
+    )
     json_path = args.output_dir / "metrics.json"
     csv_path = args.output_dir / "metrics.csv"
     args.output_dir.mkdir(parents=True, exist_ok=True)

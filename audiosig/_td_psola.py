@@ -6,9 +6,15 @@ from typing import cast
 
 import numpy as np
 
+from ._automation import _LinearEnvelope, _RateMap
 from ._pitch import PitchTrack, estimate_pitch_track_lane
 from ._resampling import resample_to_length
-from ._validation import validate_audio, validate_finite, validate_positive
+from ._validation import (
+    validate_audio,
+    validate_finite,
+    validate_integer,
+    validate_positive,
+)
 from .exceptions import InvalidParameterError
 
 _MIN_RATE = 0.75
@@ -356,4 +362,187 @@ def td_psola_prosody(
             pitch_ceiling=ceiling,
         )
     reshaped = output.reshape((*moved.shape[:-1], target_length))
+    return np.moveaxis(reshaped, -1, normalized_axis).astype(source.dtype, copy=False)
+
+
+def _target_marks_with_envelopes(
+    source_marks: np.ndarray,
+    *,
+    source_length: int,
+    target_length: int,
+    sample_rate: int,
+    rate_map: _RateMap,
+    pitch_envelope: _LinearEnvelope,
+) -> tuple[np.ndarray, np.ndarray]:
+    if source_marks.size == 0:
+        return np.empty(0, dtype=np.int64), np.empty(0, dtype=np.float64)
+    first = rate_map.output_time_for_source_time(float(source_marks[0]) / sample_rate) * sample_rate
+    last = min(
+        float(target_length - 1),
+        rate_map.output_time_for_source_time(float(source_marks[-1]) / sample_rate) * sample_rate,
+    )
+    output_positions: list[int] = []
+    source_positions: list[float] = []
+    position = first
+    while position <= last + 1.0:
+        source_position = rate_map.source_time_at(position / sample_rate) * sample_rate
+        nearest = int(np.searchsorted(source_marks, source_position, side="left"))
+        nearest = min(nearest, source_marks.size - 1)
+        if nearest > 0 and abs(source_marks[nearest - 1] - source_position) < abs(
+            source_marks[nearest] - source_position
+        ):
+            nearest -= 1
+        if 0.0 <= source_position < source_length:
+            output_positions.append(round(position))
+            source_positions.append(float(source_marks[nearest]))
+        if nearest + 1 < source_marks.size:
+            local_period = float(source_marks[nearest + 1] - source_marks[nearest])
+        elif nearest > 0:
+            local_period = float(source_marks[nearest] - source_marks[nearest - 1])
+        else:
+            local_period = 1.0
+        semitones = pitch_envelope.value_at(position / sample_rate)
+        pitch_ratio = float(np.exp2(semitones / 12.0))
+        position += max(1.0, local_period / pitch_ratio)
+    if not output_positions:
+        return np.empty(0, dtype=np.int64), np.empty(0, dtype=np.float64)
+    positions = np.asarray(output_positions, dtype=np.int64)
+    mapped_sources = np.asarray(source_positions, dtype=np.float64)
+    keep = np.r_[True, np.diff(positions) > 0]
+    return positions[keep], mapped_sources[keep]
+
+
+def _voiced_output_mask_with_rate_map(
+    track: PitchTrack,
+    *,
+    sample_rate: int,
+    rate_map: _RateMap,
+    target_length: int,
+    normalization: np.ndarray,
+) -> np.ndarray:
+    mask = np.zeros(target_length, dtype=np.float64)
+    for source_start, source_end in track.voiced_intervals:
+        start = max(
+            0, round(rate_map.output_time_for_source_time(source_start / sample_rate) * sample_rate)
+        )
+        end = min(
+            target_length,
+            round(rate_map.output_time_for_source_time(source_end / sample_rate) * sample_rate),
+        )
+        mask[start:end] = 1.0
+    mask *= normalization > 0.25
+    fade = max(1, round(sample_rate * 0.004))
+    if fade > 1 and np.any(mask):
+        kernel = np.hanning(2 * fade + 1)
+        kernel /= np.sum(kernel)
+        mask = np.convolve(mask, kernel, mode="same")
+        mask = np.clip(mask * 1.8, 0.0, 1.0)
+    return mask
+
+
+def _voiced_td_psola_lane_with_envelopes(
+    signal: np.ndarray,
+    track: PitchTrack,
+    *,
+    sample_rate: int,
+    target_length: int,
+    rate_map: _RateMap,
+    pitch_envelope: _LinearEnvelope,
+) -> tuple[np.ndarray, np.ndarray]:
+    target_marks, mapped_source_marks = _target_marks_with_envelopes(
+        track.pitch_marks,
+        source_length=signal.size,
+        target_length=target_length,
+        sample_rate=sample_rate,
+        rate_map=rate_map,
+        pitch_envelope=pitch_envelope,
+    )
+    output, normalization = _overlap_add_grains(
+        signal,
+        track.pitch_marks,
+        target_marks,
+        mapped_source_marks,
+        target_length,
+    )
+    output /= np.maximum(normalization, _EPSILON)
+    mask = _voiced_output_mask_with_rate_map(
+        track,
+        sample_rate=sample_rate,
+        rate_map=rate_map,
+        target_length=target_length,
+        normalization=normalization,
+    )
+    return output, mask
+
+
+def _duration_fallback_with_rate_map(
+    signal: np.ndarray,
+    *,
+    sample_rate: int,
+    rate_map: _RateMap,
+    target_length: int,
+) -> np.ndarray:
+    from ._wsola import wsola_time_stretch_rate_map
+
+    result = wsola_time_stretch_rate_map(
+        signal[None, :],
+        rate_map=rate_map,
+        target_length=target_length,
+        sample_rate=sample_rate,
+        axis=-1,
+    )
+    return np.asarray(result[0], dtype=np.float64)
+
+
+def td_psola_prosody_envelope(
+    audio: np.ndarray,
+    *,
+    sample_rate: int,
+    target_length: int,
+    rate_map: _RateMap,
+    pitch_envelope: _LinearEnvelope,
+    axis: int = -1,
+    pitch_floor: float = 60.0,
+    pitch_ceiling: float = 500.0,
+) -> np.ndarray:
+    """Apply coordinated variable-rate and variable-pitch TD-PSOLA."""
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
+    sample_hz = validate_integer(sample_rate, "sample_rate")
+    output_length = validate_integer(target_length, "target_length", minimum=0)
+    floor = validate_positive(pitch_floor, "pitch_floor")
+    ceiling = validate_positive(pitch_ceiling, "pitch_ceiling")
+    if ceiling <= floor or ceiling >= sample_hz / 2.0:
+        raise InvalidParameterError(
+            "pitch_ceiling must be greater than pitch_floor and below Nyquist"
+        )
+    input_length = source.shape[normalized_axis]
+    moved = np.moveaxis(source, normalized_axis, -1)
+    if input_length == 0 or output_length == 0:
+        result = np.zeros((*moved.shape[:-1], output_length), dtype=source.dtype)
+        return np.moveaxis(result, -1, normalized_axis)
+    flat = moved.reshape((-1, input_length))
+    output = np.empty((flat.shape[0], output_length), dtype=np.float64)
+    for lane_index, lane in enumerate(flat):
+        track = estimate_pitch_track_lane(
+            lane, sample_rate=sample_hz, pitch_floor=floor, pitch_ceiling=ceiling
+        )
+        fallback = _duration_fallback_with_rate_map(
+            lane,
+            sample_rate=sample_hz,
+            rate_map=rate_map,
+            target_length=output_length,
+        )
+        if track.pitch_marks.size < 3:
+            output[lane_index] = fallback
+            continue
+        direct, mask = _voiced_td_psola_lane_with_envelopes(
+            lane,
+            track,
+            sample_rate=sample_hz,
+            target_length=output_length,
+            rate_map=rate_map,
+            pitch_envelope=pitch_envelope,
+        )
+        output[lane_index] = direct * mask + fallback * (1.0 - mask)
+    reshaped = output.reshape((*moved.shape[:-1], output_length))
     return np.moveaxis(reshaped, -1, normalized_axis).astype(source.dtype, copy=False)
