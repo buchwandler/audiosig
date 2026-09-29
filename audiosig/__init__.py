@@ -19,7 +19,9 @@ from .boundaries import find_smooth_cut_point
 from .effects import PitchShiftMethod, TimeStretchMethod, pitch_shift, time_stretch
 from .exceptions import AudioShapeError, AudioSignalError, InvalidParameterError
 from .loudness import (
+    LoudnessAnalysis,
     LoudnessMetrics,
+    analyze_loudness,
     integrated_loudness,
     measure_loudness,
     sample_peak_dbfs,
@@ -60,6 +62,7 @@ __all__ = [
     "AudioShapeError",
     "AudioSignalError",
     "InvalidParameterError",
+    "LoudnessAnalysis",
     "LoudnessMetrics",
     "PitchShiftMethod",
     "SpeechEffectsEnvelopeMethod",
@@ -69,6 +72,7 @@ __all__ = [
     "abs2",
     "activity_to_intervals",
     "amplitude_to_db",
+    "analyze_loudness",
     "apply_gain_db",
     "apply_speech_effects",
     "apply_speech_effects_envelope",

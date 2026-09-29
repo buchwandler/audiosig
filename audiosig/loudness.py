@@ -9,7 +9,7 @@ import numpy as np
 
 from ._resampling import resample
 from ._validation import validate_audio, validate_integer
-from .exceptions import AudioShapeError
+from .exceptions import AudioShapeError, InvalidParameterError
 
 _ABSOLUTE_GATE_LUFS = -70.0
 _RELATIVE_GATE_LU = -10.0
@@ -20,11 +20,11 @@ _LUFS_OFFSET = -0.691
 
 @dataclass(frozen=True, slots=True)
 class LoudnessMetrics:
-    """Immutable loudness and peak measurements for one audio signal."""
+    """Immutable loudness and peak measurements; unrequested metrics are ``None``."""
 
-    integrated_lufs: float
-    sample_peak_dbfs: float
-    true_peak_dbtp: float
+    integrated_lufs: float | None
+    sample_peak_dbfs: float | None
+    true_peak_dbtp: float | None
 
 
 def _validate_mono_audio(audio: np.ndarray, axis: int) -> np.ndarray:
@@ -134,8 +134,12 @@ def _block_mean_squares(weighted: np.ndarray, sample_rate: int) -> np.ndarray:
         return np.empty(0, dtype=np.float64)
     block_count = 1 + (weighted.size - block_size) // hop_size
     starts = np.arange(block_count, dtype=np.intp) * hop_size
-    blocks = np.lib.stride_tricks.sliding_window_view(weighted, block_size)[starts]
-    return np.asarray(np.mean(blocks * blocks, axis=1, dtype=np.float64), dtype=np.float64)
+    stops = starts + block_size
+    prefix = np.empty(weighted.size + 1, dtype=np.float64)
+    prefix[0] = 0.0
+    np.multiply(weighted, weighted, out=prefix[1:])
+    np.cumsum(prefix[1:], dtype=np.float64, out=prefix[1:])
+    return (prefix[stops] - prefix[starts]) / block_size
 
 
 def _energy_to_lufs(energy: float) -> float:
@@ -144,25 +148,9 @@ def _energy_to_lufs(energy: float) -> float:
     return _LUFS_OFFSET + 10.0 * math.log10(energy)
 
 
-def integrated_loudness(
-    audio: np.ndarray,
-    *,
-    sample_rate: int,
-    axis: int = -1,
-) -> float:
-    """Measure BS.1770-style gated integrated loudness in LUFS.
-
-    V1 accepts finite one-dimensional mono NumPy audio. Complete 400 ms blocks
-    are analyzed with a 100 ms hop; audio shorter than one complete block has
-    no reportable integrated loudness and returns ``-math.inf`` without padding.
-    """
-    signal = _validate_mono_audio(audio, axis)
-    rate = _validate_sample_rate(sample_rate)
-    weighted = _k_weight(np.asarray(signal, dtype=np.float64), rate)
-    energies = _block_mean_squares(weighted, rate)
+def _integrated_loudness_from_energies(energies: np.ndarray) -> float:
     if energies.size == 0:
         return -math.inf
-
     absolute_threshold = 10.0 ** ((_ABSOLUTE_GATE_LUFS - _LUFS_OFFSET) / 10.0)
     absolute = energies >= absolute_threshold
     if not np.any(absolute):
@@ -177,6 +165,30 @@ def integrated_loudness(
     return float(_energy_to_lufs(float(np.mean(energies[gated], dtype=np.float64))))
 
 
+def integrated_loudness(
+    audio: np.ndarray,
+    *,
+    sample_rate: int,
+    axis: int = -1,
+) -> float:
+    """Measure BS.1770-style gated integrated loudness in LUFS.
+
+    Complete 400 ms blocks are analyzed with a 100 ms hop. Audio shorter than
+    one complete block has no reportable integrated loudness and returns
+    ``-math.inf`` without padding.
+    """
+    analysis = analyze_loudness(
+        audio,
+        sample_rate=sample_rate,
+        axis=axis,
+        integrated=True,
+        sample_peak=False,
+        true_peak=False,
+    )
+    assert analysis.integrated_lufs is not None
+    return analysis.integrated_lufs
+
+
 def sample_peak_dbfs(audio: np.ndarray, *, axis: int = -1) -> float:
     """Return the largest absolute sample level in dBFS."""
     signal = _validate_mono_audio(audio, axis)
@@ -186,6 +198,49 @@ def sample_peak_dbfs(audio: np.ndarray, *, axis: int = -1) -> float:
     return float(20.0 * math.log10(peak))
 
 
+_TRUE_PEAK_PHASE_COEFFICIENTS = np.asarray(
+    (
+        (0.001708984375, -0.0291748046875, -0.0189208984375, -0.00830078125),
+        (0.010986328125, 0.029296875, 0.0330810546875, 0.014892578125),
+        (-0.0196533203125, -0.0517578125, -0.0582275390625, -0.026611328125),
+        (0.033203125, 0.089111328125, 0.1015625, 0.047607421875),
+        (-0.0594482421875, -0.16650390625, -0.2003173828125, -0.102294921875),
+        (0.1373291015625, 0.465087890625, 0.77978515625, 0.97216796875),
+        (0.97216796875, 0.77978515625, 0.465087890625, 0.1373291015625),
+        (-0.102294921875, -0.2003173828125, -0.16650390625, -0.0594482421875),
+        (0.047607421875, 0.1015625, 0.089111328125, 0.033203125),
+        (-0.026611328125, -0.0582275390625, -0.0517578125, -0.0196533203125),
+        (0.014892578125, 0.0330810546875, 0.029296875, 0.010986328125),
+        (-0.00830078125, -0.0189208984375, -0.0291748046875, 0.001708984375),
+    ),
+    dtype=np.float64,
+)
+_TRUE_PEAK_CHUNK_SIZE = 8192
+
+
+def _stream_true_peak(signal: np.ndarray) -> float:
+    """Return a 4-phase FIR peak while retaining only one bounded input chunk."""
+    coefficients = _TRUE_PEAK_PHASE_COEFFICIENTS
+    history_size = coefficients.shape[0] - 1
+    history = np.zeros(history_size, dtype=np.float64)
+    peak = 0.0
+
+    def consume(chunk: np.ndarray) -> None:
+        nonlocal history, peak
+        extended = np.concatenate((history, chunk))
+        output_start = history.size
+        output_stop = output_start + chunk.size
+        for phase in range(coefficients.shape[1]):
+            interpolated = np.convolve(extended, coefficients[:, phase], mode="full")
+            peak = max(peak, float(np.max(np.abs(interpolated[output_start:output_stop]))))
+        history = extended[-history_size:]
+
+    for start in range(0, signal.size, _TRUE_PEAK_CHUNK_SIZE):
+        consume(signal[start : start + _TRUE_PEAK_CHUNK_SIZE])
+    consume(np.zeros(history_size, dtype=np.float64))
+    return peak
+
+
 def true_peak_dbtp(
     audio: np.ndarray,
     *,
@@ -193,27 +248,129 @@ def true_peak_dbtp(
     axis: int = -1,
     oversample: int = 4,
 ) -> float:
-    """Estimate inter-sample peak level in dBTP by NumPy oversampling.
+    """Estimate inter-sample peak level in dBTP without materializing 4x audio.
 
-    ``oversample=1`` measures the discrete sample peak. Values greater than
-    one use AudioSig's windowed-sinc resampler and never alter the input.
+    The standard 4x path uses the 48-tap, 4-phase FIR example from ITU-R
+    BS.1770-5 Annex 2 and streams the input in bounded chunks. Other oversample
+    factors retain the historical general-purpose resampler behavior.
     """
     signal = _validate_mono_audio(audio, axis)
     rate = _validate_sample_rate(sample_rate)
     factor = validate_integer(oversample, "oversample", minimum=1)
-    sample_peak = float(np.max(np.abs(np.asarray(signal, dtype=np.float64))))
+    values = np.asarray(signal, dtype=np.float64)
+    sample_peak = float(np.max(np.abs(values)))
     if sample_peak == 0.0:
         return -math.inf
     if factor == 1:
         return float(20.0 * math.log10(sample_peak))
-    oversampled = resample(
-        np.asarray(signal, dtype=np.float64),
-        source_rate=rate,
-        target_rate=rate * factor,
-        filter_width=32,
-    )
-    peak = max(sample_peak, float(np.max(np.abs(np.asarray(oversampled, dtype=np.float64)))))
+    if factor == 4:
+        peak = max(sample_peak, _stream_true_peak(values))
+    else:
+        oversampled = resample(
+            values,
+            source_rate=rate,
+            target_rate=rate * factor,
+            filter_width=32,
+        )
+        peak = max(sample_peak, float(np.max(np.abs(np.asarray(oversampled, dtype=np.float64)))))
     return float(20.0 * math.log10(peak))
+
+
+@dataclass(frozen=True, slots=True)
+class LoudnessAnalysis:
+    """Reusable measurements and block energies for uniform-gain evaluation."""
+
+    sample_rate: int
+    block_mean_squares: np.ndarray | None
+    integrated_lufs: float | None
+    sample_peak_dbfs: float | None
+    true_peak_dbtp: float | None
+
+    def __post_init__(self) -> None:
+        if self.block_mean_squares is not None:
+            self.block_mean_squares.setflags(write=False)
+
+    def metrics(self) -> LoudnessMetrics:
+        """Return the metrics measured during analysis; unselected values are None."""
+        return LoudnessMetrics(
+            integrated_lufs=self.integrated_lufs,
+            sample_peak_dbfs=self.sample_peak_dbfs,
+            true_peak_dbtp=self.true_peak_dbtp,
+        )
+
+    def metrics_after_gain(self, gain_db: float) -> LoudnessMetrics:
+        """Derive metrics after uniform gain and re-run BS.1770 gating from cached blocks."""
+        if isinstance(gain_db, bool):
+            raise InvalidParameterError("gain_db must be a finite real number")
+        try:
+            gain = float(gain_db)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise InvalidParameterError("gain_db must be a finite real number") from exc
+        if not math.isfinite(gain):
+            raise InvalidParameterError("gain_db must be a finite real number")
+        integrated = self.integrated_lufs
+        if self.block_mean_squares is not None:
+            gain_factor = 10.0 ** (gain / 10.0)
+            integrated = _integrated_loudness_from_energies(self.block_mean_squares * gain_factor)
+
+        def shifted(value: float | None) -> float | None:
+            if value is None or not math.isfinite(value):
+                return value
+            return float(value + gain)
+
+        return LoudnessMetrics(
+            integrated_lufs=integrated,
+            sample_peak_dbfs=shifted(self.sample_peak_dbfs),
+            true_peak_dbtp=shifted(self.true_peak_dbtp),
+        )
+
+
+def analyze_loudness(
+    audio: np.ndarray,
+    *,
+    sample_rate: int,
+    axis: int = -1,
+    integrated: bool = True,
+    sample_peak: bool = True,
+    true_peak: bool = True,
+    true_peak_oversample: int = 4,
+) -> LoudnessAnalysis:
+    """Analyze selected loudness metrics and retain only reusable block statistics."""
+    for name, selected in (
+        ("integrated", integrated),
+        ("sample_peak", sample_peak),
+        ("true_peak", true_peak),
+    ):
+        if not isinstance(selected, bool):
+            raise InvalidParameterError(f"{name} must be a bool")
+    signal = _validate_mono_audio(audio, axis)
+    rate = _validate_sample_rate(sample_rate)
+    energies = None
+    integrated_value = None
+    if integrated:
+        weighted = _k_weight(np.asarray(signal, dtype=np.float64), rate)
+        energies = _block_mean_squares(weighted, rate)
+        integrated_value = _integrated_loudness_from_energies(energies)
+    values = np.asarray(signal, dtype=np.float64)
+    sample_peak_value = None
+    if sample_peak:
+        peak = float(np.max(np.abs(values)))
+        sample_peak_value = -math.inf if peak == 0.0 else float(20.0 * math.log10(peak))
+    true_peak_value = None
+    if true_peak:
+        true_peak_value = true_peak_dbtp(
+            signal,
+            sample_rate=rate,
+            axis=axis,
+            oversample=true_peak_oversample,
+        )
+    return LoudnessAnalysis(
+        sample_rate=rate,
+        block_mean_squares=energies,
+        integrated_lufs=integrated_value,
+        sample_peak_dbfs=sample_peak_value,
+        true_peak_dbtp=true_peak_value,
+    )
 
 
 def measure_loudness(
@@ -224,13 +381,9 @@ def measure_loudness(
     true_peak_oversample: int = 4,
 ) -> LoudnessMetrics:
     """Return integrated loudness, sample peak, and true peak measurements."""
-    return LoudnessMetrics(
-        integrated_lufs=integrated_loudness(audio, sample_rate=sample_rate, axis=axis),
-        sample_peak_dbfs=sample_peak_dbfs(audio, axis=axis),
-        true_peak_dbtp=true_peak_dbtp(
-            audio,
-            sample_rate=sample_rate,
-            axis=axis,
-            oversample=true_peak_oversample,
-        ),
-    )
+    return analyze_loudness(
+        audio,
+        sample_rate=sample_rate,
+        axis=axis,
+        true_peak_oversample=true_peak_oversample,
+    ).metrics()
