@@ -1,0 +1,15 @@
+rows:
+  - sha: 4d5cedb8fc77dd0cb956429a2a362a195e12849a
+    inspected: true
+    inspected_paths:
+      - audiosig/__init__.py
+      - audiosig/loudness.py
+      - benchmarks/bench_loudness.py
+      - tests/test_loudness.py
+    observed_behavior: "Added exported selective loudness analysis, reusable gain-adjusted block metrics, prefix-sum block processing, a memory-bounded 4x true-peak FIR meter, and regression/conformance tests."
+    public_impact: public
+    decision: accepted
+    target_entry_key: null
+    target_entry_id: null
+    notes: ""
+    stale: false

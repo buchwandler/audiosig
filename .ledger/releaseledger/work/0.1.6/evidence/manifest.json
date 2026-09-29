@@ -1,0 +1,28 @@
+{
+  "candidate_count": 1,
+  "candidates": [
+    {
+      "additions": 478,
+      "deletions": 45,
+      "patch_file": "4d5cedb.patch",
+      "patch_sha256": "11bb67ac91d21aa7a7f659b124873fdfdb9db24e80f857e6305cf4486d328edc",
+      "paths": [
+        "audiosig/__init__.py",
+        "audiosig/loudness.py",
+        "benchmarks/bench_loudness.py",
+        "tests/test_loudness.py"
+      ],
+      "sha": "4d5cedb8fc77dd0cb956429a2a362a195e12849a",
+      "short_sha": "4d5cedb",
+      "source_ref": "git:4d5cedb8fc77dd0cb956429a2a362a195e12849a"
+    }
+  ],
+  "git_base_ref": "ca74470524957f2b155920aaea7a7bab24f08b7f",
+  "git_base_sha": "ca74470524957f2b155920aaea7a7bab24f08b7f",
+  "git_head_ref": "4d5cedb8fc77dd0cb956429a2a362a195e12849a",
+  "git_head_sha": "4d5cedb8fc77dd0cb956429a2a362a195e12849a",
+  "include_merges": "nontrivial",
+  "object_type": "git_evidence_manifest",
+  "release_version": "0.1.6",
+  "schema_version": 1
+}

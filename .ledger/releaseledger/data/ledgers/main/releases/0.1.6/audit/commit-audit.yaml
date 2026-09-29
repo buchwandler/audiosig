@@ -1,0 +1,41 @@
+schema_version: 1
+object_type: commit_audit_sheet
+versioning:
+  schema_version: 1
+  revision: 3
+release_version: 0.1.6
+git_base_ref: v0.1.5
+git_base_sha: ca74470524957f2b155920aaea7a7bab24f08b7f
+git_head_ref: HEAD
+git_head_sha: 4d5cedb8fc77dd0cb956429a2a362a195e12849a
+git_range: ca74470524957f2b155920aaea7a7bab24f08b7f..4d5cedb8fc77dd0cb956429a2a362a195e12849a
+commit_count: 1
+rows:
+  - sha: 4d5cedb8fc77dd0cb956429a2a362a195e12849a
+    source_ref: git:4d5cedb8fc77dd0cb956429a2a362a195e12849a
+    short_sha: 4d5cedb
+    changed_paths:
+      - audiosig/__init__.py
+      - audiosig/loudness.py
+      - benchmarks/bench_loudness.py
+      - tests/test_loudness.py
+    stats:
+      files_changed: 4
+      insertions: 478
+      deletions: 45
+    inspected: true
+    inspected_paths:
+      - audiosig/__init__.py
+      - audiosig/loudness.py
+      - benchmarks/bench_loudness.py
+      - tests/test_loudness.py
+    observed_behavior:
+      Added exported selective loudness analysis, reusable gain-adjusted
+      block metrics, prefix-sum block processing, a memory-bounded 4x true-peak FIR
+      meter, and regression/conformance tests.
+    public_impact: public
+    decision: accepted
+    stale: false
+    evidence_subject: "feat: better loudness algos"
+    target_entry_id: entry-0001
+    notes: ""
