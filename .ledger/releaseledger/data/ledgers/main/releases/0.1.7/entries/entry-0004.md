@@ -5,9 +5,9 @@ versioning:
   schema_version: 1
   revision: 1
 entry_id: entry-0004
-release_version: 0.1.6
+release_version: 0.1.7
 kind: changed
-summary: Excluded project-local ledger state from source distributions
+summary: Changed source distributions to exclude project-local ledger state
 status: accepted
 audience: null
 scopes: []
@@ -18,7 +18,7 @@ paths:
 issues: []
 prs: []
 sources:
-  - tl:task-0022
+  - git:51411c8b350bfd38f33fd5e786f8b9384eff90b6
 contributors: []
 breaking: false
 internal: false

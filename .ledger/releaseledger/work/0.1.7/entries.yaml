@@ -1,0 +1,59 @@
+schema: releaseledger.entry-batch.v1
+operation: create
+schema_version: 1
+object_type: release_entry_batch
+release_version: 0.1.7
+git_base_ref: 3addd4cbafca572dc9387caf88efaaa700080526
+git_base_sha: 3addd4cbafca572dc9387caf88efaaa700080526
+git_head_ref: 51411c8b350bfd38f33fd5e786f8b9384eff90b6
+git_head_sha: 51411c8b350bfd38f33fd5e786f8b9384eff90b6
+include_merges: nontrivial
+entries:
+  - kind: added
+    summary: "Added NumPy-only spectral analysis, pitch tracking, reference metrics, and STOI/ESTOI APIs"
+    status: accepted
+    source_refs:
+      - git:51411c8b350bfd38f33fd5e786f8b9384eff90b6
+    paths:
+      - audiosig/_pitch.py
+      - audiosig/intelligibility.py
+      - audiosig/metrics.py
+      - audiosig/pitch.py
+      - audiosig/spectral.py
+      - tests/test_intelligibility.py
+      - tests/test_metrics.py
+      - tests/test_public_pitch.py
+      - tests/test_public_spectral.py
+    sources:
+      - git:51411c8b350bfd38f33fd5e786f8b9384eff90b6
+    contributors:
+      - "@holgern"
+  - kind: docs
+    summary: "Documented analysis APIs, metric formulas, validation rules, and quality-evaluation boundaries"
+    status: accepted
+    source_refs: []
+    paths:
+      - README.md
+      - docs/api-reference.md
+      - docs/quality-evaluation.md
+    sources:
+      - git:51411c8b350bfd38f33fd5e786f8b9384eff90b6
+  - kind: quality
+    summary: "Improved regression and quality coverage for spectral, pitch, metric, intelligibility, and packaging behavior"
+    status: accepted
+    source_refs: []
+    paths:
+      - tests/test_intelligibility_quality.py
+      - tests/test_metrics_quality.py
+      - tests/test_packaging.py
+    sources:
+      - git:51411c8b350bfd38f33fd5e786f8b9384eff90b6
+  - kind: changed
+    summary: "Changed source distributions to exclude project-local ledger state"
+    status: accepted
+    source_refs: []
+    paths:
+      - MANIFEST.in
+      - tests/test_packaging.py
+    sources:
+      - git:51411c8b350bfd38f33fd5e786f8b9384eff90b6

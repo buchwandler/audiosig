@@ -3,20 +3,20 @@ schema_version: 2
 object_type: release
 versioning:
   schema_version: 1
-  revision: 6
+  revision: 10
 version: 0.1.6
-status: planned
+status: released
 history_state: curated
 title: null
-released_at: null
+released_at: "2026-09-29"
 previous_version: 0.1.5
 cancel_reason: null
 superseded_by: null
-changelog_file: null
+changelog_file: docs/changelog.md
 boundary_ref: null
 source_refs: []
 source_count: null
-entry_count: 4
+entry_count: 1
 artifact_count: 0
 git_base_ref: v0.1.5
 git_base_sha: ca74470524957f2b155920aaea7a7bab24f08b7f

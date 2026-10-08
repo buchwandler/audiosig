@@ -1,0 +1,61 @@
+schema_version: 1
+object_type: commit_audit_sheet
+versioning:
+  schema_version: 1
+  revision: 1
+release_version: 0.1.7
+git_base_ref: v0.1.6
+git_base_sha: 3addd4cbafca572dc9387caf88efaaa700080526
+git_head_ref: HEAD
+git_head_sha: 51411c8b350bfd38f33fd5e786f8b9384eff90b6
+git_range: 3addd4cbafca572dc9387caf88efaaa700080526..51411c8b350bfd38f33fd5e786f8b9384eff90b6
+commit_count: 1
+rows:
+  - sha: 51411c8b350bfd38f33fd5e786f8b9384eff90b6
+    source_ref: git:51411c8b350bfd38f33fd5e786f8b9384eff90b6
+    short_sha: 51411c8
+    changed_paths:
+      - .ledger/documentledger/data/docs/docs-advanced-md-0f0c40de.yaml
+      - .ledger/documentledger/data/docs/docs-api-reference-md-b1e6394f.yaml
+      - .ledger/documentledger/data/docs/docs-changelog-md-77f023b9.yaml
+      - .ledger/documentledger/data/docs/docs-examples-md-42c9e8de.yaml
+      - .ledger/documentledger/data/docs/docs-getting-started-md-31bcba2c.yaml
+      - .ledger/documentledger/data/docs/docs-index-rst-8d068e87.yaml
+      - .ledger/documentledger/data/docs/docs-quality-evaluation-md-ad754f9f.yaml
+      - .ledger/documentledger/data/docs/readme-md-b3356305.yaml
+      - .ledger/documentledger/data/scan.yaml
+      - .ledger/documentledger/data/source-index.json
+      - .ledger/documentledger/data/storage.yaml
+      - .ledger/releaseledger/data/ledgers/main/events/events.jsonl
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.6/entries/entry-0002.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.6/entries/entry-0003.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.6/entries/entry-0004.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.6/release.md
+      - MANIFEST.in
+      - README.md
+      - audiosig/_pitch.py
+      - audiosig/intelligibility.py
+      - audiosig/metrics.py
+      - audiosig/pitch.py
+      - audiosig/spectral.py
+      - docs/api-reference.md
+      - docs/index.rst
+      - docs/quality-evaluation.md
+      - tests/test_intelligibility.py
+      - tests/test_intelligibility_quality.py
+      - tests/test_metrics.py
+      - tests/test_metrics_quality.py
+      - tests/test_packaging.py
+      - tests/test_public_pitch.py
+      - tests/test_public_spectral.py
+    stats:
+      files_changed: 33
+      insertions: 12450
+      deletions: 8980
+    inspected: false
+    inspected_paths: []
+    observed_behavior: ""
+    public_impact: unknown
+    decision: needs_review
+    stale: false
+    evidence_subject: "feat: spectral analysis methods and api"

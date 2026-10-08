@@ -1,0 +1,27 @@
+rows:
+  - sha: 51411c8b350bfd38f33fd5e786f8b9384eff90b6
+    inspected: true
+    inspected_paths:
+      - audiosig/_pitch.py
+      - audiosig/intelligibility.py
+      - audiosig/metrics.py
+      - audiosig/pitch.py
+      - audiosig/spectral.py
+      - MANIFEST.in
+      - README.md
+      - docs/api-reference.md
+      - docs/quality-evaluation.md
+      - tests/test_intelligibility.py
+      - tests/test_intelligibility_quality.py
+      - tests/test_metrics.py
+      - tests/test_metrics_quality.py
+      - tests/test_packaging.py
+      - tests/test_public_pitch.py
+      - tests/test_public_spectral.py
+    observed_behavior: "Adds NumPy-only spectral analysis, pitch tracking, deterministic reference metrics, and STOI/ESTOI APIs with strict caller-owned input validation; expands regression and quality coverage and excludes project-local ledger state from source distributions."
+    public_impact: public
+    decision: accepted
+    target_entry_key: null
+    target_entry_id: null
+    notes: "Reviewed implementation, public documentation, tests, and packaging changes."
+    stale: false
