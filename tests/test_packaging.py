@@ -47,7 +47,20 @@ def test_core_dependencies_are_portable() -> None:
     data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
     dependencies = data["project"]["dependencies"]
     assert any(dep.startswith("numpy") for dep in dependencies)
-    forbidden = ("librosa", "scipy", "scikit-learn", "sklearn", "audiomentations", "numba", "torch")
+    forbidden = (
+        "librosa",
+        "scipy",
+        "scikit-learn",
+        "sklearn",
+        "audiomentations",
+        "numba",
+        "torch",
+        "torchaudio",
+        "onnx",
+        "onnxruntime",
+        "huggingface-hub",
+        "huggingface_hub",
+    )
     assert not any(dep.lower().startswith(prefix) for dep in dependencies for prefix in forbidden)
 
 
@@ -78,6 +91,10 @@ def test_wheel_contains_typing_marker_and_required_modules() -> None:
         "audiosig/_esola.py",
         "audiosig/_resampling.py",
         "audiosig/_spectral.py",
+        "audiosig/spectral.py",
+        "audiosig/pitch.py",
+        "audiosig/metrics.py",
+        "audiosig/intelligibility.py",
     }
     assert required <= names
     assert not any("__pycache__" in name for name in names)
@@ -92,6 +109,11 @@ def test_source_distribution_contains_basic_module_and_typing_marker() -> None:
 
     assert "audiosig/basic.py" in names
     assert "audiosig/py.typed" in names
+    assert "audiosig/spectral.py" in names
+    assert "audiosig/pitch.py" in names
+    assert "audiosig/metrics.py" in names
+    assert "audiosig/intelligibility.py" in names
+    assert not any(name.startswith(".ledger/") for name in names)
 
 
 def test_wheel_record_has_no_absolute_paths() -> None:
@@ -144,6 +166,20 @@ assert callable(audiosig.speech_effects_output_frames)
 assert callable(audiosig.downmix_to_mono)
 assert callable(audiosig.generate_silence)
 assert callable(audiosig.find_smooth_cut_point)
+from audiosig.spectral import stft, mel_spectrogram, mfcc
+from audiosig.pitch import pitch_track
+from audiosig.metrics import MetricResult, si_sdr, log_mel_l1, mel_cepstral_distortion
+from audiosig.intelligibility import stoi, estoi
+assert callable(stft)
+assert callable(mel_spectrogram)
+assert callable(mfcc)
+assert callable(pitch_track)
+assert MetricResult
+assert callable(si_sdr)
+assert callable(log_mel_l1)
+assert callable(mel_cepstral_distortion)
+assert callable(stoi)
+assert callable(estoi)
 from audiosig.basic import downmix_to_mono, generate_silence
 assert callable(downmix_to_mono)
 assert callable(generate_silence)
@@ -177,9 +213,22 @@ def test_distribution_metadata_has_no_librosa_dependency(tmp_path: Path) -> None
     # Filter out optional extras - only core requirements are checked.
     requirements = [r for r in (distribution.requires or []) if "extra ==" not in r]
 
-    assert all("librosa" not in r.lower() for r in requirements)
-    assert all("scipy" not in r.lower() for r in requirements)
-    assert all("numba" not in r.lower() for r in requirements)
+    forbidden = (
+        "librosa",
+        "scipy",
+        "numba",
+        "torch",
+        "torchaudio",
+        "onnx",
+        "onnxruntime",
+        "huggingface-hub",
+        "huggingface_hub",
+    )
+    assert all(
+        not requirement.lower().startswith(forbidden_prefix)
+        for requirement in requirements
+        for forbidden_prefix in forbidden
+    )
 
 
 def test_documentation_configuration_has_a_buildable_index() -> None:
@@ -199,7 +248,14 @@ def test_import_boundary() -> None:
 import json, sys
 sys.path.insert(0, sys.argv[1])
 import audiosig
-forbidden = {'librosa', 'scipy', 'sklearn', 'audiomentations', 'torch', 'numba'}
+import audiosig.spectral
+import audiosig.pitch
+import audiosig.metrics
+import audiosig.intelligibility
+forbidden = {
+    'librosa', 'scipy', 'sklearn', 'audiomentations', 'numba', 'torch',
+    'torchaudio', 'onnx', 'onnxruntime', 'huggingface_hub'
+}
 print(json.dumps(sorted(forbidden.intersection(sys.modules))))
 """
     result = subprocess.run(

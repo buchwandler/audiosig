@@ -165,6 +165,35 @@ sections:
       \ formant preservation, does not pitch unvoiced\nregions, and is not intended\
       \ for music or polyphonic material."
     links: []
+  - section_id: md:section:docs/examples.md::time-varying-speech-effects
+    doc_path: docs/examples.md
+    heading_path:
+      - AudioSig Examples
+      - Basic Audio Processing
+      - Time-varying Speech Effects
+    heading_slug: time-varying-speech-effects
+    line_span:
+      - 118
+      - 142
+    section_hash: d0579c4ca9f36d9e466c9a5398241b8f05aa2ccd42f7f16cbce64efec7f560f3
+    summary: Time-varying Speech Effects
+    text:
+      "### Time-varying Speech Effects\n\nAvailable since AudioSig 0.1.5, `apply_speech_effects_envelope`\
+      \ accepts numeric curves in output seconds. Rate is a positive playback factor;\
+      \ pitch is a semitone offset. Both curves interpolate linearly and hold their\
+      \ final values.\n\n```python\nfrom audiosig import apply_speech_effects_envelope,\
+      \ speech_effects_output_frames\n\nout = apply_speech_effects_envelope(\n    audio,\n\
+      \    sample_rate=24_000,\n    rate_points=[(0.0, 1.0), (0.45, 0.85)],\n    pitch_points=[(0.0,\
+      \ 0.0), (0.30, 2.0)],\n)\nframes = speech_effects_output_frames(\n    audio.shape[-1],\n\
+      \    sample_rate=24_000,\n    rate_points=[(0.0, 1.0), (0.45, 0.85)],\n)\nassert\
+      \ out.shape[-1] == frames\n```\n\nControl-point times are measured on the transformed\
+      \ output timeline. Omit either curve to use its neutral value, rate `1.0` or pitch\
+      \ `0.0`. A short clip does not compress the requested envelope. Variable pitch\
+      \ uses TD-PSOLA on voiced material and WSOLA rate mapping for unvoiced fallback;\
+      \ it is intended for speech, not general music or formant-preserving pitch shifting.\n\
+      \nEnvelope output is deterministic for identical input and parameters within one\
+      \ AudioSig version. Exact PCM is not promised across versions."
+    links: []
   - section_id: md:section:docs/examples.md::resampling-examples
     doc_path: docs/examples.md
     heading_path:
@@ -173,8 +202,8 @@ sections:
       - Resampling Examples
     heading_slug: resampling-examples
     line_span:
-      - 118
-      - 139
+      - 143
+      - 164
     section_hash: 8b5be101df178e75a6b099308f28aa54ee9f1aa91594bfd4801017937456d7d4
     summary: Resampling Examples
     text: '### Resampling Examples
@@ -221,8 +250,8 @@ sections:
       - Smooth Cut-Point Selection
     heading_slug: smooth-cut-point-selection
     line_span:
-      - 140
-      - 159
+      - 165
+      - 183
     section_hash: ce647ad49665ac49fbb4ef2700ab32c877695d3b02f5ba3ff074be80bf65d547
     summary: Smooth Cut-Point Selection
     text:
@@ -242,7 +271,7 @@ sections:
         impact: unknown
         reason: Examples document the synthetic smooth cut-point usage.
         tracked_hashes:
-          body_hash: 22c9d828accffc5668fb2a6e940e29f9cfcfcfdeaaede01ffb43efa8047c51df
+          body_hash: 9c63a15299d32fffc8340f7ed47e8030a818a5e265f588364fa21edbb78fca41
   - section_id: md:section:docs/examples.md::silence-detection-and-vad
     doc_path: docs/examples.md
     heading_path:
@@ -250,8 +279,8 @@ sections:
       - Silence Detection and VAD
     heading_slug: silence-detection-and-vad
     line_span:
-      - 160
-      - 161
+      - 184
+      - 185
     section_hash: 9b71cc83a8e1561fd04bdf47b057ee788fb5ae84a48e02e9dfb2858fe84af244
     summary: Silence Detection and VAD
     text: "## Silence Detection and VAD"
@@ -264,8 +293,8 @@ sections:
       - Basic VAD Usage
     heading_slug: basic-vad-usage
     line_span:
-      - 162
-      - 184
+      - 186
+      - 208
     section_hash: 434b83b06da5b062825f0728b86f5b5a4a6d131fc578baf1c4c2c234fcc0cb67
     summary: Basic VAD Usage
     text:
@@ -286,8 +315,8 @@ sections:
       - Tuning VAD Parameters
     heading_slug: tuning-vad-parameters
     line_span:
-      - 185
-      - 208
+      - 209
+      - 232
     section_hash: 180a5899de9a557293a02748c599813edc54e411761698e1076a4589836483c4
     summary: Tuning VAD Parameters
     text:
@@ -308,8 +337,8 @@ sections:
       - Finding Speech Boundaries
     heading_slug: finding-speech-boundaries
     line_span:
-      - 209
       - 233
+      - 257
     section_hash: 7846ce8515b1e2c0e484753d2d88e97f46d1da1a82acb8f98afc2935dee4ca6d
     summary: Finding Speech Boundaries
     text:
@@ -330,8 +359,8 @@ sections:
       - Silence Trimming
     heading_slug: silence-trimming
     line_span:
-      - 234
-      - 235
+      - 258
+      - 259
     section_hash: 46519470a4100dc3482b2bd314bc7ba7e59cab3ce9fcf49fc1a42cacaa23a5a9
     summary: Silence Trimming
     text: "## Silence Trimming"
@@ -344,8 +373,8 @@ sections:
       - Basic Trimming
     heading_slug: basic-trimming
     line_span:
-      - 236
-      - 254
+      - 260
+      - 278
     section_hash: b58f63a990ac95f428d1a36939376791da2eb14e01c210321c11f7f7c649150b
     summary: Basic Trimming
     text: '### Basic Trimming
@@ -388,8 +417,8 @@ sections:
       - Splitting Audio Segments
     heading_slug: splitting-audio-segments
     line_span:
-      - 255
-      - 276
+      - 279
+      - 300
     section_hash: 4aee7b277a81c5581e78ca3a40aab35deec201e465724dbbb41bfc3fb677b880
     summary: Splitting Audio Segments
     text:
@@ -412,8 +441,8 @@ sections:
       - Custom Trimming Parameters
     heading_slug: custom-trimming-parameters
     line_span:
-      - 277
-      - 294
+      - 301
+      - 318
     section_hash: 08f5eb98c20f45a0164c3154fe43eb0534ffd09221e9a42f29f171b46f3b04a8
     summary: Custom Trimming Parameters
     text:
@@ -432,8 +461,8 @@ sections:
       - Amplitude Processing
     heading_slug: amplitude-processing
     line_span:
-      - 295
-      - 296
+      - 319
+      - 320
     section_hash: 0c74f88a70ca2f36b72e6a20ca63dc28489aa959ed71222facb7b23d38ba4b31
     summary: Amplitude Processing
     text: "## Amplitude Processing"
@@ -446,8 +475,8 @@ sections:
       - Gain Control
     heading_slug: gain-control
     line_span:
-      - 297
-      - 328
+      - 321
+      - 352
     section_hash: ff9ee4b7382e30a164c2dc0fc23ae1b3ce4ce5baa38f37719369492c6a456696
     summary: Gain Control
     text:
@@ -471,8 +500,8 @@ sections:
       - Normalization
     heading_slug: normalization
     line_span:
-      - 329
-      - 346
+      - 353
+      - 370
     section_hash: 9260484c313d39e8313d23231ebc7403e09f31a7f9c9439ee022c2938b79f84e
     summary: Normalization
     text:
@@ -491,8 +520,8 @@ sections:
       - Frame Analysis
     heading_slug: frame-analysis
     line_span:
-      - 347
-      - 348
+      - 371
+      - 372
     section_hash: e13af51ce590491375ec1488f4b109a2961bbd932f24e844f2620fcdafdac51f
     summary: Frame Analysis
     text: "## Frame Analysis"
@@ -505,8 +534,8 @@ sections:
       - Basic Framing
     heading_slug: basic-framing
     line_span:
-      - 349
       - 373
+      - 397
     section_hash: 9734827ab12c4b31a0f0b0ef706fec8e11f5495fda8e904258aabb792f836911
     summary: Basic Framing
     text:
@@ -526,8 +555,8 @@ sections:
       - Feature Extraction
     heading_slug: feature-extraction
     line_span:
-      - 374
       - 398
+      - 422
     section_hash: 3ebedd1d91c224e59d0a48cc08937e350c440bb20289f4462dfa4819df9ce69f
     summary: Feature Extraction
     text:
@@ -547,8 +576,8 @@ sections:
       - Real-World Examples
     heading_slug: real-world-examples
     line_span:
-      - 399
-      - 400
+      - 423
+      - 424
     section_hash: 47fc289c964d539dd675d7420f900cf1e41f5c1b3bab0fb304751ab85c933505
     summary: Real-World Examples
     text: "## Real-World Examples"
@@ -561,8 +590,8 @@ sections:
       - Audio Preprocessing Pipeline
     heading_slug: audio-preprocessing-pipeline
     line_span:
-      - 401
-      - 436
+      - 425
+      - 460
     section_hash: 28de27837a3bf900a86a808632370a8e02f8a39cbc05046e70db98aa8866683e
     summary: Audio Preprocessing Pipeline
     text:
@@ -587,8 +616,8 @@ sections:
       - Speech Segmentation
     heading_slug: speech-segmentation
     line_span:
-      - 437
-      - 468
+      - 461
+      - 492
     section_hash: eeaac01e3a95f37d9cf5ed26922fefa3f78a4a191682cecf6f31432667b19498
     summary: Speech Segmentation
     text:
@@ -612,8 +641,8 @@ sections:
       - Batch Processing
     heading_slug: batch-processing
     line_span:
-      - 469
-      - 500
+      - 493
+      - 524
     section_hash: 3371a0b4407500caeee57beeb54b8264354209a3b93e18ac70e633bb94b6732d
     summary: Batch Processing
     text:
@@ -635,8 +664,8 @@ sections:
       - Performance Tips
     heading_slug: performance-tips
     line_span:
-      - 501
-      - 502
+      - 525
+      - 526
     section_hash: 9f45e623a3799bb28d59bece819699f2b641c69ae542ac5cb9301f949760f6cc
     summary: Performance Tips
     text: "## Performance Tips"
@@ -649,8 +678,8 @@ sections:
       - Memory Efficiency
     heading_slug: memory-efficiency
     line_span:
-      - 503
-      - 518
+      - 527
+      - 542
     section_hash: 84157e356fd24f4e18ef4410722f4b43ca7e3e422f982e6a1fb6f6b6a351d9ce
     summary: Memory Efficiency
     text:
@@ -669,8 +698,8 @@ sections:
       - Using Appropriate dtypes
     heading_slug: using-appropriate-dtypes
     line_span:
-      - 519
-      - 531
+      - 543
+      - 555
     section_hash: 64941a9172dab6ea26ef161f3e09829979e778443566cefaad4555ec4bf469ae
     summary: Using Appropriate dtypes
     text: "### Using Appropriate dtypes
@@ -696,9 +725,10 @@ sections:
 
       ```"
     links: []
-last_fresh_scan_version: 5
-last_fresh_hash: 7c9624617ad568340ed9d1e5bc0b4167fb4eaaad9c55e471132733ba9e61b14a
+last_fresh_scan_version: 7
+last_fresh_hash: 66ef9f1011b64f7d8ad9fc0cd075c1ad0b70475d26da9aaee697c3ee20eb4b3c
 notes:
-  Smooth cut-point documentation and source links reviewed after implementation;
-  remaining unlinked source units are intentional test and internal coverage gaps.
-version: 14
+  Reviewed all five reported smooth cut-point sections against audiosig/boundaries.py;
+  documented interval, scoring, lane, and empty-input behavior matches current implementation.
+  Sphinx HTML build succeeded.
+version: 63

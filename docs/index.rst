@@ -2,9 +2,9 @@ AudioSig
 ========
 
 AudioSig is a portable, NumPy-only signal-processing layer for speech and TTS
-applications. It provides gain and normalization, resampling, time and pitch
-effects, silence trimming, interval extraction, frame features, and explicit
-voice-activity detection policies.
+applications. It provides waveform effects, spectral and pitch analysis, and
+reference metrics without model downloads or neural inference. STOI/ESTOI require
+explicit equal-length mono input at 10 kHz.
 
 Public behavior
 ---------------
@@ -30,6 +30,9 @@ Documentation
    api-reference.md
    examples.md
    advanced.md
+
+   quality-evaluation.md
+   changelog.md
 
 Indices and tables
 ------------------

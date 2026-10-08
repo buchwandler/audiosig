@@ -4,6 +4,593 @@ linked_sources:
   - audiosig/boundaries.py
   - audiosig/exceptions.py
 sections:
+  - section_id: md:section:docs/getting-started.md::getting-started-with-audiosig
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+    heading_slug: getting-started-with-audiosig
+    line_span:
+      - 1
+      - 2
+    section_hash: b8ccbb2eb4269768a9c935e96b043d1ee52bfd44929016777997e44ab2cb1645
+    summary: Getting Started with AudioSig
+    text: "# Getting Started with AudioSig"
+    links: []
+  - section_id: md:section:docs/getting-started.md::installation
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Installation
+    heading_slug: installation
+    line_span:
+      - 3
+      - 16
+    section_hash: 170cf3edd8d99b803a897deac95242f9caaf0e3d12f3a3c2ed277ec92bd810ba
+    summary: Installation
+    text: "## Installation
+
+
+      Install AudioSig from PyPI:
+
+
+      ```bash
+
+      pip install audiosig
+
+      ```
+
+
+      For development with test dependencies:
+
+
+      ```bash
+
+      pip install audiosig[dev]
+
+      ```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::quick-start
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Quick Start
+    heading_slug: quick-start
+    line_span:
+      - 17
+      - 18
+    section_hash: 1985dd2230f19f78053dffdd87e216bc0de15281ed671f03ee450271c3537590
+    summary: Quick Start
+    text: "## Quick Start"
+    links: []
+  - section_id: md:section:docs/getting-started.md::basic-audio-processing
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Quick Start
+      - Basic Audio Processing
+    heading_slug: basic-audio-processing
+    line_span:
+      - 19
+      - 39
+    section_hash: ac4c73d39f7f3d50a30c8c3f71751b4f09b1696af6f3846032631a0ec8b6a511
+    summary: Basic Audio Processing
+    text: "### Basic Audio Processing
+
+
+      ```python
+
+      import numpy as np
+
+      from audiosig import pitch_shift, time_stretch, resample
+
+
+      # Create a sample audio signal (1 second at 24kHz)
+
+      sample_rate = 24_000
+
+      t = np.linspace(0, 1, sample_rate, dtype=np.float32)
+
+      audio = np.sin(2 * np.pi * 440 * t)  # 440 Hz sine wave
+
+
+      # Time stretching (make audio 20% faster)
+
+      faster = time_stretch(audio, rate=1.2)
+
+
+      # Pitch shifting (raise pitch by 2 semitones)
+
+      higher = pitch_shift(audio, sample_rate=sample_rate, semitones=2.0)
+
+
+      # Resampling (convert from 24kHz to 16kHz)
+
+      resampled = resample(audio, source_rate=24_000, target_rate=16_000)
+
+      ```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::constructing-silence-and-downmixing-channels
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Quick Start
+      - Constructing Silence and Downmixing Channels
+    heading_slug: constructing-silence-and-downmixing-channels
+    line_span:
+      - 40
+      - 72
+    section_hash: 896f8453e3cc12791bc4bceec3a2e191065cb85c5b4b98b0d19d608b15c73b70
+    summary: Constructing Silence and Downmixing Channels
+    text: "### Constructing Silence and Downmixing Channels
+
+
+      Use `generate_silence` for deterministic mono silence. Its sample count uses
+
+      the existing TTS/PyKokoro-compatible floor rule,
+
+      `int(duration * sample_rate)`, and output is float32 unless float64 is
+
+      requested:
+
+
+      ```python
+
+      from audiosig import generate_silence
+
+
+      pause = generate_silence(0.5, 24_000)
+
+      precise_pause = generate_silence(0.5, 24_000, dtype=np.float64)
+
+      ```
+
+
+      Use `downmix_to_mono` when the decoder has already produced a NumPy array.
+
+      The basic API accepts finite real floating arrays shaped `(frames,)`,
+
+      `(frames, channels)`, or `(channels, frames)` and returns contiguous,
+
+      caller-owned results. SoundFile-style `(frames, channels)` data uses the
+
+      default `channel_axis=-1`, while channels-first data uses `channel_axis=0`.
+
+
+      ```python
+
+      from audiosig import downmix_to_mono
+
+
+      mono = downmix_to_mono(frames_first)
+
+      mono = downmix_to_mono(channels_first, channel_axis=0)
+
+      ```
+
+
+      Downmixing is an arithmetic mean in the source dtype with no clipping or
+
+      normalization. Both functions return caller-owned arrays and raise typed
+
+      `AudioSig` exceptions for invalid inputs. AudioSig does not decode files or
+
+      stream long silence buffers; applications creating long files should write
+
+      bounded silence chunks through their file layer."
+    links: []
+  - section_id: md:section:docs/getting-started.md::smooth-cut-point-selection
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Quick Start
+      - Smooth Cut-Point Selection
+    heading_slug: smooth-cut-point-selection
+    line_span:
+      - 73
+      - 90
+    section_hash: d499519c3ac248cdcf05516ebc19b307e0b798fb8f911ff398733223b89450bb
+    summary: Smooth Cut-Point Selection
+    text:
+      "### Smooth Cut-Point Selection\n\nWhen an application already has a legal\
+      \ numeric interval, it can choose a low-disruption waveform boundary without changing\
+      \ the audio:\n\n```python\nfrom audiosig import find_smooth_cut_point\n\ncandidate\
+      \ = find_smooth_cut_point(\n    audio,\n    start=search_start,\n    end=search_end,\n\
+      \    anchor=preferred_index,\n    window_length=120,\n )\n```\n\nThe interval\
+      \ is half-open, the anchor is only a preference, and the function always returns\
+      \ a legal candidate for a non-empty interval. It is not a silence detector. Invalid\
+      \ arrays or parameters raise typed `AudioSig` exceptions. The application must\
+      \ decide whether the interval is semantically legal and whether a failed downstream\
+      \ policy should retry."
+    links:
+      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+        source_path: audiosig/boundaries.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Getting-started example documents the public boundary primitive.
+        tracked_hashes:
+          body_hash: 9c63a15299d32fffc8340f7ed47e8030a818a5e265f588364fa21edbb78fca41
+  - section_id: md:section:docs/getting-started.md::silence-detection-and-trimming
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Quick Start
+      - Silence Detection and Trimming
+    heading_slug: silence-detection-and-trimming
+    line_span:
+      - 91
+      - 110
+    section_hash: ee560cf5f614f26d6ba3069f6fac98d17bfb0c4ca837444e44be55b7c862b9b3
+    summary: Silence Detection and Trimming
+    text:
+      "### Silence Detection and Trimming\n\n```python\nfrom audiosig import trim,\
+      \ split, normalized_energy_vad\n\n# Trim silence from beginning and end\ntrimmed,\
+      \ interval = trim(audio, top_db=40.0)\n\n# Split audio into non-silent segments\n\
+      intervals = split(audio, top_db=40.0)\n\n# Voice Activity Detection\nactivity\
+      \ = normalized_energy_vad(\n    audio,\n    sample_rate,\n    frame_duration_ms=10,\n\
+      \    energy_threshold=0.15,\n)\n```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::amplitude-processing
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Quick Start
+      - Amplitude Processing
+    heading_slug: amplitude-processing
+    line_span:
+      - 111
+      - 122
+    section_hash: 5e5124a4d48d9d43ce24e4bf7c5fb911c8d7a1a1a977fe21fb249d1db6e3f516
+    summary: Amplitude Processing
+    text: "### Amplitude Processing
+
+
+      ```python
+
+      from audiosig import apply_gain_db, peak_normalize
+
+
+      # Apply gain in decibels
+
+      louder = apply_gain_db(audio, db=6.0)
+
+
+      # Normalize to peak amplitude
+
+      normalized = peak_normalize(audio, peak=0.9)
+
+      ```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::loudness-measurement
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Quick Start
+      - Loudness Measurement
+    heading_slug: loudness-measurement
+    line_span:
+      - 123
+      - 141
+    section_hash: 92bb5435bdc9d44a4a28ab9683589b6a873292c5c70532a0080c396b1f297327
+    summary: Loudness Measurement
+    text:
+      "### Loudness Measurement\n\nUse integrated loudness when comparing perceived\
+      \ programme level, rather than treating peak normalization or full-file RMS as\
+      \ a loudness meter:\n\n```python\nimport audiosig\n\nmetrics = audiosig.measure_loudness(audio,\
+      \ sample_rate=24_000)\nprint(metrics.integrated_lufs, metrics.sample_peak_dbfs,\
+      \ metrics.true_peak_dbtp)\n\nbefore = audiosig.integrated_loudness(audio, sample_rate=24_000)\n\
+      after = audiosig.integrated_loudness(\n    audiosig.apply_gain_db(audio, 3.0),\
+      \ sample_rate=24_000\n)\nassert abs((after - before) - 3.0) < 0.05\n```\n\n`integrated_loudness`\
+      \ follows BS.1770-style K-weighting and gated 400 ms blocks. `sample_peak_dbfs`\
+      \ is the discrete sample maximum; `true_peak_dbtp` uses configurable oversampling\
+      \ (4x by default) to estimate inter-sample overshoot. These functions measure\
+      \ only: they do not clip, limit, or normalize audio. V1 accepts mono one-dimensional\
+      \ arrays and validates the mandatory 24 kHz case, plus 44.1 and 48 kHz. Silence\
+      \ returns `-math.inf`; empty, non-finite, and inputs shorter than 400 ms have\
+      \ explicit validation/deterministic behavior documented in the API reference."
+    links: []
+  - section_id: md:section:docs/getting-started.md::understanding-the-api
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Understanding the API
+    heading_slug: understanding-the-api
+    line_span:
+      - 142
+      - 143
+    section_hash: 430518de47340453c73d98813599f86cd92e5b1a0a9c0ec348f6b667b339ca4c
+    summary: Understanding the API
+    text: "## Understanding the API"
+    links: []
+  - section_id: md:section:docs/getting-started.md::array-shapes
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Understanding the API
+      - Array Shapes
+    heading_slug: array-shapes
+    line_span:
+      - 144
+      - 153
+    section_hash: 525d528d50e1402359267db76ad15ae3d3eee1e303c1acb29b520d54d902a68a
+    summary: Array Shapes
+    text: "### Array Shapes
+
+
+      AudioSig accepts arrays in these shapes:
+
+
+      - **1D**: `(samples,)` - Single channel audio
+
+      - **2D**: `(channels, samples)` - Multi-channel audio
+
+      - **nD**: `(..., samples)` - Batch dimensions followed by sample axis
+
+
+      The sample axis defaults to the last dimension (`axis=-1`)."
+    links: []
+  - section_id: md:section:docs/getting-started.md::data-types
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Understanding the API
+      - Data types
+    heading_slug: data-types
+    line_span:
+      - 154
+      - 163
+    section_hash: 9eee05638c32148d6d509abbe761ca65218f068269d5d325280e344c9850e0f1
+    summary: Data types
+    text:
+      "### Data types\n\n- Audio inputs must be `float32` or `float64` NumPy arrays.\n\
+      - Audio transforms such as gain, resampling, time stretching, pitch shifting,\n\
+      \  and trimming preserve the audio dtype.\n- Feature and decibel functions may\
+      \ return `float32` or `float64` as documented.\n- VAD functions return boolean\
+      \ masks.\n- Interval and frame-index conversion functions return integer values.\n\
+      - Public operations do not mutate the input audio."
+    links: []
+  - section_id: md:section:docs/getting-started.md::time-stretching
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Understanding the API
+      - Time Stretching
+    heading_slug: time-stretching
+    line_span:
+      - 164
+      - 181
+    section_hash: e9ea3d312f7d09da814104d58db10a85fc6185d65186bc5df8ca31d06e40b313
+    summary: Time Stretching
+    text: "### Time Stretching
+
+
+      `time_stretch(audio, rate)` changes duration while preserving pitch:
+
+
+      - `rate > 1.0`: Faster and shorter
+
+      - `rate < 1.0`: Slower and longer
+
+      - `rate = 1.0`: No change (returns copy)
+
+
+      ```python
+
+      from audiosig import time_stretch
+
+
+      # Make audio 50% faster
+
+      faster = time_stretch(audio, rate=1.5)
+
+
+      # Make audio 30% slower
+
+      slower = time_stretch(audio, rate=0.7)
+
+      ```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::pitch-shifting
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Understanding the API
+      - Pitch Shifting
+    heading_slug: pitch-shifting
+    line_span:
+      - 182
+      - 220
+    section_hash: 32cde56eb2b4e274c7bf8b811f0b472782d64e786a95bbd4823a9f4ca5693dcd
+    summary: Pitch Shifting
+    text:
+      "### Pitch Shifting\n\n`pitch_shift(audio, sample_rate, semitones)` changes\
+      \ pitch while preserving duration:\n\n- `semitones > 0`: Higher pitch\n- `semitones\
+      \ < 0`: Lower pitch\n- `semitones = 0`: No change (returns copy)\n\n```python\n\
+      from audiosig import pitch_shift\n\n# Raise pitch by 3 semitones\nhigher = pitch_shift(audio,\
+      \ sample_rate=24000, semitones=3.0)\n\n# Lower pitch by 5 semitones\nlower = pitch_shift(audio,\
+      \ sample_rate=24000, semitones=-5.0)\n```\n\nFor experimental speech-only direct\
+      \ pitch/prosody processing, opt in with\n`method=\"td_psola\"`. Moderate changes\
+      \ only are supported; unvoiced regions are\nduration-scaled without pitch synthesis\
+      \ and formant preservation is not\nguaranteed:\n\n```python\nfrom audiosig import\
+      \ apply_speech_effects, pitch_shift\n\nvoice_up = pitch_shift(audio, sample_rate=24_000,\
+      \ semitones=4.0, method=\"td_psola\")\nslower_voice = apply_speech_effects(\n\
+      \    audio,\n    sample_rate=24_000,\n    rate=0.85,\n    semitones=-3.0,\n  \
+      \  method=\"td_psola\",\n)\n```\n\nTD-PSOLA is experimental and intended for clean\
+      \ or mildly noisy speech, not\nmusic, polyphony, strong noise, reverb, creaky\
+      \ voice, or extreme shifts."
+    links: []
+  - section_id: md:section:docs/getting-started.md::resampling
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Understanding the API
+      - Resampling
+    heading_slug: resampling
+    line_span:
+      - 221
+      - 234
+    section_hash: 2c587871803aea2445e89918a1e5c7a0280fc247c7a8cb63404104941f1b286a
+    summary: Resampling
+    text: "### Resampling
+
+
+      `resample(audio, source_rate, target_rate)` changes sample rate:
+
+
+      ```python
+
+      from audiosig import resample
+
+
+      # Downsample from 48kHz to 16kHz
+
+      downsampled = resample(audio_48k, source_rate=48000, target_rate=16000)
+
+
+      # Upsample from 8kHz to 24kHz
+
+      upsampled = resample(audio_8k, source_rate=8000, target_rate=24000)
+
+      ```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::voice-activity-detection-vad
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Voice Activity Detection (VAD)
+    heading_slug: voice-activity-detection-vad
+    line_span:
+      - 235
+      - 238
+    section_hash: 3b69812c4b5693ec817a7c0240977e4656d5f08b1f96de61125d2897637e3464
+    summary: Voice Activity Detection (VAD)
+    text: "## Voice Activity Detection (VAD)
+
+
+      AudioSig provides two VAD algorithms:"
+    links: []
+  - section_id: md:section:docs/getting-started.md::normalized-energy-vad
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Voice Activity Detection (VAD)
+      - Normalized Energy VAD
+    heading_slug: normalized-energy-vad
+    line_span:
+      - 239
+      - 254
+    section_hash: f6b69d6faceaa54ef903fcc4b63223cdeadcc3ecf9b9cd1195e39d7123ba0e25
+    summary: Normalized Energy VAD
+    text:
+      "### Normalized Energy VAD\n\nBest for speech detection with known sample\
+      \ rate:\n\n```python\nfrom audiosig import normalized_energy_vad\n\nactivity =\
+      \ normalized_energy_vad(\n    audio,\n    sample_rate=24000,\n    frame_duration_ms=10,\
+      \      # Frame size in milliseconds\n    energy_threshold=0.15,     # Threshold\
+      \ in [0, 1]\n    pad_end=False,             # Discard trailing partial frame\n\
+      )\n```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::relative-db-vad
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Voice Activity Detection (VAD)
+      - Relative dB VAD
+    heading_slug: relative-db-vad
+    line_span:
+      - 255
+      - 269
+    section_hash: 4993606f2e9632dcff127ea71c151e1483828aa9a2adc1fe752a5887022e9562
+    summary: Relative dB VAD
+    text:
+      "### Relative dB VAD\n\nBest for general audio with relative threshold:\n\n\
+      ```python\nfrom audiosig import relative_db_vad\n\nactivity = relative_db_vad(\n\
+      \    audio,\n    frame_length=2048,\n    hop_length=512,\n    threshold_db=40.0,\
+      \         # dB below peak\n)\n```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::unified-interface
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Voice Activity Detection (VAD)
+      - Unified Interface
+    heading_slug: unified-interface
+    line_span:
+      - 270
+      - 283
+    section_hash: 9fabe9eea219872e83cbb9b0205d0e4782969dc28702e0f5ac9268e856bb8879
+    summary: Unified Interface
+    text: "### Unified Interface
+
+
+      The `energy_based_vad` function selects the algorithm based on parameters:
+
+
+      ```python
+
+      from audiosig import energy_based_vad
+
+
+      # With sample_rate → normalized energy VAD
+
+      activity = energy_based_vad(audio, sample_rate=24000)
+
+
+      # Without sample_rate → relative dB VAD
+
+      activity = energy_based_vad(audio, frame_length=2048, hop_length=512)
+
+      ```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::silence-trimming
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Silence Trimming
+    heading_slug: silence-trimming
+    line_span:
+      - 284
+      - 285
+    section_hash: 46519470a4100dc3482b2bd314bc7ba7e59cab3ce9fcf49fc1a42cacaa23a5a9
+    summary: Silence Trimming
+    text: "## Silence Trimming"
+    links: []
+  - section_id: md:section:docs/getting-started.md::trim
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Silence Trimming
+      - trim()
+    heading_slug: trim
+    line_span:
+      - 286
+      - 303
+    section_hash: 7da4bf77609edd2c2333f6c89d4f79e2f1ba9a5ab6cd7c0ccdd47200f3b07809
+    summary: trim()
+    text:
+      "### trim()\n\nRemoves leading and trailing silence:\n\n```python\nfrom audiosig\
+      \ import trim\n\ntrimmed, interval = trim(\n    audio,\n    top_db=40.0,     \
+      \     # Silence threshold in dB\n    frame_length=2048,    # Analysis frame size\n\
+      \    hop_length=128,       # Hop size\n)\n\n# interval is [start, end] sample\
+      \ indices\nprint(f\"Trimmed from sample {interval[0]} to {interval[1]}\")\n```"
+    links: []
+  - section_id: md:section:docs/getting-started.md::split
+    doc_path: docs/getting-started.md
+    heading_path:
+      - Getting Started with AudioSig
+      - Silence Trimming
+      - split()
+    heading_slug: split
+    line_span:
+      - 304
+      - 323
+    section_hash: 80346168247c239ae848ab1417e21ebf9ce5284e63316c9126df405929f9ad45
+    summary: split()
+    text:
+      "### split()\n\nReturns all non-silent segments:\n\n```python\nfrom audiosig\
+      \ import split\n\nintervals = split(\n    audio,\n    top_db=40.0,\n    frame_length=512,\n\
+      \    hop_length=128,\n)\n\n# Each interval is [start, end) half-open\nfor start,\
+      \ end in intervals:\n    segment = audio[start:end]\n    process_segment(segment)\n\
+      ```"
+    links: []
   - section_id: md:section:docs/getting-started.md::error-handling
     doc_path: docs/getting-started.md
     heading_path:
@@ -11,8 +598,8 @@ sections:
       - Error Handling
     heading_slug: error-handling
     line_span:
-      - 306
-      - 322
+      - 324
+      - 340
     section_hash: 605d7d9aef7139ff4f1f57b10d47b103c096cb8b24dd47bd8e5a4a0cafe84d12
     summary: Error Handling
     text:
@@ -44,40 +631,30 @@ sections:
         reason: Code contains public class `InvalidParameterError`.
         tracked_hashes:
           body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-  - section_id: md:section:docs/getting-started.md::smooth-cut-point-selection
+  - section_id: md:section:docs/getting-started.md::next-steps
     doc_path: docs/getting-started.md
     heading_path:
       - Getting Started with AudioSig
-      - Quick Start
-      - Smooth Cut-Point Selection
-    heading_slug: smooth-cut-point-selection
+      - Next Steps
+    heading_slug: next-steps
     line_span:
-      - 73
-      - 91
-    section_hash: d499519c3ac248cdcf05516ebc19b307e0b798fb8f911ff398733223b89450bb
-    summary: Smooth Cut-Point Selection
-    text:
-      "### Smooth Cut-Point Selection\n\nWhen an application already has a legal\
-      \ numeric interval, it can choose a low-disruption waveform boundary without changing\
-      \ the audio:\n\n```python\nfrom audiosig import find_smooth_cut_point\n\ncandidate\
-      \ = find_smooth_cut_point(\n    audio,\n    start=search_start,\n    end=search_end,\n\
-      \    anchor=preferred_index,\n    window_length=120,\n )\n```\n\nThe interval\
-      \ is half-open, the anchor is only a preference, and the function always returns\
-      \ a legal candidate for a non-empty interval. It is not a silence detector. Invalid\
-      \ arrays or parameters raise typed `AudioSig` exceptions. The application must\
-      \ decide whether the interval is semantically legal and whether a failed downstream\
-      \ policy should retry."
-    links:
-      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
-        source_path: audiosig/boundaries.py
-        coverage: implementation-note
-        impact: unknown
-        reason: Getting-started example documents the public boundary primitive.
-        tracked_hashes:
-          body_hash: 22c9d828accffc5668fb2a6e940e29f9cfcfcfdeaaede01ffb43efa8047c51df
-last_fresh_scan_version: 5
-last_fresh_hash: 54ae5330ab3cb3e5df7dcd60633ad064af1d7cb3f2bc4e1175fe82ac214769ec
+      - 341
+      - 345
+    section_hash: 517538fc868475f6e473d781ef136f330c6a86e57b99a4003ebcbcd430c6d5e5
+    summary: Next Steps
+    text: "## Next Steps
+
+
+      - See the [API Reference](api-reference.md) for complete function documentation
+
+      - Check the [Examples](examples.md) for more usage patterns
+
+      - Read the [Advanced Topics](advanced.md) for performance tips and edge cases"
+    links: []
+last_fresh_scan_version: 7
+last_fresh_hash: 67a77ab1744a7ffb00eb287190e7e9aa6ad361f464ed8bf66f4e19ce2d84dde4
 notes:
-  Smooth cut-point documentation and source links reviewed after implementation;
-  remaining unlinked source units are intentional test and internal coverage gaps.
-version: 14
+  Reviewed all five reported smooth cut-point sections against audiosig/boundaries.py;
+  documented interval, scoring, lane, and empty-input behavior matches current implementation.
+  Sphinx HTML build succeeded.
+version: 63

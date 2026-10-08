@@ -110,6 +110,51 @@ assert abs((after - before) - 3.0) < 0.05
 
 The stable PyKokoro handoff imports are `LoudnessMetrics`, `integrated_loudness`, `sample_peak_dbfs`, `true_peak_dbtp`, and `measure_loudness` from `audiosig`; the minimum release containing this API is `0.1.3`. AudioSig only measures and applies generic gain. It does not choose a target LUFS, normalize every segment, or implement voice calibration.
 
+## Spectral analysis, pitch tracking, and metrics
+
+The submodules `audiosig.spectral`, `audiosig.pitch`, `audiosig.metrics`, and
+`audiosig.intelligibility` provide explicit NumPy APIs without adding runtime
+dependencies. Spectral features include STFT/iSTFT, power and Slaney-mel
+spectrograms, natural-log-mel MFCCs, frame-center times, and strict frame
+matching. `pitch_track` returns F0, voicing, confidence, and time arrays for
+mono input; `hop_length=None` preserves the tracker's legacy frame geometry.
+
+Reference metrics return a `MetricResult` with a scalar value, units,
+directionality, parameters, and diagnostics. Available functions include SNR,
+unscaled residual SDR, SI-SDR, log-spectral distance, mel-spectral distance,
+log-mel L1, mel-cepstral distortion, log-F0 RMSE, and voiced/unvoiced error.
+STOI and ESTOI are available from `audiosig.intelligibility` and accept only
+equal-length mono floating-point pairs explicitly sampled at 10 kHz.
+
+```python
+from audiosig.spectral import mel_spectrogram, mfcc, stft
+from audiosig.pitch import pitch_track
+from audiosig.metrics import log_spectral_distance, si_sdr
+from audiosig.intelligibility import estoi, stoi
+
+spectrum = stft(audio, n_fft=1024, hop_length=256)
+mel = mel_spectrogram(audio, sample_rate=sample_rate, n_fft=1024,
+                      hop_length=256, n_mels=80)
+cepstra = mfcc(audio, sample_rate=sample_rate)
+track = pitch_track(audio, sample_rate=sample_rate)  # mono only
+
+# reference and estimate must already have matching shapes and sample rates.
+level_error = si_sdr(reference, estimate, sample_rate=sample_rate)
+stoi_score = stoi(reference, estimate, sample_rate=10_000)
+estoi_score = estoi(reference, estimate, sample_rate=10_000)
+```
+
+Metrics never align, resample, truncate, normalize loudness, or downmix their
+inputs. Prepare such transformations explicitly and record them at the caller's
+boundary. Speech intelligibility functions reject non-10-kHz input rather than
+silently resampling it. These are deterministic signal metrics, not MOS
+predictions or neural/model-based evaluations; AudioSig does not download or
+load pretrained models.
+
+See the [API reference](docs/api-reference.md) and [quality evaluation
+notes](docs/quality-evaluation.md) for definitions, limitations, and
+independent numerical checks.
+
 ## Silence trimming and VAD
 
 ```python

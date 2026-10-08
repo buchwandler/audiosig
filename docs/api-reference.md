@@ -521,6 +521,166 @@ Calculate spectral flux between adjacent frames.
 
 ---
 
+## Spectral and Pitch Analysis
+
+These stable submodule APIs are imported from `audiosig.spectral` and
+`audiosig.pitch`; they are intentionally not re-exported through the root
+namespace.
+
+### Spectral features (`audiosig.spectral`)
+
+- `stft(audio, *, n_fft, hop_length, center=True)` returns the existing
+  Hann-windowed complex STFT with shape `(..., n_fft // 2 + 1, frames)`.
+  It preserves the private spectral path's conventions.
+- `istft(spectrum, *, n_fft, hop_length, length=None, center=True, dtype=np.float64)` uses the existing overlap-add inverse and returns
+  `float32` or `float64` samples.
+- `power_spectrogram(audio, *, n_fft, hop_length, center=True, power=2.0)`
+  returns linear `abs(STFT) ** power`, without normalization or dB conversion.
+- `mel_filterbank(*, sample_rate, n_fft, n_mels, f_min=0.0, f_max=None, mel_scale='slaney', norm='slaney')` creates Slaney mel triangles on exact
+  real-FFT bin centers. `norm=None` disables area normalization.
+- `mel_spectrogram(..., log=False, log_floor=1e-10)` returns linear mel power
+  by default. `log=True` returns `ln(max(mel_power, log_floor))`; it does not
+  apply a power-to-dB transform.
+- `mfcc(..., n_fft=1024, hop_length=256, n_mfcc=13, n_mels=40, center=True, ...)` computes an orthonormal DCT-II of natural-log mel power. Output shape is
+  `(..., n_mfcc, frames)`; coefficient zero is included.
+- `frame_times(n_frames, *, sample_rate, hop_length, frame_length=None, center=True)` returns frame-center times in seconds. For `center=False`,
+  `frame_length` is required.
+- `match_frames(reference, estimate, *, frame_axis=-1)` accepts only arrays with
+  identical shape. It validates correspondence and never crops or aligns.
+
+### Pitch tracking (`audiosig.pitch`)
+
+`PitchTrack` is a frozen, slotted result object with `frame_times_s`, `f0_hz`,
+`voiced`, and `confidence` arrays. `pitch_track(audio, *, sample_rate, hop_length=None, f0_min=60.0, f0_max=500.0)` accepts only mono arrays shaped
+`(samples,)`. The optional hop changes analysis geometry; `None` preserves the
+legacy tracker default. Callers with multiple channels must explicitly select a
+channel or downmix before analysis. Unvoiced frames are identified by `voiced`;
+consult the track's voicing mask rather than treating all F0 values as speech
+pitch.
+
+## Reference Metrics
+
+Import metrics from `audiosig.metrics`; intelligibility functions live in
+`audiosig.intelligibility`. Here, a reference is decoded reference waveform
+samples, not a transcript or reference text. Each function returns a frozen,
+slotted `MetricResult` containing `name`, `value`, `unit`, `higher_is_better`,
+`parameters`, and `diagnostics`. Every feature and transformation parameter used
+by a metric is recorded in `parameters`. `value` is `float | None`; undefined
+pitch RMSE is represented by `None`, not a fabricated zero.
+
+All pairwise metrics require finite floating-point arrays with identical shape
+and sample count, and require `estimate_sample_rate` (when supplied) to equal
+`sample_rate`. The default `alignment='none'` is the only supported alignment.
+No metric implicitly aligns, resamples, truncates, normalizes loudness, or
+converts channels. `axis` selects the sample dimension where supported. Any
+necessary preparation is the caller's responsibility.
+
+| Function                  | Unit     | Direction | Definition / notes                                                      |
+| ------------------------- | -------- | --------- | ----------------------------------------------------------------------- |
+| `snr`                     | dB       | higher    | Global reference energy over residual energy; no gain fitting.          |
+| `sdr`                     | dB       | higher    | Explicitly unscaled reference-residual SDR; numerically equal to SNR.   |
+| `si_sdr`                  | dB       | higher    | Scale-invariant projection, with optional per-lane mean removal.        |
+| `log_spectral_distance`   | dB       | lower     | Mean per-frame RMS absolute log-magnitude STFT distance.                |
+| `mel_spectral_distance`   | dB       | lower     | Mean per-frame RMS mel-power dB distance.                               |
+| `log_mel_l1`              | ln-power | lower     | Global mean absolute natural-log mel-power difference.                  |
+| `mel_cepstral_distortion` | dB       | lower     | Orthonormal-DCT-II MFCC distance, with optional c0; no DTW.             |
+| `log_f0_rmse`             | ln-Hz    | lower     | Natural-log F0 RMSE on jointly voiced frames; `None` if there are none. |
+| `voiced_unvoiced_error`   | fraction | lower     | Fraction of pitch frames with a voicing-decision mismatch.              |
+
+### Formula conventions and comparability
+
+Let `r` be the reference waveform and `y` the estimate. SNR and this package's
+explicitly unscaled SDR both use
+
+```text
+10 * log10(sum(r**2) / sum((r - y)**2))
+```
+
+There is no gain fit or centering in these two metrics. A zero-energy reference
+is invalid; an exact reconstruction has zero residual and returns positive
+infinity. SI-SDR optionally removes each lane's mean first (default true), then
+flattens the remaining samples and fits one global scale
+`alpha = dot(y, r) / dot(r, r)`. Its score is
+`10 * log10(sum((alpha*r)**2) / sum((y - alpha*r)**2))`.
+
+Let `X_r` and `X_y` be reference/estimate STFTs, and `M_r` and `M_y` their
+mel-power features. Means below cover every lane and frame (and, for log-mel,
+every mel band); spectral distances take an RMS across frequency or mel bands
+before averaging lanes and frames.
+
+```text
+LSD = mean(lane, frame) sqrt(mean_bin(
+    (max(20*log10(abs(X_r)), db_floor)
+  - max(20*log10(abs(X_y)), db_floor))**2))
+
+mel_spectral_distance = mean(lane, frame) sqrt(mean_mel(
+    (max(10*log10(M_r), db_floor)
+  - max(10*log10(M_y), db_floor))**2))
+
+log_mel_l1 = mean(abs(ln(max(M_r, log_floor)) - ln(max(M_y, log_floor))))
+```
+
+Defaults are `n_fft=1024`, `hop_length=256`, `center=True`, `n_mels=80`,
+`db_floor=-120.0`, and `log_floor=1e-10`, as applicable. Mel features use
+Slaney scaling and area normalization. The complete chosen recipe is recorded
+in `MetricResult.parameters`.
+
+For MFCC vectors `c_r` and `c_y`, MCD is
+
+```text
+mean(lane, frame) (10*sqrt(2)/ln(10)) *
+    sqrt(sum_{k in K} (c_r[k] - c_y[k])**2)
+```
+
+where `K={1,...,n_mfcc-1}` by default and `K={0,...,n_mfcc-1}` with
+`include_c0=True`. There is no DTW. MCD scores are comparable only when the
+complete MFCC recipe, including sample rate, FFT/hop, mel scale and count,
+frequency limits, log floor, centering, coefficient count, and c0 policy,
+matches.
+
+For pitch, `log_f0_rmse` is
+`sqrt(mean((ln(f0_reference) - ln(f0_estimate))**2))` over jointly voiced
+frames. It returns `None` when there are no such frames. The V/UV error is the
+number of differing voiced/unvoiced decisions divided by all pitch frames.
+`MetricResult.higher_is_better` states the direction for each metric; values
+are not clipped to an arbitrary range.
+
+Spectral and pitch parameters, floors, feature geometry, and diagnostics are
+recorded in each result. Pitch metrics are mono-only. Log-F0 RMSE compares only
+jointly voiced frames; V/UV error compares the complete voicing masks.
+
+### STOI and ESTOI (`audiosig.intelligibility`)
+
+`stoi(reference, estimate, *, sample_rate, estimate_sample_rate=None, alignment='none')` and `estoi(...)` return higher-is-better scores. The
+reference is waveform audio, not a transcript. Both effective sample rates must
+be exactly 10,000 Hz; when `estimate_sample_rate` is omitted it defaults to
+`sample_rate`. Inputs must be finite mono `float32` or `float64` arrays with
+identical sample counts. Other rates, stereo, unequal lengths, unsupported
+alignment, and fewer than 30 active frames after silence removal are rejected.
+All transformations are caller-owned: AudioSig does no file decoding, trimming,
+resampling, time alignment, truncation, loudness normalization, or downmixing.
+
+Both implementations use complete 256-sample frames at a 128-sample hop,
+symmetric Hann weighting, a 512-point FFT, 15 one-third-octave bands beginning
+at 150 Hz, and contiguous 30-frame segments. Reference frames below -40 dB of
+the peak weighted RMS are removed and the remaining active frames are
+compressed. Band edges are assigned to nearest FFT bins. These fixed algorithm
+settings, the score-specific parameters, and input rates are recorded in each
+`MetricResult.parameters`.
+
+STOI norm-matches each estimate segment to its reference segment, clips the
+normalized estimate at `reference * (1 + 10**(15/20))`, computes mean-centered
+correlation for each band and segment, and averages those correlations. ESTOI
+centers and unit-normalizes each band's 30-frame trajectory, then centers and
+unit-normalizes across bands at each frame; normalized segment inner products
+are averaged across frames and segments.
+
+These are signal-based intelligibility measures, not MOS prediction, human
+listening, or model inference. See the quality-evaluation notes for paper
+references and the independent numerical-oracle procedure.
+
+---
+
 ## Utility Functions
 
 ### Decibel Conversion

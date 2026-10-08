@@ -8,24 +8,25 @@ sections:
     heading_slug: whole-doc
     line_span:
       - 1
-      - 39
-    section_hash: 9ead0cbb768ce32d9eb5dda0644452778b572836627a885b436862a9df7a79e2
+      - 42
+    section_hash: 297215af769d6d907a5d1d0d7dafab4dbc9b37eb7166827e26c1afaa7dd29430
     summary: Whole document.
     text:
       "AudioSig\n========\n\nAudioSig is a portable, NumPy-only signal-processing\
-      \ layer for speech and TTS\napplications. It provides gain and normalization,\
-      \ resampling, time and pitch\neffects, silence trimming, interval extraction,\
-      \ frame features, and explicit\nvoice-activity detection policies.\n\nPublic behavior\n\
-      ---------------\n\nThe package accepts ``float32`` and ``float64`` NumPy arrays\
-      \ and keeps the\nsample axis explicit through the public APIs. ``split`` returns\
-      \ clipped,\nhalf-open non-silent sample intervals. ``normalized_energy_vad`` preserves\
-      \ its\nhistorical non-padded default; pass ``pad_end=True`` when trailing partial\n\
-      speech must be analyzed. ``find_speech_bounds`` returns ``[0, 0]`` when no\nspeech\
-      \ is found.\n\nSee the repository README for the detailed replacement boundary\
-      \ and downstream\naudit status.\n\nDocumentation\n-------------\n\n.. toctree::\n\
-      \   :maxdepth: 2\n   :caption: Contents:\n\n   getting-started.md\n   api-reference.md\n\
-      \   examples.md\n   advanced.md\n\nIndices and tables\n------------------\n\n\
-      * :ref:`genindex`\n* :ref:`modindex`\n* :ref:`search`"
+      \ layer for speech and TTS\napplications. It provides waveform effects, spectral\
+      \ and pitch analysis, and\nreference metrics without model downloads or neural\
+      \ inference. STOI/ESTOI require\nexplicit equal-length mono input at 10 kHz.\n\
+      \nPublic behavior\n---------------\n\nThe package accepts ``float32`` and ``float64``\
+      \ NumPy arrays and keeps the\nsample axis explicit through the public APIs. ``split``\
+      \ returns clipped,\nhalf-open non-silent sample intervals. ``normalized_energy_vad``\
+      \ preserves its\nhistorical non-padded default; pass ``pad_end=True`` when trailing\
+      \ partial\nspeech must be analyzed. ``find_speech_bounds`` returns ``[0, 0]``\
+      \ when no\nspeech is found.\n\nSee the repository README for the detailed replacement\
+      \ boundary and downstream\naudit status.\n\nDocumentation\n-------------\n\n..\
+      \ toctree::\n   :maxdepth: 2\n   :caption: Contents:\n\n   getting-started.md\n\
+      \   api-reference.md\n   examples.md\n   advanced.md\n\n   quality-evaluation.md\n\
+      \   changelog.md\n\nIndices and tables\n------------------\n\n* :ref:`genindex`\n\
+      * :ref:`modindex`\n* :ref:`search`"
     links: []
 last_fresh_scan_version: 5
 last_fresh_hash: 423dbef38926cb813fc67bc883a900b887c71df36377d18c30f06e148c1faf81
@@ -33,4 +34,4 @@ notes:
   Smooth cut-point documentation and source links reviewed after implementation;
   remaining unlinked source units are intentional test and internal coverage gaps.
   (intentionally unlinked)
-version: 14
+version: 61

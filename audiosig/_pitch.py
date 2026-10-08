@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from ._validation import validate_integer
 from .exceptions import InvalidParameterError
 
 
@@ -53,12 +54,18 @@ def _validate_pitch_parameters(
     return rate, floor, ceiling
 
 
-def _analysis_geometry(sample_rate: int, pitch_floor: float) -> tuple[int, int]:
+def _analysis_geometry(
+    sample_rate: int, pitch_floor: float, hop_length: int | None = None
+) -> tuple[int, int]:
     maximum_period = int(np.ceil(sample_rate / pitch_floor))
     frame_length = max(3 * maximum_period + 1, round(sample_rate * 0.04))
     frame_length = min(frame_length, max(3 * maximum_period + 1, round(sample_rate * 0.12)))
-    hop_length = max(1, round(sample_rate * 0.01))
-    return frame_length, hop_length
+    hop = (
+        max(1, round(sample_rate * 0.01))
+        if hop_length is None
+        else validate_integer(hop_length, "hop_length")
+    )
+    return frame_length, hop
 
 
 def _frame_starts(length: int, frame_length: int, hop_length: int) -> np.ndarray:
@@ -330,12 +337,13 @@ def estimate_pitch_track_lane(
     sample_rate: int,
     pitch_floor: float = 60.0,
     pitch_ceiling: float = 500.0,
+    hop_length: int | None = None,
 ) -> PitchTrack:
     """Estimate a conservative F0 track and pulse marks for one lane."""
 
     rate, floor, ceiling = _validate_pitch_parameters(sample_rate, pitch_floor, pitch_ceiling)
     signal = np.asarray(audio, dtype=np.float64).reshape(-1)
-    frame_length, hop_length = _analysis_geometry(rate, floor)
+    frame_length, hop_length = _analysis_geometry(rate, floor, hop_length)
     starts = _frame_starts(signal.size, frame_length, hop_length)
     if starts.size == 0:
         empty_float = np.empty(0, dtype=np.float64)

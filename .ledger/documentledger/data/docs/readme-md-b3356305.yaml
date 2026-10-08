@@ -3,50 +3,82 @@ doc_path: README.md
 linked_sources:
   - audiosig/boundaries.py
   - audiosig/exceptions.py
+  - audiosig/intelligibility.py
+  - audiosig/metrics.py
+  - audiosig/pitch.py
+  - audiosig/spectral.py
 sections:
-  - section_id: md:section:README.md::pykokoro-integration
+  - section_id: md:section:README.md::audiosig
     doc_path: README.md
     heading_path:
       - AudioSig
-      - PyKokoro integration
-    heading_slug: pykokoro-integration
+    heading_slug: audiosig
     line_span:
-      - 148
-      - 176
-    section_hash: e8c1e91fa13eb62bea48c4eb5407889b203242abb16ef70c9489878acc50fdcc
-    summary: PyKokoro integration
+      - 5
+      - 12
+    section_hash: d257dcf48e070adc7104ffe0ffff390961c5abbbd87eb3ab406dc766f5e27612
+    summary: AudioSig
+    text: "# AudioSig
+
+
+      Portable, dependency-light audio signal processing for NumPy arrays.
+
+
+      AudioSig provides the focused DSP operations needed by speech and audiobook
+
+      applications without requiring librosa, SciPy, scikit-learn, or native
+
+      extensions."
+    links: []
+  - section_id: md:section:README.md::installation
+    doc_path: README.md
+    heading_path:
+      - AudioSig
+      - Installation
+    heading_slug: installation
+    line_span:
+      - 13
+      - 18
+    section_hash: f6984639be585fb778167971e5a571188b33379a13477ccbd5cfa8613a19cdc4
+    summary: Installation
+    text: "## Installation
+
+
+      ```bash
+
+      pip install audiosig
+
+      ```"
+    links: []
+  - section_id: md:section:README.md::basic-usage
+    doc_path: README.md
+    heading_path:
+      - AudioSig
+      - Basic usage
+    heading_slug: basic-usage
+    line_span:
+      - 19
+      - 54
+    section_hash: 616d9707e7b8b21c25cb26418bd7c2429aff61614e74820f656042cc4f69e149
+    summary: Basic usage
     text:
-      "## PyKokoro integration\n\nAudioSig provides numeric DSP only. PyKokoro should\
-      \ parse SSMD strings at its\napplication boundary, call AudioSig with numeric\
-      \ parameters, catch\n`AudioSignalError`, and decide whether to log, retry, or\
-      \ return the original\naudio. A stable dependency range such as `audiosig>=0.1.0,<0.2`\
-      \ should only be\ndeclared after that release is published on the intended package\
-      \ index.\n\nThe relevant numeric operations are `apply_speech_effects`, `apply_gain_db`,\n\
-      `energy_based_vad`, `frame_rms`, `resample`, `resample_speed`,\n`resample_to_length`,\
-      \ `trim`, and `activity_to_intervals`.\n\n`find_smooth_cut_point` selects a waveform-safe\
-      \ candidate inside a caller-provided numeric half-open interval. It uses the sample\
-      \ axis and optional preferred anchor supplied by the caller, but it does not decide\
-      \ whether that interval is semantically legal or whether a downstream application\
-      \ should retry.\n\n```python\nfrom audiosig import find_smooth_cut_point\n\ncandidate\
-      \ = find_smooth_cut_point(\n    audio,\n    start=search_start,\n    end=search_end,\n\
-      \    anchor=preferred_index,\n    window_length=120,\n )\n```\n\nThis checkout\
-      \ contains AudioSig only; downstream source changes and release\nverification\
-      \ require the PyKokoro and TTSForge repositories."
-    links:
-      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
-        source_path: audiosig/boundaries.py
-        coverage: implementation-note
-        impact: unknown
-        reason: README integration guidance documents the public numeric boundary primitive.
-        tracked_hashes:
-          body_hash: 22c9d828accffc5668fb2a6e940e29f9cfcfcfdeaaede01ffb43efa8047c51df
-      - source_id: py:class:audiosig/exceptions.py::AudioSignalError
-        source_path: audiosig/exceptions.py
-        coverage: implementation-note
-        impact: unknown
-        reason: Code contains public class `AudioSignalError`.
-        tracked_hashes:
-          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      "## Basic usage\n\n```python\nimport numpy as np\nfrom audiosig import (\n\
+      \    apply_speech_effects,\n    generate_silence,\n    pitch_shift,\n    resample_speed,\n\
+      \    resample_to_length,\n    time_stretch,\n)\n\nsample_rate = 24_000\naudio\
+      \ = np.zeros(sample_rate, dtype=np.float32)\n\nfaster = time_stretch(audio, rate=1.1)\n\
+      higher = pitch_shift(audio, sample_rate=sample_rate, semitones=2.0)\nexact = resample_to_length(audio,\
+      \ 12_000)\nfaster_playback = resample_speed(audio, speed=1.25)\nspeech_effects\
+      \ = apply_speech_effects(audio, sample_rate=sample_rate, rate=1.1)\npause = generate_silence(0.25,\
+      \ sample_rate)\n```\n\nAudioSig accepts `float32` and `float64` NumPy arrays shaped\
+      \ as `(samples,)`,\n`(channels, samples)`, or arbitrary leading batch dimensions\
+      \ followed by the\nsample axis. The public functions never mutate their input\
+      \ and preserve the\nfloating-point dtype.\n\n`time_stretch(rate=1.1)` makes audio\
+      \ faster and shorter; rates below one make\nit slower and longer. `pitch_shift(semitones=2)`\
+      \ raises pitch while preserving\nthe exact input length. `resample_speed` changes\
+      \ both duration and pitch,\nwhile `resample_to_length` targets an exact sample\
+      \ count. Regular resampling\nuses a finite windowed-sinc low-pass filter and produces\n\
+      `round(input_length * target_rate / source_rate)` samples."
+    links: []
   - section_id: md:section:README.md::waveform-construction-and-channel-downmixing
     doc_path: README.md
     heading_path:
@@ -125,9 +157,301 @@ sections:
         reason: Code contains public class `InvalidParameterError`.
         tracked_hashes:
           body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-last_fresh_scan_version: 5
-last_fresh_hash: aa29d1994080d3ddcc412232f6b8176876c90f12b7fcbed4528549433632f14e
+  - section_id: md:section:README.md::loudness-and-peak-measurement
+    doc_path: README.md
+    heading_path:
+      - AudioSig
+      - Loudness and peak measurement
+    heading_slug: loudness-and-peak-measurement
+    line_span:
+      - 85
+      - 112
+    section_hash: a45736ebc296dabe14e2815ff31c98a8f748f1d09be56f4826419024442baa5d
+    summary: Loudness and peak measurement
+    text: "## Loudness and peak measurement
+
+
+      AudioSig provides measurement primitives for comparing audio levels without modifying
+      the waveform:
+
+
+      - `sample_peak_dbfs` reports the largest discrete sample in dBFS.
+
+      - `peak_normalize` scales to a requested sample peak; it is not perceived-loudness
+      normalization.
+
+      - RMS and short-time energy describe signal energy over a selected window, but
+      are not LUFS.
+
+      - `integrated_loudness` applies BS.1770-style K-weighting and absolute/relative
+      gating to report LUFS.
+
+      - `true_peak_dbtp` oversamples to estimate inter-sample peak in dBTP.
+
+
+      The v1 loudness meter accepts finite one-dimensional mono `float32` or `float64`
+      arrays. It uses 400 ms blocks with a 100 ms hop, returns `-math.inf` for digital
+      silence, and does not pad signals shorter than one complete block:
+
+
+      ```python
+
+      import audiosig
+
+
+      metrics = audiosig.measure_loudness(audio, sample_rate=24_000)
+
+      print(metrics.integrated_lufs)
+
+      print(metrics.sample_peak_dbfs)
+
+      print(metrics.true_peak_dbtp)
+
+
+      before = audiosig.integrated_loudness(audio, sample_rate=24_000)
+
+      louder = audiosig.apply_gain_db(audio, 3.0)
+
+      after = audiosig.integrated_loudness(louder, sample_rate=24_000)
+
+      assert abs((after - before) - 3.0) < 0.05
+
+      ```
+
+
+      The stable PyKokoro handoff imports are `LoudnessMetrics`, `integrated_loudness`,
+      `sample_peak_dbfs`, `true_peak_dbtp`, and `measure_loudness` from `audiosig`;
+      the minimum release containing this API is `0.1.3`. AudioSig only measures and
+      applies generic gain. It does not choose a target LUFS, normalize every segment,
+      or implement voice calibration."
+    links: []
+  - section_id: md:section:README.md::spectral-analysis-pitch-tracking-and-metrics
+    doc_path: README.md
+    heading_path:
+      - AudioSig
+      - Spectral analysis, pitch tracking, and metrics
+    heading_slug: spectral-analysis-pitch-tracking-and-metrics
+    line_span:
+      - 113
+      - 157
+    section_hash: fb3262de724b7c498402c0e9fdde175b9f765b5d2fb0e2690da554b144ccaeef
+    summary: Spectral analysis, pitch tracking, and metrics
+    text:
+      "## Spectral analysis, pitch tracking, and metrics\n\nThe submodules `audiosig.spectral`,\
+      \ `audiosig.pitch`, `audiosig.metrics`, and\n`audiosig.intelligibility` provide\
+      \ explicit NumPy APIs without adding runtime\ndependencies. Spectral features\
+      \ include STFT/iSTFT, power and Slaney-mel\nspectrograms, natural-log-mel MFCCs,\
+      \ frame-center times, and strict frame\nmatching. `pitch_track` returns F0, voicing,\
+      \ confidence, and time arrays for\nmono input; `hop_length=None` preserves the\
+      \ tracker's legacy frame geometry.\n\nReference metrics return a `MetricResult`\
+      \ with a scalar value, units,\ndirectionality, parameters, and diagnostics. Available\
+      \ functions include SNR,\nunscaled residual SDR, SI-SDR, log-spectral distance,\
+      \ mel-spectral distance,\nlog-mel L1, mel-cepstral distortion, log-F0 RMSE, and\
+      \ voiced/unvoiced error.\nSTOI and ESTOI are available from `audiosig.intelligibility`\
+      \ and accept only\nequal-length mono floating-point pairs explicitly sampled at\
+      \ 10 kHz.\n\n```python\nfrom audiosig.spectral import mel_spectrogram, mfcc, stft\n\
+      from audiosig.pitch import pitch_track\nfrom audiosig.metrics import log_spectral_distance,\
+      \ si_sdr\nfrom audiosig.intelligibility import estoi, stoi\n\nspectrum = stft(audio,\
+      \ n_fft=1024, hop_length=256)\nmel = mel_spectrogram(audio, sample_rate=sample_rate,\
+      \ n_fft=1024,\n                      hop_length=256, n_mels=80)\ncepstra = mfcc(audio,\
+      \ sample_rate=sample_rate)\ntrack = pitch_track(audio, sample_rate=sample_rate)\
+      \  # mono only\n\n# reference and estimate must already have matching shapes and\
+      \ sample rates.\nlevel_error = si_sdr(reference, estimate, sample_rate=sample_rate)\n\
+      stoi_score = stoi(reference, estimate, sample_rate=10_000)\nestoi_score = estoi(reference,\
+      \ estimate, sample_rate=10_000)\n```\n\nMetrics never align, resample, truncate,\
+      \ normalize loudness, or downmix their\ninputs. Prepare such transformations explicitly\
+      \ and record them at the caller's\nboundary. Speech intelligibility functions\
+      \ reject non-10-kHz input rather than\nsilently resampling it. These are deterministic\
+      \ signal metrics, not MOS\npredictions or neural/model-based evaluations; AudioSig\
+      \ does not download or\nload pretrained models.\n\nSee the [API reference](docs/api-reference.md)\
+      \ and [quality evaluation\nnotes](docs/quality-evaluation.md) for definitions,\
+      \ limitations, and\nindependent numerical checks."
+    links:
+      - source_id: py:function:audiosig/intelligibility.py::estoi
+        source_path: audiosig/intelligibility.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README documents strict ESTOI input requirements.
+        tracked_hashes:
+          body_hash: 9dae3af01842f3f241cc0683ae631ec5c34183329ba847c358712248b76398d3
+      - source_id: py:function:audiosig/intelligibility.py::stoi
+        source_path: audiosig/intelligibility.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README documents strict STOI input requirements.
+        tracked_hashes:
+          body_hash: 06a44814f90d8ccbe895b6e3faa39126411dbede8b32848592946808e15b619e
+      - source_id: py:class:audiosig/metrics.py::MetricResult
+        source_path: audiosig/metrics.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README describes structured reference-metric results.
+        tracked_hashes:
+          body_hash: de523fa6bfc9316b9044b4f4d1af51d60ab0dd91b1d9b295d4932106956c298b
+      - source_id: py:function:audiosig/metrics.py::log_spectral_distance
+        source_path: audiosig/metrics.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README lists spectral reference metrics.
+        tracked_hashes:
+          body_hash: bfc4d2e16c0eb159db57a8879ab5ddecd00bb4108327be389db77af37ca5f1e6
+      - source_id: py:function:audiosig/metrics.py::si_sdr
+        source_path: audiosig/metrics.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README shows reference-metric usage.
+        tracked_hashes:
+          body_hash: 90565fa92c0ebb7c7c14f80a8e0a344b8378617892e8894f0e5bbe2bf0e15bd1
+      - source_id: py:function:audiosig/pitch.py::pitch_track
+        source_path: audiosig/pitch.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README documents mono pitch tracking.
+        tracked_hashes:
+          body_hash: fd43e0a6b4972fd2bf9a41c183869b03c000b4dd83c14976780dd995e237d4f9
+      - source_id: py:function:audiosig/spectral.py::mel_spectrogram
+        source_path: audiosig/spectral.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README documents the public Slaney mel-spectrogram API.
+        tracked_hashes:
+          body_hash: 73d54ae751359d8cb05bfd56a00023b3e40601734160614e135ae2ab5c51c357
+      - source_id: py:function:audiosig/spectral.py::mfcc
+        source_path: audiosig/spectral.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README documents the public MFCC API.
+        tracked_hashes:
+          body_hash: 227219de0e7eb741a98a23902c055d15b6eb371f3054cd480bbb2240be102fc9
+      - source_id: py:function:audiosig/spectral.py::stft
+        source_path: audiosig/spectral.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README documents the public STFT call and output API.
+        tracked_hashes:
+          body_hash: 33966e0ad2ac9b32e8db92b6b3a1004c56dd0dfa78c6520811a8c46291b47f15
+  - section_id: md:section:README.md::silence-trimming-and-vad
+    doc_path: README.md
+    heading_path:
+      - AudioSig
+      - Silence trimming and VAD
+    heading_slug: silence-trimming-and-vad
+    line_span:
+      - 158
+      - 220
+    section_hash: 019721beee72f6da786e2eda00af478bc745a38f64da6b17fb2a48901fb280a6
+    summary: Silence trimming and VAD
+    text:
+      "## Silence trimming and VAD\n\n```python\nfrom audiosig import normalized_energy_vad,\
+      \ split, trim\n\ntrimmed, interval = trim(\n    audio,\n    top_db=40.0,\n   \
+      \ frame_length=512,\n    hop_length=128,\n)\n\nactivity = normalized_energy_vad(\n\
+      \    audio,\n    sample_rate,\n    frame_duration_ms=10,\n    energy_threshold=0.15,\n\
+      )\n\nintervals = split(audio, top_db=40.0, frame_length=512, hop_length=128)\n\
+      ```\n\nPassing `sample_rate` selects normalized-energy VAD compatible with the\
+      \ former\nPyKokoro helper. Omitting it selects relative-dB VAD with overlapping\
+      \ frame\ncontrols. The package also exports framing, frame RMS, short-time energy,\n\
+      zero-crossing rate, spectral flux, median smoothing, decibel conversion, and\n\
+      non-silent-frame detection.\n`split` returns clipped half-open `[start, end)`\
+      \ intervals for every active\nregion, while `trim` returns the single outer interval.\n\
+      The compatibility `energy_based_vad` wrapper remains available; explicit\n`normalized_energy_vad`\
+      \ and `relative_db_vad` functions make the algorithm\nchoice visible. Normalized\
+      \ VAD preserves its historical `pad_end=False`\ndefault, while `pad_end=True`\
+      \ analyzes trailing partial speech. Use\n`find_speech_bounds` when `[0, 0]` must\
+      \ be distinguishable from speech at\nsample zero.\n\nSynthetic examples are available\
+      \ under [`examples/`](examples/README.md). They\nuse sine waves and seeded noise,\
+      \ so no input recordings or optional packages\nare required.\n\nAudioSig provides\
+      \ speech-oriented NumPy WSOLA and experimental ESOLA backends\nfor moderate rate\
+      \ and prosody changes, plus a basic phase-vocoder backend for\ngeneric numerical\
+      \ use. Select ESOLA with `method=\"esola\"` and provide\n`sample_rate`; its supported\
+      \ rate range is `0.5 <= rate <= 2.0`. The\nspeech-effects compositor uses WSOLA\
+      \ by default and combines pitch and rate in\none time-scale pass. ESOLA is not\
+      \ a general music stretcher, does not claim\nformant preservation, and has not\
+      \ been validated as an extreme-speed solution.\nThe experimental `method=\"td_psola\"\
+      ` option is available only through\n`pitch_shift` and `apply_speech_effects`:\
+      \ it directly modifies voiced speech\npulses and uses WSOLA for unvoiced duration\
+      \ changes. It is limited to\n`-6 <= semitones <= 6` and `0.75 <= rate <= 1.5`,\
+      \ is not a music or polyphonic\npitch shifter, and does not guarantee formant\
+      \ preservation. It is not a\ndefault; see the [TD-PSOLA listening protocol](docs/td-psola-listening-evaluation-2026-07-31.md)\n\
+      before considering any promotion.\nAll public effects preserve exact output-length,\
+      \ dtype, axis, copy, and finite\ninput contracts. Invalid arrays and parameters\
+      \ raise typed `AudioSig`\nexceptions so applications can choose their own fail-open\
+      \ or fail-fast policy.\n\nAudioSig supports Python 3.10 through 3.14 and requires\
+      \ NumPy 1.24 or newer.\nThe package is licensed under Apache-2.0. See\n[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)\
+      \ for the provenance boundary\nof the clean-room silence/VAD implementation."
+    links: []
+  - section_id: md:section:README.md::pykokoro-integration
+    doc_path: README.md
+    heading_path:
+      - AudioSig
+      - PyKokoro integration
+    heading_slug: pykokoro-integration
+    line_span:
+      - 221
+      - 249
+    section_hash: e8c1e91fa13eb62bea48c4eb5407889b203242abb16ef70c9489878acc50fdcc
+    summary: PyKokoro integration
+    text:
+      "## PyKokoro integration\n\nAudioSig provides numeric DSP only. PyKokoro should\
+      \ parse SSMD strings at its\napplication boundary, call AudioSig with numeric\
+      \ parameters, catch\n`AudioSignalError`, and decide whether to log, retry, or\
+      \ return the original\naudio. A stable dependency range such as `audiosig>=0.1.0,<0.2`\
+      \ should only be\ndeclared after that release is published on the intended package\
+      \ index.\n\nThe relevant numeric operations are `apply_speech_effects`, `apply_gain_db`,\n\
+      `energy_based_vad`, `frame_rms`, `resample`, `resample_speed`,\n`resample_to_length`,\
+      \ `trim`, and `activity_to_intervals`.\n\n`find_smooth_cut_point` selects a waveform-safe\
+      \ candidate inside a caller-provided numeric half-open interval. It uses the sample\
+      \ axis and optional preferred anchor supplied by the caller, but it does not decide\
+      \ whether that interval is semantically legal or whether a downstream application\
+      \ should retry.\n\n```python\nfrom audiosig import find_smooth_cut_point\n\ncandidate\
+      \ = find_smooth_cut_point(\n    audio,\n    start=search_start,\n    end=search_end,\n\
+      \    anchor=preferred_index,\n    window_length=120,\n )\n```\n\nThis checkout\
+      \ contains AudioSig only; downstream source changes and release\nverification\
+      \ require the PyKokoro and TTSForge repositories."
+    links:
+      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+        source_path: audiosig/boundaries.py
+        coverage: implementation-note
+        impact: unknown
+        reason: README integration guidance documents the public numeric boundary primitive.
+        tracked_hashes:
+          body_hash: 9c63a15299d32fffc8340f7ed47e8030a818a5e265f588364fa21edbb78fca41
+      - source_id: py:class:audiosig/exceptions.py::AudioSignalError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioSignalError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:README.md::compatibility-policy
+    doc_path: README.md
+    heading_path:
+      - AudioSig
+      - Compatibility policy
+    heading_slug: compatibility-policy
+    line_span:
+      - 250
+      - 257
+    section_hash: 6e09bb1e1ce4960e931f8dd70e60e10b14fbd5f66299371eadfc199b18bc59f8
+    summary: Compatibility policy
+    text: '## Compatibility policy
+
+
+      Direct `resample` keeps AudioSig''s historical rounded output length by default;
+
+      pass `length_mode="ceil"` when matching librosa''s length policy is required.
+
+      `pitch_shift` continues to enforce the exact input length. The portable effect
+
+      implementation intentionally retains its symmetric Hann window and reflect
+
+      center padding, so time/pitch effects are covered by duration, axis, channel,
+
+      and finite-output invariants rather than sample-for-sample librosa equality.'
+    links: []
+last_fresh_scan_version: 7
+last_fresh_hash: 886cc24d04a8a34b4c5996a58ca8a79c8b6acac5a08e93041a78222e642d8b51
 notes:
-  Smooth cut-point documentation and source links reviewed after implementation;
-  remaining unlinked source units are intentional test and internal coverage gaps.
-version: 14
+  Reviewed all five reported smooth cut-point sections against audiosig/boundaries.py;
+  documented interval, scoring, lane, and empty-input behavior matches current implementation.
+  Sphinx HTML build succeeded.
+version: 63

@@ -1,6 +1,9 @@
 schema: documentledger.doc_record.v4
 doc_path: docs/quality-evaluation.md
-linked_sources: []
+linked_sources:
+  - tests/test_intelligibility.py
+  - tests/test_intelligibility_quality.py
+  - tests/test_metrics.py
 sections:
   - section_id: md:section:docs/quality-evaluation.md::speech-effects-quality-evaluation
     doc_path: docs/quality-evaluation.md
@@ -33,8 +36,8 @@ sections:
     heading_slug: local-comparison-harness
     line_span:
       - 9
-      - 43
-    section_hash: 23fdb0e5a2190968b62f30e8420696db149181a48fd2e9b53528ae49e95560ce
+      - 51
+    section_hash: 83dd70f549e7bc9983d2b3b9fe9b18bc5f55a7916b65373040986e6320924d8e
     summary: Local comparison harness
     text: "## Local comparison harness
 
@@ -61,6 +64,24 @@ sections:
       not install,
 
       invoke, or require Rubber Band, SoundTouch, WORLD, or another external backend.
+
+
+      For envelope A/B renders, add `--envelopes`. It adds rate transitions from `1.0`
+      to each requested rate over 0.45 output seconds, pitch transitions from `0.0`
+      to each requested semitone target over 0.30 seconds, and combined transitions.
+      For a focused run on a permitted speech WAV:
+
+
+      ```bash
+
+      python scripts/compare_speech_effects.py input.wav comparison-output --rates 0.9
+      --semitones 2 --envelopes
+
+      ```
+
+
+      The generated `envelope_*.wav` files and metrics record the numeric control points
+      and exact expected frame count. No speech recording is distributed with AudioSig.
 
 
       The required performance and robustness matrix is reproducible with:
@@ -97,6 +118,91 @@ sections:
 
       the real-speech listening protocol below."
     links: []
+  - section_id: md:section:docs/quality-evaluation.md::time-varying-envelope-evaluation
+    doc_path: docs/quality-evaluation.md
+    heading_path:
+      - Speech effects quality evaluation
+      - Time-varying envelope evaluation
+    heading_slug: time-varying-envelope-evaluation
+    line_span:
+      - 52
+      - 79
+    section_hash: cfa102aaa0c6150b1e4917ad4e55f36613d1a83246ac57805c343829667a7192
+    summary: Time-varying envelope evaluation
+    text: "## Time-varying envelope evaluation
+
+
+      The envelope regression tests live in `tests/test_automation.py`, `tests/test_speech_envelope.py`,
+      and `tests/test_speech_envelope_quality.py`. They cover analytical integration
+      and inverse-map round trips, exact output sizing, amplitude-coded source landmarks,
+      local pitch trajectories, combined automation, voiced/unvoiced fallback, output-knot
+      jumps, and high-frequency burst guards. These objective tests are diagnostics,
+      not a substitute for listening.
+
+
+      Reproduce the 1, 10, and 60 second envelope benchmark with:
+
+
+      ```bash
+
+      python scripts/benchmark_speech_envelopes.py --output /tmp/speech-envelope-benchmark.json
+
+      ```
+
+
+      The script runs static rate, static pitch, static combined, variable-rate, variable-pitch,
+      and combined-variable cases on a deterministic 16 kHz harmonic fixture. Constant-rate
+      baselines are chosen to match the variable-rate output frame count. It records
+      runtime, real-time factor, expected/output frames, length error, finite status,
+      environment, and variable/static runtime ratio. A ratio above `1.0` means the
+      envelope case took longer. This is a single sequential run without warm-up, so
+      treat timings as indicative rather than a performance guarantee.
+
+
+      Recorded on Python 3.13.14, NumPy 2.5.3, AudioSig working-tree metadata 0.1.4,
+      Linux 6.18.33.2 under WSL2, Intel Core Ultra 7 355, 8 logical CPUs. All 18 outputs
+      were finite and had zero frame error. Relative elapsed-time ratios were:
+
+
+      | Input | Variable rate / static rate | Variable pitch / static pitch | Combined
+      variable / static combined |
+
+      | ----: | --------------------------: | ----------------------------: | ----------------------------------:
+      |
+
+      |   1 s |                       1.277 |                         1.054 |                               0.948
+      |
+
+      |  10 s |                       1.205 |                         1.133 |                               0.929
+      |
+
+      |  60 s |                       0.950 |                         0.866 |                               0.968
+      |
+
+
+      The fixture is synthetic and fully voiced. These timings do not establish perceptual
+      quality or predict every speech input.
+
+
+      The feature is available since AudioSig 0.1.5. After redoing all three A/B comparisons
+      on a permitted user-created PCM WAV, the user could not hear a clear difference
+      and considered the static and envelope renders the same. This is one listener's
+      subjective result for this source and these settings, not a general claim of equivalence.
+      Findings are in the [listening report](envelope-listening-evaluation.md). The
+      source and rendered files remain local and are not part of release materials.
+
+
+      Variable-rate-only runs use the absolute integrated rate map with WSOLA. Any variable
+      pitch uses TD-PSOLA on voiced regions and mapped WSOLA for unvoiced fallback;
+      the speech path is not formant-preserving and larger shifts can sound more artifact-prone.
+      Results are deterministic within an AudioSig version but are not promised to be
+      bit-identical across versions.
+
+
+      The listening report records the corrected result and can capture further listeners
+      or samples. This listening step is complete for the current sample; overall release
+      acceptance still depends on remaining technical validation."
+    links: []
   - section_id: md:section:docs/quality-evaluation.md::listening-protocol
     doc_path: docs/quality-evaluation.md
     heading_path:
@@ -104,8 +210,8 @@ sections:
       - Listening protocol
     heading_slug: listening-protocol
     line_span:
-      - 44
-      - 54
+      - 80
+      - 92
     section_hash: 2d2855e297536add5f9219fd2fdaa5b62a5d89f23f0b23c93efc56b52a8720bc
     summary: Listening protocol
     text: "## Listening protocol
@@ -129,10 +235,108 @@ sections:
 
       claim of studio-grade perceptual quality."
     links: []
+  - section_id: md:section:docs/quality-evaluation.md::deterministic-reference-metrics-and-intelligibility-validation
+    doc_path: docs/quality-evaluation.md
+    heading_path:
+      - Speech effects quality evaluation
+      - Deterministic reference metrics and intelligibility validation
+    heading_slug: deterministic-reference-metrics-and-intelligibility-validation
+    line_span:
+      - 93
+      - 123
+    section_hash: ae02613f0c5bd95d82caa8bd40ca31bb57d3adeeea04dc7643f2e71e6d784a0f
+    summary: Deterministic reference metrics and intelligibility validation
+    text: "## Deterministic reference metrics and intelligibility validation
+
+
+      Reference metrics are deterministic comparisons of caller-supplied arrays, not
+
+      perceptual ratings. Pairwise tests cover analytic waveform cases, strict shape
+
+      and rate rejection, no hidden alignment/transformation, structured result
+
+      metadata, and synthetic degradation ordering. A seeded voiced synthetic fixture
+
+      also verifies that stronger added noise lowers both STOI and ESTOI; this is a
+
+      regression check, not a listening-quality claim.
+
+
+      STOI and ESTOI were gated on a separate, independent black-box numerical check.
+
+      The golden fixture uses `numpy.random.default_rng(20261008)` to generate a
+
+      40,000-sample standard-normal reference and an estimate equal to that reference
+
+      plus `0.2` times an independent standard-normal sequence. With both rates at
+
+      10 kHz, PySTOI 0.4.1 returned STOI `0.9589928689124777` and ESTOI
+
+      `0.9558169218900828`. AudioSig returned `0.9590914015701738` and
+
+      `0.9559175969169041`, respectively; the test accepts an absolute difference
+
+      of `2e-4` for each. PySTOI's upstream Octave-comparison test documents its
+
+      reference lineage. PySTOI was used only as a temporary external oracle and is
+
+      not an AudioSig dependency or implementation source.
+
+
+      The NumPy implementations follow the published algorithm descriptions:
+
+      Taal et al., “A Short-Time Objective Intelligibility Measure for Time-Frequency
+
+      Weighted Noisy Speech,” ICASSP 2010,
+
+      [doi:10.1109/ICASSP.2010.5495701](https://doi.org/10.1109/ICASSP.2010.5495701);
+
+      and Jensen & Taal, “An Algorithm for Predicting the Intelligibility of Speech
+
+      Masked by Modulated Noise Maskers,” IEEE/ACM TASLP 2016,
+
+      [doi:10.1109/TASLP.2016.2585878](https://doi.org/10.1109/TASLP.2016.2585878).
+
+      The independent fixture is broadband noise rather than speech, so it checks
+
+      numerical agreement only; it does not establish predictive validity or human
+
+      perceptual quality. AudioSig emits no MOS, loads no neural model, downloads no
+
+      weights, and never transforms metric inputs implicitly."
+    links:
+      - source_id: py:function:tests/test_intelligibility.py::test_stoi_estoi_against_independent_scientific_reference_values
+        source_path: tests/test_intelligibility.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Quality notes record the seeded independent STOI/ESTOI numerical oracle.
+        tracked_hashes:
+          body_hash: 95e9697be8a84c4d0fbc1075331b4c5527024003e07dc19095ef537888a9fb9c
+      - source_id: py:function:tests/test_intelligibility_quality.py::test_intelligibility_scores_degrade_with_added_noise
+        source_path: tests/test_intelligibility_quality.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Quality notes describe the deterministic degradation-order regression.
+        tracked_hashes:
+          body_hash: 2ac6b4c768268dd3719d79be5a684c1deb6fc42ee0809c5a8cd3b2cb691ff59f
+      - source_id: py:function:tests/test_metrics.py::test_log_mel_l1_and_mcd_formulas_and_c0_option
+        source_path: tests/test_metrics.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Quality notes summarize MCD and log-mel formula checks.
+        tracked_hashes:
+          body_hash: 46b72fd36f7f67f437a470ffd61115be7e6c1e47e6a33717f227ef6eef3e4164
+      - source_id: py:function:tests/test_metrics.py::test_metric_result_and_waveform_metric_formulas
+        source_path: tests/test_metrics.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Quality notes summarize analytic waveform metric checks.
+        tracked_hashes:
+          body_hash: 2e8f7dc982d5d4c1cfe198a0fc92af4eb6dab74130f7c7f35129c9abc6da7b0c
 last_fresh_scan_version: 5
 last_fresh_hash: 533ef71eb0dba935a187ad22f332ba678f23ddc40ccc79c3e6de4b9db8642454
 notes:
   Smooth cut-point documentation and source links reviewed after implementation;
   remaining unlinked source units are intentional test and internal coverage gaps.
   (intentionally unlinked)
-version: 14
+version: 60

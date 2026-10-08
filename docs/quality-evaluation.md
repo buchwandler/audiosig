@@ -88,3 +88,35 @@ Native pitch shifting changes the spectral envelope along with F0 and therefore
 does not currently preserve vocal formants. Larger shifts are expected to be
 more artifact-prone; this harness records metrics but does not turn them into a
 claim of studio-grade perceptual quality.
+
+## Deterministic reference metrics and intelligibility validation
+
+Reference metrics are deterministic comparisons of caller-supplied arrays, not
+perceptual ratings. Pairwise tests cover analytic waveform cases, strict shape
+and rate rejection, no hidden alignment/transformation, structured result
+metadata, and synthetic degradation ordering. A seeded voiced synthetic fixture
+also verifies that stronger added noise lowers both STOI and ESTOI; this is a
+regression check, not a listening-quality claim.
+
+STOI and ESTOI were gated on a separate, independent black-box numerical check.
+The golden fixture uses `numpy.random.default_rng(20261008)` to generate a
+40,000-sample standard-normal reference and an estimate equal to that reference
+plus `0.2` times an independent standard-normal sequence. With both rates at
+10 kHz, PySTOI 0.4.1 returned STOI `0.9589928689124777` and ESTOI
+`0.9558169218900828`. AudioSig returned `0.9590914015701738` and
+`0.9559175969169041`, respectively; the test accepts an absolute difference
+of `2e-4` for each. PySTOI's upstream Octave-comparison test documents its
+reference lineage. PySTOI was used only as a temporary external oracle and is
+not an AudioSig dependency or implementation source.
+
+The NumPy implementations follow the published algorithm descriptions:
+Taal et al., “A Short-Time Objective Intelligibility Measure for Time-Frequency
+Weighted Noisy Speech,” ICASSP 2010,
+[doi:10.1109/ICASSP.2010.5495701](https://doi.org/10.1109/ICASSP.2010.5495701);
+and Jensen & Taal, “An Algorithm for Predicting the Intelligibility of Speech
+Masked by Modulated Noise Maskers,” IEEE/ACM TASLP 2016,
+[doi:10.1109/TASLP.2016.2585878](https://doi.org/10.1109/TASLP.2016.2585878).
+The independent fixture is broadband noise rather than speech, so it checks
+numerical agreement only; it does not establish predictive validity or human
+perceptual quality. AudioSig emits no MOS, loads no neural model, downloads no
+weights, and never transforms metric inputs implicitly.

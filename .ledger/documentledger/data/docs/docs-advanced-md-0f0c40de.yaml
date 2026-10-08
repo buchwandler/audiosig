@@ -4,6 +4,612 @@ linked_sources:
   - audiosig/boundaries.py
   - audiosig/exceptions.py
 sections:
+  - section_id: md:section:docs/advanced.md::advanced-topics
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+    heading_slug: advanced-topics
+    line_span:
+      - 1
+      - 2
+    section_hash: 977efe701cb7c5f8db26e69b83c274eb2be846223fadb52e256ba90f0eb672b6
+    summary: Advanced Topics
+    text: "# Advanced Topics"
+    links: []
+  - section_id: md:section:docs/advanced.md::choosing-a-time-stretch-backend
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Choosing a time-stretch backend
+    heading_slug: choosing-a-time-stretch-backend
+    line_span:
+      - 3
+      - 57
+    section_hash: eb87d018f2e68ebfde57f935ebd0e13c4a7fe5f049e669a57d7d1dbaa2bc3270
+    summary: Choosing a time-stretch backend
+    text:
+      "## Choosing a time-stretch backend\n\nAudioSig has three explicit time-stretch\
+      \ backends. The basic phase vocoder is a\ngeneric numerical reference path; it\
+      \ uses STFT/ISTFT phase propagation and can\nsound phasey around transients. WSOLA\
+      \ is the speech-oriented default for\n`apply_speech_effects` and searches for\
+      \ waveform-similar splice points in the\ntime domain. ESOLA is an experimental\
+      \ speech backend that aligns fixed\nwaveform frames using detected epochs; it\
+      \ supports `0.5 <= rate <= 2.0` and\nrequires `sample_rate`. WSOLA, ESOLA, and\
+      \ TD-PSOLA process every non-sample\ndimension as an independent lane, so they\
+      \ do not guarantee a stereo image or\nshared pitch/epoch decisions. For stereo\
+      \ speech where image coherence matters,\nprovide a shared analysis signal and\
+      \ apply its decisions in an application-level\nchannel wrapper; ordinary batch\
+      \ and arbitrary-axis processing remains supported.\n\nUse WSOLA when processing\
+      \ speech:\n\n```python\nfrom audiosig import apply_speech_effects, time_stretch\n\
+      \nstretched = time_stretch(\n    audio,\n    rate=1.2,\n    sample_rate=24_000,\n\
+      \    method=\"wsola\",\n)\nspeech = apply_speech_effects(audio, sample_rate=24_000,\
+      \ rate=1.2)\n```\n\nUse ESOLA for an experimental moderate-range speech comparison:\n\
+      \n```python\nstretched = time_stretch(\n    audio,\n    rate=1.25,\n    sample_rate=24_000,\n\
+      \    method=\"esola\",\n)\n```\n\nUse the basic phase vocoder for generic array\
+      \ processing or controlled\ncomparisons:\n\n```python\nfrom audiosig import time_stretch\n\
+      \n# Control FFT resolution\nresult = time_stretch(\n    audio,\n    rate=1.2,\n\
+      \    method=\"phase_vocoder\",\n    n_fft=4096,        # Higher = better frequency\
+      \ resolution, worse time resolution\n    hop_length=1024,   # Controls overlap\
+      \ between frames\n)\n```"
+    links: []
+  - section_id: md:section:docs/advanced.md::backend-trade-offs
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Choosing a time-stretch backend
+      - Backend trade-offs
+    heading_slug: backend-trade-offs
+    line_span:
+      - 58
+      - 84
+    section_hash: 6929b2188219c52990dcabdf2d6085854f5057b470e595474a8c79b38e7cc567
+    summary: Backend trade-offs
+    text:
+      "### Backend trade-offs\n\n- **WSOLA frame/overlap/search**: Defaults are\
+      \ 30/10/10 ms and are sample-rate aware; larger searches cost more and can select\
+      \ less stable matches.\n- **Phase-vocoder n_fft**: Larger values improve frequency\
+      \ separation but worsen time precision.\n- **Phase-vocoder hop_length**: Typically\
+      \ n_fft // 4 for the basic backend.\n- **ESOLA frame/epoch alignment**: Uses a\
+      \ fixed 20 ms frame, 50% synthesis\n  overlap, NumPy epoch extraction, and a raised-cosine\
+      \ pairwise crossfade.\n  It is speech-specific and remains experimental until\
+      \ real-speech listening\n  results establish a stable benefit over WSOLA.\n\n\
+      The standard compositor plans pitch and rate together using\n`tsm_rate = rate\
+      \ / pitch_ratio`, then resamples once when necessary. Selecting\n`method=\"td_psola\"\
+      ` uses a separate direct pitch/prosody path instead: it tracks\nvoicing and pulses,\
+      \ changes synthesis-pulse spacing for voiced speech, and uses\nWSOLA for unvoiced\
+      \ duration fallback. Its conservative limits are\n`-6..+6` semitones and `0.75..1.5`\
+      \ rate. If too few pitch marks are available,\nthe direct path explicitly falls\
+      \ back. Pure pitch requests use WSOLA plus\nresampling for the requested ratio;\
+      \ duration-modification requests preserve\nunvoiced material with duration-only\
+      \ WSOLA rather than globally tonalizing it.\nThe backend does not silently return\
+      \ unchanged audio.\nAll paths preserve exact output-length and dtype contracts,\
+      \ but TD-PSOLA does\nnot guarantee formant preservation and should not be treated\
+      \ as a general music\nor polyphonic pitch-shifting backend.\n\nTD-PSOLA remains\
+      \ experimental until objective, runtime, and real-speech\nlistening gates pass.\
+      \ See the [evaluation protocol](td-psola-listening-evaluation-2026-07-31.md)."
+    links: []
+  - section_id: md:section:docs/advanced.md::time-varying-speech-envelopes
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Time-varying speech envelopes
+    heading_slug: time-varying-speech-envelopes
+    line_span:
+      - 85
+      - 94
+    section_hash: c1646b7ece440019b4d1d44ab853cb6ba60de6eda7103e300a38e68b0a16623f
+    summary: Time-varying speech envelopes
+    text: '## Time-varying speech envelopes
+
+
+      `apply_speech_effects_envelope` is available since AudioSig 0.1.5. It accepts
+      only numeric control points and leaves higher-level meaning to calling applications.
+      Rate values are positive playback factors; pitch values are semitones. Control-point
+      times use output seconds, both curves interpolate linearly, the first point is
+      at zero, and the final point is held. No repeated calls to static effects or chunk
+      stitching are used.
+
+
+      For output time `y`, the rate map consumes source time `x(y) = integral(0, y,
+      r(u) du)`. Linear segments are integrated analytically in float64. AudioSig solves
+      the inverse map at the input duration and rounds `output_seconds * sample_rate`
+      once to determine the output frame count. `speech_effects_output_frames` exposes
+      that same calculation for downstream timing prediction. Pitch-only envelopes preserve
+      exact input length.
+
+
+      Variable rate-only processing defaults to mapped WSOLA, where each expected source
+      frame is computed from the absolute integrated map and overlap search remains
+      local and deterministic. Selecting `method="td_psola"` uses voiced pulse synthesis
+      with mapped WSOLA fallback for rate-only curves. When pitch varies, TD-PSOLA controls
+      voiced pulse spacing from output-time semitone values, while unvoiced spans use
+      the same mapped WSOLA rate trajectory. This coordinated path is speech-oriented
+      and does not claim vocal-formant preservation.
+
+
+      Omitted rate and pitch curves mean `1.0` and `0.0`. Clips shorter than the requested
+      transition duration evaluate only the output-time portion that exists; they do
+      not compress the curve. Digital silence remains digital silence. The same timing
+      map and control points apply to all channels. Identical inputs and parameters
+      are deterministic within an AudioSig version, but bit-identical output across
+      versions is not promised.'
+    links: []
+  - section_id: md:section:docs/advanced.md::resampling-internals
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Resampling Internals
+    heading_slug: resampling-internals
+    line_span:
+      - 95
+      - 112
+    section_hash: 564802c182c58ba34f5ecb9a209d87d676fbe8f5635943244f69da1387af03db
+    summary: Resampling Internals
+    text:
+      "## Resampling Internals\n\nAudioSig uses windowed-sinc interpolation:\n\n\
+      ```python\nfrom audiosig import resample\n\n# Control filter characteristics\n\
+      result = resample(\n    audio,\n    source_rate=48000,\n    target_rate=16000,\n\
+      \    filter_width=64,     # Wider = sharper cutoff, slower\n    rolloff=0.945,\
+      \       # Anti-aliasing filter rolloff\n    length_mode='round', # Output length\
+      \ calculation\n)\n```"
+    links: []
+  - section_id: md:section:docs/advanced.md::length-modes
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Resampling Internals
+      - Length Modes
+    heading_slug: length-modes
+    line_span:
+      - 113
+      - 128
+    section_hash: 6d213952e4cd634fb98d20b5f43dc9416ee8eaaae350b379c160b5aca6deadd5
+    summary: Length Modes
+    text: '### Length Modes
+
+
+      - `''round''`: AudioSig''s default, matches historical behavior
+
+      - `''ceil''`: Matches librosa''s output length semantics
+
+
+      ```python
+
+      from audiosig import resample
+
+
+      # Compare length modes
+
+      result_round = resample(audio, source_rate=44100, target_rate=16000, length_mode=''round'')
+
+      result_ceil = resample(audio, source_rate=44100, target_rate=16000, length_mode=''ceil'')
+
+
+      print(f"Round: {len(result_round)}")
+
+      print(f"Ceil: {len(result_ceil)}")
+
+      ```'
+    links: []
+  - section_id: md:section:docs/advanced.md::loudness-measurement
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Loudness measurement
+    heading_slug: loudness-measurement
+    line_span:
+      - 129
+      - 145
+    section_hash: f0ce74a0991440a2bd3e44b27220f808176adb0f918ce90e4cc12a872ad1cc56
+    summary: Loudness measurement
+    text: "## Loudness measurement
+
+
+      Loudness and peak metrics are deliberately separate from amplitude transforms.
+      `peak_normalize` sets the largest discrete sample, RMS/short-time energy describes
+      a chosen window, integrated loudness reports gated BS.1770-style LUFS, and true
+      peak estimates inter-sample dBTP. Equal sample peaks do not imply equal perceived
+      loudness.
+
+
+      The v1 meter accepts finite one-dimensional mono arrays and uses float64 calculation
+      paths. It analyzes complete 400 ms blocks with a 100 ms hop, applies K-weighting,
+      then uses the -70 LUFS absolute gate and -10 LU relative gate. It returns `-math.inf`
+      for silence and for audio shorter than one complete block; it never pads, clips,
+      limits, or automatically normalizes. The default true-peak oversampling factor
+      is 4, configurable for callers that need a different cost/accuracy trade-off.
+
+
+      ```python
+
+      import audiosig
+
+
+      metrics = audiosig.measure_loudness(audio, sample_rate=24_000)
+
+      print(metrics.integrated_lufs)  # LUFS
+
+      print(metrics.sample_peak_dbfs)  # dBFS
+
+      print(metrics.true_peak_dbtp)   # dBTP
+
+      ```
+
+
+      The stable release contract for downstream PyKokoro code is `audiosig>=0.1.3`
+      for `LoudnessMetrics`, `integrated_loudness`, `sample_peak_dbfs`, `true_peak_dbtp`,
+      and `measure_loudness`, plus the existing `apply_gain_db`. AudioSig supplies measurements
+      and generic gain only; target LUFS and voice calibration remain application policy."
+    links: []
+  - section_id: md:section:docs/advanced.md::vad-algorithm-details
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - VAD Algorithm Details
+    heading_slug: vad-algorithm-details
+    line_span:
+      - 146
+      - 147
+    section_hash: 615101f04345d632f7384416e472b1d3ecb559307e256ee55de94f953adbaa1b
+    summary: VAD Algorithm Details
+    text: "## VAD Algorithm Details"
+    links: []
+  - section_id: md:section:docs/advanced.md::normalized-energy-vad
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - VAD Algorithm Details
+      - Normalized Energy VAD
+    heading_slug: normalized-energy-vad
+    line_span:
+      - 148
+      - 169
+    section_hash: 87d457b83bcbcb919e8f6a237d4af212de843c3a26b68d681f2c24201615cc58
+    summary: Normalized Energy VAD
+    text:
+      "### Normalized Energy VAD\n\nThe normalized energy VAD works by:\n\n1. Framing\
+      \ the audio into non-overlapping segments\n2. Computing RMS energy per frame\n\
+      3. Normalizing to [0, 1] range\n4. Thresholding to detect activity\n\n```python\n\
+      from audiosig import normalized_energy_vad\n\n# The algorithm in detail\nactivity\
+      \ = normalized_energy_vad(\n    audio,\n    sample_rate=24000,\n    frame_duration_ms=10,\
+      \     # 10ms frames = 240 samples\n    energy_threshold=0.15,    # 15% of max\
+      \ energy\n    pad_end=False,            # Discard trailing partial frame\n)\n\
+      ```"
+    links: []
+  - section_id: md:section:docs/advanced.md::relative-db-vad
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - VAD Algorithm Details
+      - Relative dB VAD
+    heading_slug: relative-db-vad
+    line_span:
+      - 170
+      - 189
+    section_hash: 1caa7de475e266e652d6e9d1362c10e704d1aa8d7c798ccba8812a2c4979acfe
+    summary: Relative dB VAD
+    text:
+      "### Relative dB VAD\n\nThe relative dB VAD works by:\n\n1. Computing short-time\
+      \ energy\n2. Finding peak energy\n3. Setting threshold relative to peak\n4. Detecting\
+      \ frames above threshold\n\n```python\nfrom audiosig import relative_db_vad\n\n\
+      activity = relative_db_vad(\n    audio,\n    frame_length=2048,\n    hop_length=512,\n\
+      \    threshold_db=40.0,  # 40 dB below peak\n)\n```"
+    links: []
+  - section_id: md:section:docs/advanced.md::smooth-cut-point-selection
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - VAD Algorithm Details
+      - Smooth Cut-Point Selection
+    heading_slug: smooth-cut-point-selection
+    line_span:
+      - 190
+      - 197
+    section_hash: a58bf43dfb462a34af05d547f3c16ee0b3111e50cd3080051938736b45e11fa7
+    summary: Smooth Cut-Point Selection
+    text: "### Smooth Cut-Point Selection
+
+
+      `find_smooth_cut_point` is a bounded, sample-domain primitive for applications
+      that already know a legal interval. It uses a cumulative-sum local RMS calculation
+      plus endpoint amplitude, cross-boundary slope, and anchor-distance costs. The
+      implementation allocates work proportional to the local search span, not candidate
+      count times window length, and conservatively aggregates all non-sample lanes.
+
+
+      The function accepts float32 or float64 NumPy arrays, supports an explicit sample
+      axis, never mutates input, and returns a legal index even when no quiet run exists.
+      An empty array returns `None` only for the explicit `start=0, end=0` contract.
+      `AudioShapeError` and `InvalidParameterError` report invalid arrays and parameters.
+
+
+      Keep semantic decisions outside AudioSig: callers choose the legal interval, interpret
+      timestamps or application metadata, and decide whether to retry. Scoring weights
+      are intentionally internal and are not public tuning parameters."
+    links:
+      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
+        source_path: audiosig/boundaries.py
+        coverage: implementation-note
+        impact: unknown
+        reason:
+          Advanced documentation explains the smooth cut-point implementation and
+          complexity.
+        tracked_hashes:
+          body_hash: 9c63a15299d32fffc8340f7ed47e8030a818a5e265f588364fa21edbb78fca41
+      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `AudioShapeError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
+        source_path: audiosig/exceptions.py
+        coverage: implementation-note
+        impact: unknown
+        reason: Code contains public class `InvalidParameterError`.
+        tracked_hashes:
+          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - section_id: md:section:docs/advanced.md::edge-cases-and-special-handling
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Edge Cases and Special Handling
+    heading_slug: edge-cases-and-special-handling
+    line_span:
+      - 198
+      - 199
+    section_hash: 0435de1a6d2c1ecac69b22e4109712515afab2ba81051d47eb51c370cbce2d19
+    summary: Edge Cases and Special Handling
+    text: "## Edge Cases and Special Handling"
+    links: []
+  - section_id: md:section:docs/advanced.md::empty-audio
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Edge Cases and Special Handling
+      - Empty Audio
+    heading_slug: empty-audio
+    line_span:
+      - 200
+      - 222
+    section_hash: 9ac96458149367b829a88d8bcca6bdee0f88386e09481b0dffe1362d6f949284
+    summary: Empty Audio
+    text: "### Empty Audio
+
+
+      ```python
+
+      import numpy as np
+
+      from audiosig import trim, split
+
+
+      # Empty arrays are handled gracefully
+
+      empty = np.array([], dtype=np.float32)
+
+
+      # trim returns empty array and [0, 0]
+
+      trimmed, interval = trim(empty)
+
+      assert len(trimmed) == 0
+
+      assert np.array_equal(interval, [0, 0])
+
+
+      # split returns empty intervals
+
+      intervals = split(empty)
+
+      assert len(intervals) == 0
+
+      ```
+
+
+      All public transformations, including `time_stretch`, `pitch_shift`, gain,
+
+      normalization, and resampling, accept an empty sample axis after validating
+
+      their parameters and return an empty copy with the original shape and dtype."
+    links: []
+  - section_id: md:section:docs/advanced.md::silent-audio
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Edge Cases and Special Handling
+      - Silent Audio
+    heading_slug: silent-audio
+    line_span:
+      - 223
+      - 246
+    section_hash: 35dec0b64d0e039e7d167be5ba698280c90cd9c3d6779074386bfb2656dc05ef
+    summary: Silent Audio
+    text: "### Silent Audio
+
+
+      ```python
+
+      import numpy as np
+
+      from audiosig import trim, peak_normalize
+
+
+      # All-zeros audio
+
+      silence = np.zeros(24000, dtype=np.float32)
+
+
+      # With the default peak-relative reference, uniform silence remains unchanged.
+
+      trimmed, interval = trim(silence, top_db=40.0, ref=np.max)
+
+      assert len(trimmed) == 24000
+
+      assert np.array_equal(interval, [0, 24000])
+
+
+      # A fixed nonzero reference classifies the all-zero signal as silence.
+
+      trimmed, interval = trim(silence, top_db=40.0, ref=1.0)
+
+      assert len(trimmed) == 0
+
+      assert np.array_equal(interval, [0, 0])
+
+
+      # Normalization preserves silence
+
+      normalized = peak_normalize(silence)
+
+      assert np.all(normalized == 0)
+
+      ```"
+    links: []
+  - section_id: md:section:docs/advanced.md::very-short-audio
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Edge Cases and Special Handling
+      - Very Short Audio
+    heading_slug: very-short-audio
+    line_span:
+      - 247
+      - 264
+    section_hash: 013b5d862836954ff63567766e13f911d2cf245c24c8bae7015536ee80201886
+    summary: Very Short Audio
+    text: "### Very Short Audio
+
+
+      ```python
+
+      import numpy as np
+
+      from audiosig import time_stretch, pitch_shift
+
+
+      # Single sample
+
+      single = np.array([0.5], dtype=np.float32)
+
+
+      # Time stretching works with minimum length 1
+
+      result = time_stretch(single, rate=2.0)
+
+      assert len(result) >= 1
+
+
+      # Pitch shifting preserves length
+
+      result = pitch_shift(single, sample_rate=24000, semitones=3.0)
+
+      assert len(result) == 1
+
+      ```"
+    links: []
+  - section_id: md:section:docs/advanced.md::multi-channel-and-batch-processing
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Multi-Channel and Batch Processing
+    heading_slug: multi-channel-and-batch-processing
+    line_span:
+      - 265
+      - 266
+    section_hash: f1e58ddde8dd6ce8efb941809edc4af8ff7f00f0ae45cba2e7f179bd796fd975
+    summary: Multi-Channel and Batch Processing
+    text: "## Multi-Channel and Batch Processing"
+    links: []
+  - section_id: md:section:docs/advanced.md::stereo-audio
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Multi-Channel and Batch Processing
+      - Stereo Audio
+    heading_slug: stereo-audio
+    line_span:
+      - 267
+      - 283
+    section_hash: 1ef055b83efa53a1e0baaf37c3fa0b2266c3834b2c566108a8e68ac4bf8037ba
+    summary: Stereo Audio
+    text: "### Stereo Audio
+
+
+      ```python
+
+      import numpy as np
+
+      from audiosig import time_stretch, pitch_shift
+
+
+      # Stereo audio: (2, samples)
+
+      stereo = np.random.randn(2, 24000).astype(np.float32)
+
+
+      # Processing works on last axis by default
+
+      stretched = time_stretch(stereo, rate=1.1)
+
+      assert stretched.shape[0] == 2  # Channels preserved
+
+
+      # Can specify axis explicitly
+
+      result = time_stretch(stereo, rate=1.1, axis=-1)
+
+      ```"
+    links: []
+  - section_id: md:section:docs/advanced.md::batch-dimensions
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Multi-Channel and Batch Processing
+      - Batch Dimensions
+    heading_slug: batch-dimensions
+    line_span:
+      - 284
+      - 297
+    section_hash: 8542ffa5bb7ea325bced095f729eae0bdc767392eafd6e2251e9675711c2dafa
+    summary: Batch Dimensions
+    text: "### Batch Dimensions
+
+
+      ```python
+
+      import numpy as np
+
+      from audiosig import time_stretch
+
+
+      # Batch of audio: (batch, channels, samples)
+
+      batch = np.random.randn(8, 2, 24000).astype(np.float32)
+
+
+      # Processing preserves batch dimensions
+
+      result = time_stretch(batch, rate=1.2)
+
+      assert result.shape == (8, 2, 20000)  # Shorter due to rate > 1
+
+      ```"
+    links: []
+  - section_id: md:section:docs/advanced.md::error-handling-strategies
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Error Handling Strategies
+    heading_slug: error-handling-strategies
+    line_span:
+      - 298
+      - 299
+    section_hash: 15255b2bb37ac0082f701e3cf96fb9a93fce90267f7592e0e2d31eda4e066e15
+    summary: Error Handling Strategies
+    text: "## Error Handling Strategies"
+    links: []
   - section_id: md:section:docs/advanced.md::fail-fast-vs-fail-open
     doc_path: docs/advanced.md
     heading_path:
@@ -12,8 +618,8 @@ sections:
       - Fail-Fast vs Fail-Open
     heading_slug: fail-fast-vs-fail-open
     line_span:
-      - 274
-      - 305
+      - 300
+      - 331
     section_hash: 96b91a514069d9f426896e5007d9c9f95fc12f0acbfb7dbe57ddc9f14842a7c1
     summary: Fail-Fast vs Fail-Open
     text:
@@ -58,8 +664,8 @@ sections:
       - Input Validation
     heading_slug: input-validation
     line_span:
-      - 306
-      - 328
+      - 332
+      - 354
     section_hash: 31b182e097969938d7b4c521462f13a60504654682bc3d1c43244595e3b40542
     summary: Input Validation
     text:
@@ -80,64 +686,301 @@ sections:
         reason: Code contains public class `AudioShapeError`.
         tracked_hashes:
           body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-  - section_id: md:section:docs/advanced.md::smooth-cut-point-selection
+  - section_id: md:section:docs/advanced.md::performance-optimization
     doc_path: docs/advanced.md
     heading_path:
       - Advanced Topics
-      - VAD Algorithm Details
-      - Smooth Cut-Point Selection
-    heading_slug: smooth-cut-point-selection
+      - Performance Optimization
+    heading_slug: performance-optimization
     line_span:
-      - 163
-      - 171
-    section_hash: a58bf43dfb462a34af05d547f3c16ee0b3111e50cd3080051938736b45e11fa7
-    summary: Smooth Cut-Point Selection
-    text: "### Smooth Cut-Point Selection
+      - 355
+      - 356
+    section_hash: ba3c2445819891a10b91a1c2816e3b240516b17eccd9f940ec100f4c162f5593
+    summary: Performance Optimization
+    text: "## Performance Optimization"
+    links: []
+  - section_id: md:section:docs/advanced.md::memory-layout
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Performance Optimization
+      - Memory Layout
+    heading_slug: memory-layout
+    line_span:
+      - 357
+      - 368
+    section_hash: 31a00108bafa6ca7cdb65a19c0629ce130a72571c7d522a7a8ef8116698ae90f
+    summary: Memory Layout
+    text: "### Memory Layout
 
 
-      `find_smooth_cut_point` is a bounded, sample-domain primitive for applications
-      that already know a legal interval. It uses a cumulative-sum local RMS calculation
-      plus endpoint amplitude, cross-boundary slope, and anchor-distance costs. The
-      implementation allocates work proportional to the local search span, not candidate
-      count times window length, and conservatively aggregates all non-sample lanes.
+      ```python
+
+      import numpy as np
 
 
-      The function accepts float32 or float64 NumPy arrays, supports an explicit sample
-      axis, never mutates input, and returns a legal index even when no quiet run exists.
-      An empty array returns `None` only for the explicit `start=0, end=0` contract.
-      `AudioShapeError` and `InvalidParameterError` report invalid arrays and parameters.
+      # C-contiguous arrays are faster
+
+      audio = np.ascontiguousarray(audio)
 
 
-      Keep semantic decisions outside AudioSig: callers choose the legal interval, interpret
-      timestamps or application metadata, and decide whether to retry. Scoring weights
-      are intentionally internal and are not public tuning parameters."
-    links:
-      - source_id: py:function:audiosig/boundaries.py::find_smooth_cut_point
-        source_path: audiosig/boundaries.py
-        coverage: implementation-note
-        impact: unknown
-        reason:
-          Advanced documentation explains the smooth cut-point implementation and
-          complexity.
-        tracked_hashes:
-          body_hash: 22c9d828accffc5668fb2a6e940e29f9cfcfcfdeaaede01ffb43efa8047c51df
-      - source_id: py:class:audiosig/exceptions.py::AudioShapeError
-        source_path: audiosig/exceptions.py
-        coverage: implementation-note
-        impact: unknown
-        reason: Code contains public class `AudioShapeError`.
-        tracked_hashes:
-          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-      - source_id: py:class:audiosig/exceptions.py::InvalidParameterError
-        source_path: audiosig/exceptions.py
-        coverage: implementation-note
-        impact: unknown
-        reason: Code contains public class `InvalidParameterError`.
-        tracked_hashes:
-          body_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-last_fresh_scan_version: 5
-last_fresh_hash: 4e8c0ca4344b04461045eec389e3d795d7c7dfdb5eebb686799ee9ad927556a1
+      # Fortran-contiguous for column-major operations
+
+      # (not typically needed for audio)
+
+      ```"
+    links: []
+  - section_id: md:section:docs/advanced.md::chunked-processing
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Performance Optimization
+      - Chunked Processing
+    heading_slug: chunked-processing
+    line_span:
+      - 369
+      - 387
+    section_hash: 5d96dcff617c3ddddc21dbdf52e7beb6b907e0ec6afc4c79a4b0fc767d4a5482
+    summary: Chunked Processing
+    text:
+      "### Chunked Processing\n\n```python\nimport numpy as np\nfrom audiosig import\
+      \ time_stretch\n\ndef process_large_file(audio, rate, chunk_seconds=10, sample_rate=24000):\n\
+      \    \"\"\"Process large audio in chunks.\"\"\"\n    chunk_size = chunk_seconds\
+      \ * sample_rate\n    results = []\n\n    for i in range(0, len(audio), chunk_size):\n\
+      \        chunk = audio[i:i + chunk_size]\n        processed = time_stretch(chunk,\
+      \ rate=rate)\n        results.append(processed)\n\n    return np.concatenate(results)\n\
+      ```"
+    links: []
+  - section_id: md:section:docs/advanced.md::type-selection
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Performance Optimization
+      - Type Selection
+    heading_slug: type-selection
+    line_span:
+      - 388
+      - 404
+    section_hash: 7be5723bd9542b3cbe8f1fefa149c9f92e6b668c6ad5db43f21aa92323cab820
+    summary: Type Selection
+    text: "### Type Selection
+
+
+      ```python
+
+      import numpy as np
+
+
+      # Float32: Good for most applications, lower memory
+
+      audio_32 = np.random.randn(24000).astype(np.float32)
+
+
+      # Float64: Higher precision, more memory
+
+      audio_64 = np.random.randn(24000).astype(np.float64)
+
+
+      # Processing preserves dtype
+
+      from audiosig import time_stretch
+
+      result_32 = time_stretch(audio_32, rate=1.1)  # Returns float32
+
+      result_64 = time_stretch(audio_64, rate=1.1)  # Returns float64
+
+      ```"
+    links: []
+  - section_id: md:section:docs/advanced.md::integration-with-other-libraries
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Integration with Other Libraries
+    heading_slug: integration-with-other-libraries
+    line_span:
+      - 405
+      - 406
+    section_hash: c9e176cf53c5468f4a861d1da40f68b58252ef5346aefb92d23c786fe1eb5594
+    summary: Integration with Other Libraries
+    text: "## Integration with Other Libraries"
+    links: []
+  - section_id: md:section:docs/advanced.md::with-librosa
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Integration with Other Libraries
+      - With librosa
+    heading_slug: with-librosa
+    line_span:
+      - 407
+      - 419
+    section_hash: 103f2ee0aa63e6ea15463396ea1cc2246d0689d53cf797a5458085d1badf8a8b
+    summary: With librosa
+    text: '### With librosa
+
+
+      ```python
+
+      import librosa
+
+      from audiosig import resample
+
+
+      # Load with librosa
+
+      audio, sr = librosa.load("file.wav", sr=None)
+
+
+      # Resample with AudioSig (NumPy-only)
+
+      resampled = resample(audio, source_rate=sr, target_rate=16000)
+
+      ```'
+    links: []
+  - section_id: md:section:docs/advanced.md::with-soundfile
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Integration with Other Libraries
+      - With soundfile
+    heading_slug: with-soundfile
+    line_span:
+      - 420
+      - 436
+    section_hash: 35381dbc0bd5f03f135ef35e34ae40eaa407a16b0e688d30a061530e5a009ca6
+    summary: With soundfile
+    text: '### With soundfile
+
+
+      ```python
+
+      import soundfile as sf
+
+      from audiosig import trim, peak_normalize
+
+
+      # Load audio
+
+      audio, sr = sf.read("file.wav")
+
+
+      # Process with AudioSig
+
+      trimmed, _ = trim(audio, top_db=40.0)
+
+      normalized = peak_normalize(trimmed, peak=0.95)
+
+
+      # Save
+
+      sf.write("processed.wav", normalized, sr)
+
+      ```'
+    links: []
+  - section_id: md:section:docs/advanced.md::with-pytorch
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Integration with Other Libraries
+      - With PyTorch
+    heading_slug: with-pytorch
+    line_span:
+      - 437
+      - 454
+    section_hash: 52b927cf7e8721f5db9579b2c6267bd06e2620f2e9d780717fb6ef9535579be5
+    summary: With PyTorch
+    text: "### With PyTorch
+
+
+      ```python
+
+      import torch
+
+      import numpy as np
+
+      from audiosig import time_stretch
+
+
+      # Convert to numpy
+
+      audio_torch = torch.randn(1, 24000)
+
+      audio_np = audio_torch.numpy().squeeze()
+
+
+      # Process with AudioSig
+
+      processed_np = time_stretch(audio_np, rate=1.1)
+
+
+      # Convert back to torch
+
+      processed_torch = torch.from_numpy(processed_np).unsqueeze(0)
+
+      ```"
+    links: []
+  - section_id: md:section:docs/advanced.md::debugging-and-profiling
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Debugging and Profiling
+    heading_slug: debugging-and-profiling
+    line_span:
+      - 455
+      - 456
+    section_hash: ae934078e67a3ab6805751ca72c464e01679e4b00b342f68447d28bb47a76e3b
+    summary: Debugging and Profiling
+    text: "## Debugging and Profiling"
+    links: []
+  - section_id: md:section:docs/advanced.md::checking-intermediate-results
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Debugging and Profiling
+      - Checking Intermediate Results
+    heading_slug: checking-intermediate-results
+    line_span:
+      - 457
+      - 475
+    section_hash: 02507d8390a0c2999407e238cf7c10a6ac9ce682f8cff421f1d7bce884477008
+    summary: Checking Intermediate Results
+    text:
+      "### Checking Intermediate Results\n\n```python\nimport numpy as np\nfrom\
+      \ audiosig import frame_signal, frame_rms\n\ndef analyze_frames(audio, frame_length=2048,\
+      \ hop_length=512):\n    \"\"\"Debug frame analysis.\"\"\"\n    frames = frame_signal(audio,\
+      \ frame_length=frame_length, hop_length=hop_length)\n    rms = frame_rms(audio,\
+      \ frame_length=frame_length, hop_length=hop_length)\n\n    print(f\"Audio length:\
+      \ {len(audio)}\")\n    print(f\"Number of frames: {len(frames)}\")\n    print(f\"\
+      Frame shape: {frames.shape}\")\n    print(f\"RMS range: [{np.min(rms):.4f}, {np.max(rms):.4f}]\"\
+      )\n\n    return frames, rms\n```"
+    links: []
+  - section_id: md:section:docs/advanced.md::performance-profiling
+    doc_path: docs/advanced.md
+    heading_path:
+      - Advanced Topics
+      - Debugging and Profiling
+      - Performance Profiling
+    heading_slug: performance-profiling
+    line_span:
+      - 476
+      - 501
+    section_hash: 099644991af8c2024241b3b41bc2b54a74bf8675a7b79684639833ad32c4b0ac
+    summary: Performance Profiling
+    text:
+      "### Performance Profiling\n\n```python\nimport time\nimport numpy as np\n\
+      from audiosig import time_stretch\n\ndef profile_time_stretch(audio, rate, iterations=100):\n\
+      \    \"\"\"Profile time_stretch performance.\"\"\"\n    times = []\n\n    for\
+      \ _ in range(iterations):\n        start = time.perf_counter()\n        result\
+      \ = time_stretch(audio, rate=rate)\n        end = time.perf_counter()\n      \
+      \  times.append(end - start)\n\n    avg_time = np.mean(times)\n    std_time =\
+      \ np.std(times)\n\n    print(f\"Average: {avg_time*1000:.2f} ms\")\n    print(f\"\
+      Std dev: {std_time*1000:.2f} ms\")\n    print(f\"Throughput: {len(audio) / avg_time\
+      \ / 1e6:.2f} Msamples/s\")\n\n    return avg_time, std_time\n```"
+    links: []
+last_fresh_scan_version: 7
+last_fresh_hash: 279202049bf704e4aa9c2a3540201b4955b2dba2d7e86f3b5255d7078f2bc1a5
 notes:
-  Smooth cut-point documentation and source links reviewed after implementation;
-  remaining unlinked source units are intentional test and internal coverage gaps.
-version: 14
+  Reviewed all five reported smooth cut-point sections against audiosig/boundaries.py;
+  documented interval, scoring, lane, and empty-input behavior matches current implementation.
+  Sphinx HTML build succeeded.
+version: 63
