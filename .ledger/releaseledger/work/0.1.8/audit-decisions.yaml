@@ -1,0 +1,30 @@
+rows:
+  - sha: 757d69d6925e829b791034932d4fafb49cab1374
+    inspected: true
+    inspected_paths:
+      - README.md
+      - audiosig/__init__.py
+      - audiosig/_resampling.py
+      - audiosig/_spectral.py
+      - audiosig/amplitude.py
+      - audiosig/boundaries.py
+      - audiosig/spectral.py
+      - audiosig/speech_level.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - tests/fixtures/sopro_reference_golden.json
+      - tests/test_output_boundaries.py
+      - tests/test_output_conditioning.py
+      - tests/test_pause_crop.py
+      - tests/test_public_dsp.py
+      - tests/test_public_spectral.py
+      - tests/test_resampling_compatibility.py
+      - tests/test_spectral_compatibility.py
+      - tests/test_speech_level.py
+    observed_behavior: "Adds public NumPy DSP primitives for configurable windowed-sinc resampling, spectral features, speech-level measurement, pause-aware cropping, and output conditioning; documents their compatibility policies and adds fixtures and regression coverage."
+    public_impact: public
+    decision: accepted
+    target_entry_key: null
+    target_entry_id: null
+    notes: "Reviewed implementation, public exports, documentation, fixtures, and regression tests."
+    stale: false

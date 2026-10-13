@@ -1,0 +1,74 @@
+schema_version: 1
+object_type: commit_audit_sheet
+versioning:
+  schema_version: 1
+  revision: 3
+release_version: 0.1.8
+git_base_ref: v0.1.7
+git_base_sha: c9eff43212a96c0289795e4c7055300391219290
+git_head_ref: HEAD
+git_head_sha: 757d69d6925e829b791034932d4fafb49cab1374
+git_range: c9eff43212a96c0289795e4c7055300391219290..757d69d6925e829b791034932d4fafb49cab1374
+commit_count: 1
+rows:
+  - sha: 757d69d6925e829b791034932d4fafb49cab1374
+    source_ref: git:757d69d6925e829b791034932d4fafb49cab1374
+    short_sha: 757d69d
+    changed_paths:
+      - README.md
+      - audiosig/__init__.py
+      - audiosig/_resampling.py
+      - audiosig/_spectral.py
+      - audiosig/amplitude.py
+      - audiosig/boundaries.py
+      - audiosig/spectral.py
+      - audiosig/speech_level.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - tests/fixtures/sopro_reference_golden.json
+      - tests/test_output_boundaries.py
+      - tests/test_output_conditioning.py
+      - tests/test_pause_crop.py
+      - tests/test_public_dsp.py
+      - tests/test_public_spectral.py
+      - tests/test_resampling_compatibility.py
+      - tests/test_spectral_compatibility.py
+      - tests/test_speech_level.py
+    stats:
+      files_changed: 19
+      insertions: 2518
+      deletions: 55
+    inspected: true
+    inspected_paths:
+      - README.md
+      - audiosig/__init__.py
+      - audiosig/_resampling.py
+      - audiosig/_spectral.py
+      - audiosig/amplitude.py
+      - audiosig/boundaries.py
+      - audiosig/spectral.py
+      - audiosig/speech_level.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - tests/fixtures/sopro_reference_golden.json
+      - tests/test_output_boundaries.py
+      - tests/test_output_conditioning.py
+      - tests/test_pause_crop.py
+      - tests/test_public_dsp.py
+      - tests/test_public_spectral.py
+      - tests/test_resampling_compatibility.py
+      - tests/test_spectral_compatibility.py
+      - tests/test_speech_level.py
+    observed_behavior:
+      Adds public NumPy DSP primitives for configurable windowed-sinc
+      resampling, spectral features, speech-level measurement, pause-aware cropping,
+      and output conditioning; documents their compatibility policies and adds fixtures
+      and regression coverage.
+    public_impact: public
+    decision: accepted
+    stale: false
+    evidence_subject: "feat: add dsp functions"
+    target_entry_id: entry-0001
+    notes:
+      Reviewed implementation, public exports, documentation, fixtures, and regression
+      tests.

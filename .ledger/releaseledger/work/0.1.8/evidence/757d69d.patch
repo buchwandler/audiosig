@@ -1,0 +1,2928 @@
+ README.md                                  |  52 +++
+ audiosig/__init__.py                       |  62 +++-
+ audiosig/_resampling.py                    | 106 ++++++
+ audiosig/_spectral.py                      |  58 +++-
+ audiosig/amplitude.py                      | 112 ++++++-
+ audiosig/boundaries.py                     | 508 ++++++++++++++++++++++++++++-
+ audiosig/spectral.py                       |  90 ++++-
+ audiosig/speech_level.py                   | 133 ++++++++
+ docs/advanced.md                           |  84 +++++
+ docs/api-reference.md                      | 108 ++++--
+ tests/fixtures/sopro_reference_golden.json | 290 ++++++++++++++++
+ tests/test_output_boundaries.py            |  82 +++++
+ tests/test_output_conditioning.py          | 103 ++++++
+ tests/test_pause_crop.py                   | 178 ++++++++++
+ tests/test_public_dsp.py                   |  64 ++++
+ tests/test_public_spectral.py              |   2 +-
+ tests/test_resampling_compatibility.py     | 172 ++++++++++
+ tests/test_spectral_compatibility.py       | 279 ++++++++++++++++
+ tests/test_speech_level.py                 |  90 +++++
+ 19 files changed, 2518 insertions(+), 55 deletions(-)
+
+diff --git a/README.md b/README.md
+index c541fb9..87ada82 100644
+--- a/README.md
++++ b/README.md
+@@ -155,6 +155,58 @@ See the [API reference](docs/api-reference.md) and [quality evaluation
+ notes](docs/quality-evaluation.md) for definitions, limitations, and
+ independent numerical checks.
+
++## Compatibility-capable speech DSP
++
++AudioSig's existing `resample()` and spectral defaults are unchanged. The opt-in
++`resample_windowed_sinc()` exposes alignment, window, anti-aliasing, boundary,
++weight-normalization, and output-length policies. For pinned half-sample
++windowed-sinc behavior, select the options explicitly:
++
++```python
++from audiosig import resample_windowed_sinc
++
++waveform_16k = resample_windowed_sinc(
++    audio_24k,
++    source_rate=24_000,
++    target_rate=16_000,
++    radius=16,
++    alignment="half_sample",
++    window="raised_cosine",
++    antialias=False,
++    normalize_weights=True,
++    boundary="zero",
++    length_mode="round",
++)
++```
++
++The spectral APIs are also available from the package root. `stft()` and
++`mel_spectrogram()` retain AudioSig's historical symmetric-Hann and reflect
++padding defaults; `window="periodic"`, `win_length`, `pad_mode`, `frame_count`,
++HTK mel, and `norm=None` are explicit options. Speech-level measurement is a
++separate active-frame statistic, not integrated LUFS. Reference normalization
++boosts toward -19.8 dB under configurable gain and peak limits:
++
++```python
++from audiosig import crop_on_pause, normalize_reference_level, speech_level
++
++level = speech_level(audio, sample_rate=24_000)  # active speech-level dB
++normalized = normalize_reference_level(audio, sample_rate=24_000).audio
++prepared = crop_on_pause(
++    normalized,
++    target_seconds=10.0,
++    sample_rate=24_000,
++    room_tone_seed=1,  # explicit local randomness; no global RNG state
++)
++```
++
++With neither a room-tone seed nor injected RNG, crop completion uses zeros.
++`PauseCropConfig` makes pause thresholds and durations configurable. Generic
++`speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`,
++`fade_edges`, `join_with_edge_fades`, `soft_limit`, and `gain_for_level` helpers
++are available for application-owned workflows. These are numeric DSP
++primitives only: AudioSig does not implement Sopro inference, load models, or
++choose application-specific speech/chapter policies.
++
+ ## Silence trimming and VAD
+
+ ```python
+diff --git a/audiosig/__init__.py b/audiosig/__init__.py
+index f7ca16e..e20ffea 100644
+--- a/audiosig/__init__.py
++++ b/audiosig/__init__.py
+@@ -12,10 +12,26 @@ except ImportError:  # pragma: no cover - only used in an unbuilt source checkou
+     except PackageNotFoundError:
+         __version__ = "0.1.dev0"
+
+-from ._resampling import resample, resample_speed, resample_to_length
+-from .amplitude import apply_gain_db, peak_normalize
++from ._resampling import resample, resample_speed, resample_to_length, resample_windowed_sinc
++from .amplitude import (
++    apply_gain_db,
++    fade_edges,
++    gain_for_level,
++    join_with_edge_fades,
++    peak_normalize,
++    soft_limit,
++)
+ from .basic import downmix_to_mono, generate_silence
+-from .boundaries import find_smooth_cut_point
++from .boundaries import (
++    PauseCropConfig,
++    crop_on_pause,
++    energy_fraction,
++    energy_onset,
++    find_smooth_cut_point,
++    speech_onset,
++    trim_lead,
++    trim_trail,
++)
+ from .effects import PitchShiftMethod, TimeStretchMethod, pitch_shift, time_stretch
+ from .exceptions import AudioShapeError, AudioSignalError, InvalidParameterError
+ from .loudness import (
+@@ -50,6 +66,16 @@ from .silence import (
+     trim,
+     zero_crossing_rate,
+ )
++from .spectral import (
++    frame_times,
++    istft,
++    match_frames,
++    mel_filterbank,
++    mel_spectrogram,
++    mfcc,
++    power_spectrogram,
++    stft,
++)
+ from .speech import (
+     SpeechEffectsEnvelopeMethod,
+     SpeechEffectsMethod,
+@@ -57,6 +83,12 @@ from .speech import (
+     apply_speech_effects_envelope,
+     speech_effects_output_frames,
+ )
++from .speech_level import (
++    ReferenceLevelResult,
++    SpeechLevel,
++    normalize_reference_level,
++    speech_level,
++)
+
+ __all__ = [
+     "AudioShapeError",
+@@ -64,9 +96,12 @@ __all__ = [
+     "InvalidParameterError",
+     "LoudnessAnalysis",
+     "LoudnessMetrics",
++    "PauseCropConfig",
+     "PitchShiftMethod",
++    "ReferenceLevelResult",
+     "SpeechEffectsEnvelopeMethod",
+     "SpeechEffectsMethod",
++    "SpeechLevel",
+     "TimeStretchMethod",
+     "__version__",
+     "abs2",
+@@ -76,36 +111,57 @@ __all__ = [
+     "apply_gain_db",
+     "apply_speech_effects",
+     "apply_speech_effects_envelope",
++    "crop_on_pause",
+     "downmix_to_mono",
+     "energy_based_vad",
++    "energy_fraction",
++    "energy_onset",
++    "fade_edges",
+     "find_smooth_cut_point",
+     "find_speech_bounds",
+     "find_speech_start",
+     "frame_rms",
+     "frame_signal",
++    "frame_times",
+     "frames_to_samples",
++    "gain_for_level",
+     "generate_silence",
+     "integrated_loudness",
++    "istft",
++    "join_with_edge_fades",
++    "match_frames",
+     "measure_loudness",
+     "median_filter_numpy",
++    "mel_filterbank",
++    "mel_spectrogram",
++    "mfcc",
+     "minmax_normalize",
+     "non_silent_frames",
++    "normalize_reference_level",
+     "normalized_energy_vad",
+     "peak_normalize",
+     "pitch_shift",
++    "power_spectrogram",
+     "power_to_db",
+     "relative_db_vad",
+     "resample",
+     "resample_speed",
+     "resample_to_length",
++    "resample_windowed_sinc",
+     "rms",
+     "sample_peak_dbfs",
+     "short_time_energy",
++    "soft_limit",
+     "spectral_flux",
+     "speech_effects_output_frames",
++    "speech_level",
++    "speech_onset",
+     "split",
++    "stft",
+     "time_stretch",
+     "trim",
++    "trim_lead",
++    "trim_trail",
+     "true_peak_dbtp",
+     "zero_crossing_rate",
+ ]
+diff --git a/audiosig/_resampling.py b/audiosig/_resampling.py
+index 71a6833..f75039e 100644
+--- a/audiosig/_resampling.py
++++ b/audiosig/_resampling.py
+@@ -130,3 +130,109 @@ def resample_speed(
+         filter_width=filter_width,
+         rolloff=rolloff,
+     )
++
++
++def resample_windowed_sinc(
++    audio: np.ndarray,
++    *,
++    source_rate: float,
++    target_rate: float,
++    axis: int = -1,
++    radius: int = 16,
++    alignment: str = "sample",
++    window: str = "kaiser",
++    rolloff: float = 1.0,
++    antialias: bool = True,
++    normalize_weights: bool = True,
++    boundary: str = "zero",
++    length_mode: str = "round",
++) -> np.ndarray:
++    """Resample using a configurable, chunked windowed-sinc kernel.
++
++    Unlike :func:`resample`, this compatibility-capable primitive exposes the
++    sample alignment and boundary policies. ``radius`` determines a 2*radius
++    tap support. ``alignment='half_sample'`` places output centers at
++    ``(i + 0.5) * source_rate / target_rate - 0.5``.
++    """
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    source_hz = validate_positive(source_rate, "source_rate")
++    target_hz = validate_positive(target_rate, "target_rate")
++    support = validate_integer(radius, "radius")
++    alignment_mode = validate_choices(alignment, ("sample", "half_sample"), "alignment")
++    window_mode = validate_choices(window, ("kaiser", "raised_cosine"), "window")
++    cutoff_rolloff = validate_filter(1, rolloff)[1]
++    antialias_value = _validate_resample_bool(antialias, "antialias")
++    normalize_value = _validate_resample_bool(normalize_weights, "normalize_weights")
++    boundary_mode = validate_choices(boundary, ("zero", "edge"), "boundary")
++    length_policy = validate_choices(length_mode, ("round", "ceil"), "length_mode")
++
++    input_length = source.shape[normalized_axis]
++    if input_length == 0:
++        return np.array(source, dtype=source.dtype, copy=True, order="C")
++    ratio = target_hz / source_hz
++    requested_length = input_length * ratio
++    if not np.isfinite(requested_length) or requested_length > np.iinfo(np.intp).max:
++        raise InvalidParameterError("requested resampled length is too large")
++    output_length = max(
++        1,
++        int(np.floor(requested_length + 0.5))
++        if length_policy == "round"
++        else int(np.ceil(requested_length)),
++    )
++    if source_hz == target_hz:
++        return np.array(source, dtype=source.dtype, copy=True, order="C")
++
++    moved = np.moveaxis(source, normalized_axis, -1)
++    flat = moved.reshape((-1, input_length))
++    tap_offsets = np.arange(1 - support, support + 1, dtype=np.int64)
++    cutoff = cutoff_rolloff * (min(1.0, ratio) if antialias_value else 1.0)
++    output = np.empty((flat.shape[0], output_length), dtype=source.dtype)
++    chunk_size = 1024
++    epsilon = np.finfo(np.float64).eps
++
++    for start in range(0, output_length, chunk_size):
++        stop = min(output_length, start + chunk_size)
++        indices_out = np.arange(start, stop, dtype=np.float64)
++        if alignment_mode == "half_sample":
++            centers = (indices_out + 0.5) / ratio - 0.5
++        else:
++            centers = indices_out / ratio
++        bases = np.floor(centers).astype(np.int64)
++        indices = bases[:, None] + tap_offsets[None, :]
++        in_bounds = (indices >= 0) & (indices < input_length)
++        if boundary_mode == "edge":
++            sample_indices = np.clip(indices, 0, input_length - 1)
++        else:
++            sample_indices = np.clip(indices, 0, input_length - 1)
++        distances = centers[:, None] - indices.astype(np.float64)
++        scaled_distance = distances / float(support)
++        if window_mode == "raised_cosine":
++            window_weights = 0.5 + 0.5 * np.cos(np.pi * scaled_distance)
++            window_weights = np.where(np.abs(scaled_distance) <= 1.0, window_weights, 0.0)
++        else:
++            inside = np.maximum(0.0, 1.0 - np.square(scaled_distance))
++            window_weights = np.i0(14.0 * np.sqrt(inside)) / np.i0(14.0)
++            window_weights = np.where(np.abs(scaled_distance) <= 1.0, window_weights, 0.0)
++        weights = np.sinc(distances * cutoff) * cutoff * window_weights
++        if boundary_mode == "zero":
++            weights *= in_bounds
++        if normalize_value:
++            weight_sums = np.sum(weights, axis=1, keepdims=True)
++            weights = np.divide(
++                weights,
++                weight_sums,
++                out=np.zeros_like(weights),
++                where=np.abs(weight_sums) > epsilon,
++            )
++        samples = flat[:, sample_indices]
++        output[:, start:stop] = np.sum(samples * weights[None, :, :], axis=-1, dtype=np.float64)
++
++    reshaped = output.reshape((*moved.shape[:-1], output_length))
++    result = np.moveaxis(reshaped, -1, normalized_axis)
++    return np.ascontiguousarray(result, dtype=source.dtype)
++
++
++def _validate_resample_bool(value: bool, name: str) -> bool:
++    if not isinstance(value, (bool, np.bool_)):
++        raise InvalidParameterError(f"{name} must be a boolean")
++    return bool(value)
+diff --git a/audiosig/_spectral.py b/audiosig/_spectral.py
+index ef5aebc..f5af964 100644
+--- a/audiosig/_spectral.py
++++ b/audiosig/_spectral.py
+@@ -5,7 +5,7 @@ from __future__ import annotations
+ import numpy as np
+
+ from ._framing import frame
+-from ._validation import validate_audio, validate_integer, validate_positive
++from ._validation import validate_audio, validate_choices, validate_integer, validate_positive
+ from .exceptions import AudioShapeError, InvalidParameterError
+
+ _DEFAULT_DTYPE = np.dtype(np.float64)
+@@ -19,14 +19,23 @@ def _fft_settings(n_fft: int, hop_length: int) -> tuple[int, int]:
+     return fft_size, hop
+
+
+-def _pad_for_stft(audio: np.ndarray, n_fft: int, hop_length: int, *, center: bool) -> np.ndarray:
++def _pad_for_stft(
++    audio: np.ndarray,
++    n_fft: int,
++    hop_length: int,
++    *,
++    center: bool,
++    pad_mode: str = "reflect",
++) -> np.ndarray:
+     """Pad short arrays safely and add centered analysis padding."""
+     source = audio
+     if center:
+         padding = n_fft // 2
+-        mode = "reflect" if source.shape[-1] > 1 else "constant"
+-        source = np.pad(  # type: ignore[call-overload]
+-            source, [(0, 0)] * (source.ndim - 1) + [(padding, padding)], mode=mode
++        mode = pad_mode if source.shape[-1] > 1 or pad_mode == "constant" else "constant"
++        source = np.pad(
++            source,
++            [(0, 0)] * (source.ndim - 1) + [(padding, padding)],
++            mode=mode,
+         )
+     if source.shape[-1] < n_fft:
+         source = np.pad(source, [(0, 0)] * (source.ndim - 1) + [(0, n_fft - source.shape[-1])])
+@@ -42,20 +51,49 @@ def stft(
+     n_fft: int,
+     hop_length: int,
+     center: bool = True,
++    win_length: int | None = None,
++    pad_mode: str = "reflect",
++    window: str = "symmetric",
++    frame_count: int | None = None,
+ ) -> np.ndarray:
+     """Compute a centered Hann-windowed real-input STFT.
+
+-    The returned shape is ``(..., frequency_bins, frames)``.
++    The returned shape is ``(..., frequency_bins, frames)``. ``window`` may be
++    ``'symmetric'`` (the historical NumPy Hann) or ``'periodic'`` (the
++    ``0.5 - 0.5*cos(2*pi*i/win_length)`` convention used by some frontends).
++    When ``win_length < n_fft``, the window is centered in the FFT frame.
+     """
+     source, axis = validate_audio(audio)
+     if axis != source.ndim - 1:
+         source = np.moveaxis(source, axis, -1)
+     fft_size, hop = _fft_settings(n_fft, hop_length)
+-    padded = _pad_for_stft(source, fft_size, hop, center=center)
++    pad = validate_choices(pad_mode, ("reflect", "constant"), "pad_mode")
++    window_mode = validate_choices(window, ("symmetric", "periodic"), "window")
++    window_size = fft_size if win_length is None else validate_integer(win_length, "win_length")
++    if window_size > fft_size:
++        raise InvalidParameterError("win_length must not exceed n_fft")
++    requested_frames = (
++        None if frame_count is None else validate_integer(frame_count, "frame_count", minimum=0)
++    )
++    padded = _pad_for_stft(source, fft_size, hop, center=center, pad_mode=pad)
+     frames = frame(padded, frame_length=fft_size, hop_length=hop)
+-    window = np.hanning(fft_size).astype(source.dtype, copy=False)
+-    spectrum = np.fft.rfft(frames * window, n=fft_size, axis=-1)
+-    return np.moveaxis(spectrum, -1, -2)
++    sample_indices = np.arange(window_size, dtype=np.float64)
++    if window_mode == "periodic":
++        analysis_window = 0.5 - 0.5 * np.cos(2.0 * np.pi * sample_indices / window_size)
++    else:
++        analysis_window = np.hanning(window_size)
++    left = (fft_size - window_size) // 2
++    right = fft_size - window_size - left
++    analysis_window = np.pad(analysis_window, (left, right)).astype(source.dtype, copy=False)
++    spectrum = np.fft.rfft(frames * analysis_window, n=fft_size, axis=-1)
++    spectrum = np.moveaxis(spectrum, -1, -2)
++    if requested_frames is not None:
++        if spectrum.shape[-1] > requested_frames:
++            spectrum = spectrum[..., :requested_frames]
++        elif spectrum.shape[-1] < requested_frames:
++            padding = requested_frames - spectrum.shape[-1]
++            spectrum = np.pad(spectrum, [(0, 0)] * (spectrum.ndim - 1) + [(0, padding)])
++    return spectrum
+
+
+ def istft(
+diff --git a/audiosig/amplitude.py b/audiosig/amplitude.py
+index 699a853..9f6efe6 100644
+--- a/audiosig/amplitude.py
++++ b/audiosig/amplitude.py
+@@ -2,10 +2,18 @@
+
+ from __future__ import annotations
+
++from collections.abc import Sequence
++
+ import numpy as np
+
+-from ._validation import validate_audio, validate_boolean, validate_gain_db
+-from .exceptions import InvalidParameterError
++from ._validation import (
++    validate_audio,
++    validate_boolean,
++    validate_finite,
++    validate_gain_db,
++    validate_integer,
++)
++from .exceptions import AudioShapeError, InvalidParameterError
+
+
+ def apply_gain_db(audio: np.ndarray, db: float, *, clip: bool = False) -> np.ndarray:
+@@ -53,3 +61,103 @@ def peak_normalize(audio: np.ndarray, *, peak: float = 1.0, eps: float = 1e-12)
+     if not np.isfinite(result).all():
+         raise InvalidParameterError("peak produces a non-finite output")
+     return np.array(result, dtype=source.dtype, copy=True)
++
++
++def fade_edges(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    fade_in: bool,
++    fade_out: bool,
++    fade_seconds: float = 0.01,
++    axis: int = -1,
++) -> np.ndarray:
++    """Apply linear fades to selected edges without modifying ``audio``."""
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    fade_in_value = validate_boolean(fade_in, "fade_in")
++    fade_out_value = validate_boolean(fade_out, "fade_out")
++    duration = validate_finite(fade_seconds, "fade_seconds")
++    if duration < 0.0:
++        raise InvalidParameterError("fade_seconds must be non-negative")
++    requested = duration * rate
++    if not np.isfinite(requested) or requested > np.iinfo(np.intp).max:
++        raise InvalidParameterError("fade length is too large")
++    fade_length = int(requested)
++    output = np.array(source, copy=True)
++    sample_count = source.shape[normalized_axis]
++    if sample_count <= 2 * fade_length or fade_length == 0:
++        return output
++    moved = np.moveaxis(output, normalized_axis, -1)
++    if fade_in_value:
++        ramp = np.linspace(0.0, 1.0, fade_length, dtype=np.float64)
++        moved[..., :fade_length] = moved[..., :fade_length] * ramp
++    if fade_out_value:
++        ramp = np.linspace(1.0, 0.0, fade_length, dtype=np.float64)
++        moved[..., -fade_length:] = moved[..., -fade_length:] * ramp
++    return output
++
++
++def join_with_edge_fades(
++    parts: Sequence[np.ndarray],
++    *,
++    sample_rate: int,
++    fade_seconds: float = 0.01,
++    axis: int = -1,
++) -> np.ndarray:
++    """Concatenate audio parts, fading internal segment edges."""
++    if not isinstance(parts, Sequence) or len(parts) == 0:
++        raise AudioShapeError("parts must be a non-empty sequence of audio arrays")
++    rate = validate_integer(sample_rate, "sample_rate")
++    duration = validate_finite(fade_seconds, "fade_seconds")
++    if duration < 0.0:
++        raise InvalidParameterError("fade_seconds must be non-negative")
++    prepared: list[np.ndarray] = []
++    reference_shape: tuple[int, ...] | None = None
++    normalized_axis: int | None = None
++    for index, part in enumerate(parts):
++        source, part_axis = validate_audio(part, axis=axis, allow_empty=True)
++        moved = np.moveaxis(source, part_axis, -1)
++        if reference_shape is None:
++            reference_shape = moved.shape[:-1]
++            normalized_axis = part_axis
++        elif moved.shape[:-1] != reference_shape:
++            raise AudioShapeError("all parts must match on non-sample dimensions")
++        prepared.append(
++            fade_edges(
++                moved,
++                sample_rate=rate,
++                fade_in=index > 0,
++                fade_out=index + 1 < len(parts),
++                fade_seconds=duration,
++                axis=-1,
++            )
++        )
++    assert normalized_axis is not None
++    joined = np.concatenate(prepared, axis=-1)
++    return np.ascontiguousarray(np.moveaxis(joined, -1, normalized_axis))
++
++
++def soft_limit(audio: np.ndarray, *, knee: float = 0.9) -> np.ndarray:
++    """Apply the smooth tanh limiter above ``knee`` without hard clipping."""
++    source, _ = validate_audio(audio, allow_empty=True)
++    knee_value = validate_finite(knee, "knee")
++    if not 0.0 < knee_value < 1.0:
++        raise InvalidParameterError("knee must be in the interval (0, 1)")
++    magnitude = np.abs(source).astype(np.float64, copy=False)
++    over = knee_value + (1.0 - knee_value) * np.tanh((magnitude - knee_value) / (1.0 - knee_value))
++    limited = np.where(magnitude > knee_value, np.sign(source) * over, source)
++    return np.array(limited, dtype=source.dtype, copy=True)
++
++
++def gain_for_level(source_db: float, target_db: float) -> float:
++    """Return the linear multiplier that moves ``source_db`` to ``target_db``."""
++    source = validate_finite(source_db, "source_db")
++    target = validate_finite(target_db, "target_db")
++    exponent = (target - source) / 20.0
++    if exponent > np.log10(np.finfo(np.float64).max):
++        raise InvalidParameterError("level difference produces an unrepresentable gain")
++    gain = float(np.power(10.0, exponent))
++    if not np.isfinite(gain):
++        raise InvalidParameterError("level difference produces an unrepresentable gain")
++    return gain
+diff --git a/audiosig/boundaries.py b/audiosig/boundaries.py
+index ab65a80..fa9a9f7 100644
+--- a/audiosig/boundaries.py
++++ b/audiosig/boundaries.py
+@@ -2,9 +2,12 @@
+
+ from __future__ import annotations
+
++from dataclasses import dataclass
++from typing import Protocol
++
+ import numpy as np
+
+-from ._validation import validate_audio, validate_integer
++from ._validation import validate_audio, validate_finite, validate_integer, validate_positive
+ from .exceptions import InvalidParameterError
+
+ _LOCAL_RMS_WEIGHT = 0.50
+@@ -113,3 +116,506 @@ def find_smooth_cut_point(
+
+     order = np.lexsort((candidates, distance, total))
+     return int(candidates[order[0]])
++
++
++@dataclass(frozen=True)
++class PauseCropConfig:
++    """Thresholds and durations for pause-aware reference cropping."""
++
++    frame_seconds: float = 0.025
++    hop_seconds: float = 0.010
++    floor_quantile: float = 0.10
++    quiet_multiplier: float = 4.0
++    pause_min_seconds: float = 0.10
++    pause_keep_seconds: float = 0.15
++    search_forward_seconds: float = 5.0
++    search_backward_seconds: float = 5.0
++    min_keep_fraction: float = 0.75
++    room_tone_seconds: float = 0.25
++    fade_seconds: float = 0.02
++
++
++class RandomSource(Protocol):
++    """Minimal interface required for injected room-tone noise sources."""
++
++    def standard_normal(self, size: tuple[int, ...]) -> np.ndarray: ...
++
++
++_DEFAULT_PAUSE_CROP_CONFIG = PauseCropConfig()
++
++
++def _validate_pause_crop_config(config: object) -> PauseCropConfig:
++    if not isinstance(config, PauseCropConfig):
++        raise InvalidParameterError("config must be a PauseCropConfig")
++    return config
++
++
++def _xorshift32_normal(size: tuple[int, ...], seed: int) -> np.ndarray:
++    """Generate standard normals using the pinned xorshift32/Box-Muller sequence."""
++    mask = 0xFFFFFFFF
++    state = seed if seed else 0x6D2B79F5
++    count = int(np.prod(size, dtype=np.int64))
++    output = np.empty(count, dtype=np.float64)
++    spare: float | None = None
++
++    def uniform() -> float:
++        nonlocal state
++        value = state
++        value ^= (value << 13) & mask
++        value ^= value >> 17
++        value ^= (value << 5) & mask
++        state = value & mask
++        return (state + 0.5) / 4294967296.0
++
++    def normal() -> float:
++        nonlocal spare
++        if spare is not None:
++            value = spare
++            spare = None
++            return value
++        magnitude = np.sqrt(-2.0 * np.log(max(1.0e-12, uniform())))
++        angle = 2.0 * np.pi * uniform()
++        spare = float(magnitude * np.sin(angle))
++        return float(magnitude * np.cos(angle))
++
++    for index in range(count):
++        output[index] = normal()
++    return output.reshape(size)
++
++
++def _pause_runs(quiet: np.ndarray, minimum_frames: int) -> list[tuple[int, int]]:
++    runs: list[tuple[int, int]] = []
++    index = 0
++    while index < quiet.size:
++        if not bool(quiet[index]):
++            index += 1
++            continue
++        start = index
++        while index < quiet.size and bool(quiet[index]):
++            index += 1
++        if index - start >= minimum_frames:
++            runs.append((start, index))
++    return runs
++
++
++def _completed_with_room_tone(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    floor: float,
++    config: PauseCropConfig,
++    room_tone_rng: RandomSource | None,
++    room_tone_seed: int | None,
++) -> np.ndarray:
++    faded = np.array(audio, copy=True)
++    fade_count = min(int(config.fade_seconds * sample_rate), faded.shape[-1])
++    if fade_count:
++        ramp = np.linspace(1.0, 0.0, fade_count, dtype=np.float64)
++        faded[..., -fade_count:] *= ramp.astype(faded.dtype, copy=False)
++    tone_count = int(config.room_tone_seconds * sample_rate)
++    tone_shape = (*audio.shape[:-1], tone_count)
++    if tone_count == 0:
++        tone = np.empty(tone_shape, dtype=audio.dtype)
++    elif room_tone_seed is not None:
++        tone = _xorshift32_normal(tone_shape, room_tone_seed)
++    elif room_tone_rng is not None:
++        tone = np.asarray(room_tone_rng.standard_normal(tone_shape), dtype=np.float64)
++        if tone.shape != tone_shape or not np.isfinite(tone).all():
++            raise InvalidParameterError(
++                "room_tone_rng must return finite values with the requested shape"
++            )
++    else:
++        tone = np.zeros(tone_shape, dtype=audio.dtype)
++    tone = (tone.astype(np.float64, copy=False) * float(floor)).astype(audio.dtype)
++    return np.concatenate((faded, tone), axis=-1)
++
++
++def crop_on_pause(
++    audio: np.ndarray,
++    *,
++    target_seconds: float,
++    sample_rate: int,
++    config: PauseCropConfig = _DEFAULT_PAUSE_CROP_CONFIG,
++    room_tone_rng: RandomSource | None = None,
++    room_tone_seed: int | None = None,
++    axis: int = -1,
++) -> np.ndarray:
++    """Crop at a nearby quiet pause or complete the tail with room tone.
++
++    If neither an RNG nor a seed is supplied, completion uses zero-valued room
++    tone. Supplying ``room_tone_seed`` uses a local xorshift32/Box-Muller source;
++    no process-global random state is consulted.
++    """
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    config = _validate_pause_crop_config(config)
++    rate = validate_integer(sample_rate, "sample_rate")
++    target_duration = validate_positive(target_seconds, "target_seconds")
++    frame_duration = validate_positive(config.frame_seconds, "frame_seconds")
++    hop_duration = validate_positive(config.hop_seconds, "hop_seconds")
++    floor_quantile = validate_finite(config.floor_quantile, "floor_quantile")
++    if not 0.0 <= floor_quantile <= 1.0:
++        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
++    quiet_multiplier = validate_positive(config.quiet_multiplier, "quiet_multiplier")
++    pause_min = validate_finite(config.pause_min_seconds, "pause_min_seconds")
++    pause_keep = validate_finite(config.pause_keep_seconds, "pause_keep_seconds")
++    forward_search = validate_finite(config.search_forward_seconds, "search_forward_seconds")
++    backward_search = validate_finite(config.search_backward_seconds, "search_backward_seconds")
++    minimum_fraction = validate_finite(config.min_keep_fraction, "min_keep_fraction")
++    room_tone_duration = validate_finite(config.room_tone_seconds, "room_tone_seconds")
++    fade_duration = validate_finite(config.fade_seconds, "fade_seconds")
++    if (
++        min(
++            pause_min,
++            pause_keep,
++            forward_search,
++            backward_search,
++            room_tone_duration,
++            fade_duration,
++        )
++        < 0.0
++    ):
++        raise InvalidParameterError(
++            "pause, search, room-tone, and fade durations must be non-negative"
++        )
++    if not 0.0 <= minimum_fraction <= 1.0:
++        raise InvalidParameterError("min_keep_fraction must be in the interval [0, 1]")
++    if room_tone_rng is not None and not callable(getattr(room_tone_rng, "standard_normal", None)):
++        raise InvalidParameterError("room_tone_rng must provide standard_normal(size)")
++    seed = None
++    if room_tone_seed is not None:
++        seed = validate_integer(room_tone_seed, "room_tone_seed", minimum=0)
++        if seed > 0xFFFFFFFF:
++            raise InvalidParameterError("room_tone_seed must fit in an unsigned 32-bit integer")
++        if room_tone_rng is not None:
++            raise InvalidParameterError("provide either room_tone_rng or room_tone_seed, not both")
++
++    moved = np.moveaxis(source, normalized_axis, -1)
++    total = moved.shape[-1]
++    if total == 0 or source.size == 0:
++        return np.array(source, copy=True, order="C")
++    requested_target = target_duration * rate
++    if not np.isfinite(requested_target) or requested_target > np.iinfo(np.intp).max:
++        raise InvalidParameterError("target crop length is too large")
++    target_samples = int(np.floor(requested_target + 0.5))
++    frame_length = int(rate * frame_duration)
++    hop_length = int(rate * hop_duration)
++    if frame_length < 1 or hop_length < 1:
++        raise InvalidParameterError("frame_seconds and hop_seconds must span at least one sample")
++    if total < 4 * frame_length:
++        return np.array(source, copy=True, order="C")
++
++    flat = moved.reshape((-1, total)).astype(np.float64, copy=False)
++    frame_count = 1 + (total - frame_length) // hop_length
++    starts = np.arange(frame_count, dtype=np.int64) * hop_length
++    rms = np.empty(frame_count, dtype=np.float64)
++    sample_offsets = np.arange(frame_length, dtype=np.int64)
++    for chunk_start in range(0, frame_count, 1024):
++        chunk_stop = min(frame_count, chunk_start + 1024)
++        indices = starts[chunk_start:chunk_stop, None] + sample_offsets[None, :]
++        frames = flat[:, indices]
++        rms[chunk_start:chunk_stop] = np.sqrt(
++            np.mean(np.square(frames), axis=(0, 2), dtype=np.float64)
++        )
++    rms = np.maximum(rms, 1e-6)
++    floor = float(np.quantile(rms, floor_quantile))
++    minimum_frames = max(1, round(pause_min / hop_duration))
++    runs = _pause_runs(rms < floor * quiet_multiplier, minimum_frames)
++    keep_frames = round(pause_keep / hop_duration)
++
++    def copy_prefix(sample_count: int) -> np.ndarray:
++        return np.array(moved[..., :sample_count], copy=True, order="C")
++
++    def cut_at(run: tuple[int, int]) -> np.ndarray:
++        start, stop = run
++        kept = min(stop - start, keep_frames)
++        return copy_prefix((start + kept) * hop_length + frame_length)
++
++    if total <= target_samples:
++        if runs and runs[-1][1] * hop_length + frame_length >= total - hop_length:
++            result = moved
++        else:
++            inside = [run for run in runs if run[0] * hop_length >= int(total * minimum_fraction)]
++            if inside:
++                result = cut_at(inside[-1])
++            else:
++                result = _completed_with_room_tone(
++                    moved,
++                    sample_rate=rate,
++                    floor=floor,
++                    config=config,
++                    room_tone_rng=room_tone_rng,
++                    room_tone_seed=seed,
++                )
++    else:
++        forward_limit = target_samples + int(forward_search * rate)
++        forward = [run for run in runs if target_samples <= run[0] * hop_length <= forward_limit]
++        if forward:
++            result = cut_at(forward[0])
++        else:
++            backward_limit = target_samples - int(backward_search * rate)
++            backward = [
++                run
++                for run in runs
++                if run[0] * hop_length < target_samples and run[1] * hop_length >= backward_limit
++            ]
++            if backward:
++                result = cut_at(backward[-1])
++            else:
++                result = _completed_with_room_tone(
++                    moved[..., :target_samples],
++                    sample_rate=rate,
++                    floor=floor,
++                    config=config,
++                    room_tone_rng=room_tone_rng,
++                    room_tone_seed=seed,
++                )
++    return np.ascontiguousarray(np.moveaxis(result, -1, normalized_axis), dtype=source.dtype)
++
++
++def _nonoverlap_frame_rms(audio: np.ndarray, frame_length: int) -> np.ndarray:
++    sample_count = audio.shape[-1]
++    frame_count = sample_count // frame_length
++    if frame_count == 0:
++        return np.empty(0, dtype=np.float64)
++    if audio.size == 0:
++        return np.zeros(frame_count, dtype=np.float64)
++    flat = audio.reshape((-1, sample_count)).astype(np.float64, copy=False)
++    frames = flat[:, : frame_count * frame_length].reshape(-1, frame_count, frame_length)
++    return np.sqrt(np.mean(np.square(frames), axis=(0, 2), dtype=np.float64))
++
++
++def _db_amplitude(db: float, name: str) -> float:
++    with np.errstate(over="ignore"):
++        amplitude = float(np.power(10.0, db / 20.0))
++    if not np.isfinite(amplitude):
++        raise InvalidParameterError(f"{name} produces an unrepresentable amplitude")
++    return amplitude
++
++
++def _speech_onset_threshold(
++    rms: np.ndarray, *, absolute_threshold_db: float, floor_quantile: float, over_floor_db: float
++) -> float:
++    threshold = _db_amplitude(absolute_threshold_db, "absolute_threshold_db")
++    if rms.size >= 30:
++        floor = float(np.quantile(rms, floor_quantile))
++        threshold = max(threshold, floor * _db_amplitude(over_floor_db, "over_floor_db"))
++    return threshold
++
++
++def _energy_threshold(
++    rms: np.ndarray, *, absolute_threshold_db: float, floor_quantile: float, over_floor_db: float
++) -> float:
++    absolute = _db_amplitude(absolute_threshold_db, "absolute_threshold_db")
++    floor = float(np.quantile(rms, floor_quantile)) if rms.size else 0.0
++    return max(absolute, floor * _db_amplitude(over_floor_db, "over_floor_db"))
++
++
++def speech_onset(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    absolute_threshold_db: float = -45.0,
++    floor_quantile: float = 0.10,
++    over_floor_db: float = 15.0,
++    frame_seconds: float = 0.010,
++    window_frames: int = 6,
++    required_frames: int = 5,
++    axis: int = -1,
++) -> int | None:
++    """Return the first sample of a window with sustained speech-level energy."""
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    frame_duration = validate_positive(frame_seconds, "frame_seconds")
++    absolute_db = validate_finite(absolute_threshold_db, "absolute_threshold_db")
++    quantile = validate_finite(floor_quantile, "floor_quantile")
++    over_db = validate_finite(over_floor_db, "over_floor_db")
++    if not 0.0 <= quantile <= 1.0:
++        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
++    window_count = validate_integer(window_frames, "window_frames")
++    required_count = validate_integer(required_frames, "required_frames")
++    if required_count > window_count:
++        raise InvalidParameterError("required_frames must not exceed window_frames")
++    frame_length = int(rate * frame_duration)
++    if frame_length < 1:
++        raise InvalidParameterError("frame_seconds must span at least one sample")
++    moved = np.moveaxis(source, normalized_axis, -1)
++    rms = _nonoverlap_frame_rms(moved, frame_length)
++    if rms.size < window_count:
++        return None
++    threshold = _speech_onset_threshold(
++        rms,
++        absolute_threshold_db=absolute_db,
++        floor_quantile=quantile,
++        over_floor_db=over_db,
++    )
++    above = (rms > threshold).astype(np.int64)
++    counts = np.convolve(above, np.ones(window_count, dtype=np.int64), mode="valid")
++    hits = np.flatnonzero(counts >= required_count)
++    return None if hits.size == 0 else int(hits[0] * frame_length)
++
++
++def energy_onset(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    over_floor_db: float = 10.0,
++    min_frames: int = 3,
++    absolute_threshold_db: float = -45.0,
++    floor_quantile: float = 0.10,
++    frame_seconds: float = 0.010,
++    axis: int = -1,
++) -> int | None:
++    """Return the start sample of the first run of energetic frames."""
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    frame_duration = validate_positive(frame_seconds, "frame_seconds")
++    over_db = validate_finite(over_floor_db, "over_floor_db")
++    absolute_db = validate_finite(absolute_threshold_db, "absolute_threshold_db")
++    quantile = validate_finite(floor_quantile, "floor_quantile")
++    if not 0.0 <= quantile <= 1.0:
++        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
++    minimum_frames = validate_integer(min_frames, "min_frames")
++    frame_length = int(rate * frame_duration)
++    if frame_length < 1:
++        raise InvalidParameterError("frame_seconds must span at least one sample")
++    moved = np.moveaxis(source, normalized_axis, -1)
++    rms = _nonoverlap_frame_rms(moved, frame_length)
++    if rms.size < minimum_frames:
++        return None
++    threshold = _energy_threshold(
++        rms,
++        absolute_threshold_db=absolute_db,
++        floor_quantile=quantile,
++        over_floor_db=over_db,
++    )
++    above = (rms > threshold).astype(np.int64)
++    counts = np.convolve(above, np.ones(minimum_frames, dtype=np.int64), mode="valid")
++    hits = np.flatnonzero(counts == minimum_frames)
++    return None if hits.size == 0 else int(hits[0] * frame_length)
++
++
++def energy_fraction(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    start: int,
++    end: int,
++    over_floor_db: float = 10.0,
++    absolute_threshold_db: float = -45.0,
++    floor_quantile: float = 0.10,
++    frame_seconds: float = 0.010,
++    axis: int = -1,
++) -> float:
++    """Return the fraction of segment frames above the global energy threshold."""
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    begin = validate_integer(start, "start", minimum=0)
++    stop = validate_integer(end, "end", minimum=0)
++    frame_duration = validate_positive(frame_seconds, "frame_seconds")
++    over_db = validate_finite(over_floor_db, "over_floor_db")
++    absolute_db = validate_finite(absolute_threshold_db, "absolute_threshold_db")
++    quantile = validate_finite(floor_quantile, "floor_quantile")
++    if not 0.0 <= quantile <= 1.0:
++        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
++    frame_length = int(rate * frame_duration)
++    if frame_length < 1:
++        raise InvalidParameterError("frame_seconds must span at least one sample")
++    moved = np.moveaxis(source, normalized_axis, -1)
++    if stop > moved.shape[-1]:
++        raise InvalidParameterError("end must not exceed the sample count")
++    if stop <= begin or moved.shape[-1] < frame_length:
++        return 0.0
++    rms = _nonoverlap_frame_rms(moved, frame_length)
++    threshold = _energy_threshold(
++        rms,
++        absolute_threshold_db=absolute_db,
++        floor_quantile=quantile,
++        over_floor_db=over_db,
++    )
++    start_frame = begin // frame_length
++    end_frame = max(start_frame + 1, stop // frame_length)
++    selected = rms[start_frame:end_frame]
++    return 0.0 if selected.size == 0 else float(np.mean(selected > threshold))
++
++
++def trim_lead(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    lead_seconds: float = 0.08,
++    skip_seconds: float = 0.0,
++    absolute_threshold_db: float = -45.0,
++    floor_quantile: float = 0.10,
++    over_floor_db: float = 15.0,
++    frame_seconds: float = 0.010,
++    window_frames: int = 6,
++    required_frames: int = 5,
++    axis: int = -1,
++) -> np.ndarray:
++    """Trim leading silence while retaining lead and a 20-ms onset safety margin."""
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    lead = validate_finite(lead_seconds, "lead_seconds")
++    skip = validate_finite(skip_seconds, "skip_seconds")
++    if lead < 0.0 or skip < 0.0:
++        raise InvalidParameterError("lead_seconds and skip_seconds must be non-negative")
++    onset = speech_onset(
++        source,
++        sample_rate=rate,
++        absolute_threshold_db=absolute_threshold_db,
++        floor_quantile=floor_quantile,
++        over_floor_db=over_floor_db,
++        frame_seconds=frame_seconds,
++        window_frames=window_frames,
++        required_frames=required_frames,
++        axis=normalized_axis,
++    )
++    moved = np.moveaxis(source, normalized_axis, -1)
++    if onset is None:
++        return np.array(source, copy=True, order="C")
++    cut = max(onset - int(lead * rate), int(skip * rate))
++    cut = min(cut, max(0, onset - int(0.020 * rate)))
++    return np.ascontiguousarray(np.moveaxis(moved[..., cut:], -1, normalized_axis))
++
++
++def trim_trail(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    trail_seconds: float = 0.30,
++    absolute_threshold_db: float = -45.0,
++    floor_quantile: float = 0.10,
++    over_floor_db: float = 15.0,
++    frame_seconds: float = 0.010,
++    axis: int = -1,
++) -> np.ndarray:
++    """Trim trailing silence after the last active frame plus a requested trail."""
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    trail = validate_finite(trail_seconds, "trail_seconds")
++    if trail < 0.0:
++        raise InvalidParameterError("trail_seconds must be non-negative")
++    frame_duration = validate_positive(frame_seconds, "frame_seconds")
++    absolute_db = validate_finite(absolute_threshold_db, "absolute_threshold_db")
++    quantile = validate_finite(floor_quantile, "floor_quantile")
++    over_db = validate_finite(over_floor_db, "over_floor_db")
++    if not 0.0 <= quantile <= 1.0:
++        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
++    frame_length = int(rate * frame_duration)
++    if frame_length < 1:
++        raise InvalidParameterError("frame_seconds must span at least one sample")
++    moved = np.moveaxis(source, normalized_axis, -1)
++    rms = _nonoverlap_frame_rms(moved, frame_length)
++    if rms.size == 0:
++        return np.array(source, copy=True, order="C")
++    threshold = _speech_onset_threshold(
++        rms,
++        absolute_threshold_db=absolute_db,
++        floor_quantile=quantile,
++        over_floor_db=over_db,
++    )
++    active = np.flatnonzero(rms > threshold)
++    if active.size == 0:
++        return np.array(source, copy=True, order="C")
++    end = min(moved.shape[-1], (int(active[-1]) + 1) * frame_length + int(trail * rate))
++    return np.ascontiguousarray(np.moveaxis(moved[..., :end], -1, normalized_axis))
+diff --git a/audiosig/spectral.py b/audiosig/spectral.py
+index 405f2e6..c95f6c8 100644
+--- a/audiosig/spectral.py
++++ b/audiosig/spectral.py
+@@ -9,6 +9,7 @@ import numpy as np
+ from . import _spectral
+ from ._validation import (
+     validate_boolean,
++    validate_choices,
+     validate_finite,
+     validate_integer,
+     validate_positive,
+@@ -24,10 +25,28 @@ def stft(
+     n_fft: int,
+     hop_length: int,
+     center: bool = True,
++    win_length: int | None = None,
++    pad_mode: Literal["reflect", "constant"] = "reflect",
++    window: Literal["symmetric", "periodic"] = "symmetric",
++    frame_count: int | None = None,
+ ) -> np.ndarray:
+-    """Return the private Hann-windowed STFT as ``(..., bins, frames)``."""
++    """Return a Hann-windowed STFT as ``(..., bins, frames)``.
++
++    The defaults retain AudioSig's historical symmetric Hann and centered
++    reflect-padding behavior. ``window='periodic'`` opts into the periodic Hann
++    convention used by compatible TTS frontends.
++    """
+     validate_boolean(center, "center")
+-    return _spectral.stft(audio, n_fft=n_fft, hop_length=hop_length, center=center)
++    return _spectral.stft(
++        audio,
++        n_fft=n_fft,
++        hop_length=hop_length,
++        center=center,
++        win_length=win_length,
++        pad_mode=pad_mode,
++        window=window,
++        frame_count=frame_count,
++    )
+
+
+ def istft(
+@@ -64,10 +83,23 @@ def power_spectrogram(
+     hop_length: int,
+     center: bool = True,
+     power: float = 2.0,
++    win_length: int | None = None,
++    pad_mode: Literal["reflect", "constant"] = "reflect",
++    window: Literal["symmetric", "periodic"] = "symmetric",
++    frame_count: int | None = None,
+ ) -> np.ndarray:
+-    """Compute ``abs(STFT) ** power`` in float64, without normalization or dB conversion."""
++    """Compute ``abs(STFT) ** power`` in float64 without dB conversion."""
+     exponent = validate_positive(power, "power")
+-    spectrum = stft(audio, n_fft=n_fft, hop_length=hop_length, center=center)
++    spectrum = stft(
++        audio,
++        n_fft=n_fft,
++        hop_length=hop_length,
++        center=center,
++        win_length=win_length,
++        pad_mode=pad_mode,
++        window=window,
++        frame_count=frame_count,
++    )
+     return np.power(np.abs(spectrum).astype(np.float64, copy=False), exponent)
+
+
+@@ -95,6 +127,18 @@ def _mel_to_hz_slaney(mel_values: np.ndarray) -> np.ndarray:
+     return frequencies
+
+
++def _hz_to_mel_htk(frequencies_hz: np.ndarray) -> np.ndarray:
++    """Convert frequencies to the HTK mel scale."""
++    frequencies = np.asarray(frequencies_hz, dtype=np.float64)
++    return 2595.0 * np.log10(1.0 + frequencies / 700.0)
++
++
++def _mel_to_hz_htk(mel_values: np.ndarray) -> np.ndarray:
++    """Convert HTK mel values to frequencies in Hz."""
++    mel = np.asarray(mel_values, dtype=np.float64)
++    return 700.0 * (np.power(10.0, mel / 2595.0) - 1.0)
++
++
+ def _frequency_limits(
+     *, sample_rate: int, f_min: float, f_max: float | None
+ ) -> tuple[int, float, float]:
+@@ -116,25 +160,26 @@ def mel_filterbank(
+     n_mels: int,
+     f_min: float = 0.0,
+     f_max: float | None = None,
+-    mel_scale: Literal["slaney"] = "slaney",
++    mel_scale: Literal["slaney", "htk"] = "slaney",
+     norm: Literal["slaney"] | None = "slaney",
+ ) -> np.ndarray:
+-    """Build Slaney mel triangles against exact real-FFT bin-center frequencies."""
++    """Build mel triangles against exact real-FFT bin-center frequencies."""
+     _, minimum, maximum = _frequency_limits(sample_rate=sample_rate, f_min=f_min, f_max=f_max)
+     fft_size = validate_integer(n_fft, "n_fft", minimum=2)
+     mel_count = validate_integer(n_mels, "n_mels")
+-    if mel_scale != "slaney":
+-        raise InvalidParameterError("mel_scale must be 'slaney'")
++    scale = validate_choices(mel_scale, ("slaney", "htk"), "mel_scale")
+     if norm not in ("slaney", None):
+         raise InvalidParameterError("norm must be 'slaney' or None")
+
++    hz_to_mel = _hz_to_mel_slaney if scale == "slaney" else _hz_to_mel_htk
++    mel_to_hz = _mel_to_hz_slaney if scale == "slaney" else _mel_to_hz_htk
+     mel_edges = np.linspace(
+-        _hz_to_mel_slaney(np.array([minimum]))[0],
+-        _hz_to_mel_slaney(np.array([maximum]))[0],
++        hz_to_mel(np.array([minimum]))[0],
++        hz_to_mel(np.array([maximum]))[0],
+         mel_count + 2,
+         dtype=np.float64,
+     )
+-    hz_edges = _mel_to_hz_slaney(mel_edges)
++    hz_edges = mel_to_hz(mel_edges)
+     frequencies = np.fft.rfftfreq(fft_size, d=1.0 / sample_rate)
+     lower = hz_edges[:-2, np.newaxis]
+     center = hz_edges[1:-1, np.newaxis]
+@@ -162,16 +207,33 @@ def mel_spectrogram(
+     power: float = 2.0,
+     f_min: float = 0.0,
+     f_max: float | None = None,
+-    mel_scale: Literal["slaney"] = "slaney",
++    mel_scale: Literal["slaney", "htk"] = "slaney",
+     norm: Literal["slaney"] | None = "slaney",
++    win_length: int | None = None,
++    pad_mode: Literal["reflect", "constant"] = "reflect",
++    window: Literal["symmetric", "periodic"] = "symmetric",
++    frame_count: int | None = None,
+     log: bool = False,
+     log_floor: float = 1e-10,
+ ) -> np.ndarray:
+-    """Return linear mel power, or its natural logarithm when ``log=True``."""
++    """Return linear mel power, or its natural logarithm when ``log=True``.
++
++    ``frame_count`` optionally fixes the number of output frames by truncating
++    extra frames or zero-padding missing ones. The defaults preserve historical
++    AudioSig feature values; ``window='periodic'`` and HTK are explicit options.
++    """
+     validate_boolean(log, "log")
+     floor = validate_positive(log_floor, "log_floor")
+     power_spec = power_spectrogram(
+-        audio, n_fft=n_fft, hop_length=hop_length, center=center, power=power
++        audio,
++        n_fft=n_fft,
++        hop_length=hop_length,
++        center=center,
++        power=power,
++        win_length=win_length,
++        pad_mode=pad_mode,
++        window=window,
++        frame_count=frame_count,
+     )
+     bank = mel_filterbank(
+         sample_rate=sample_rate,
+diff --git a/audiosig/speech_level.py b/audiosig/speech_level.py
+new file mode 100644
+index 0000000..60e18d9
+--- /dev/null
++++ b/audiosig/speech_level.py
+@@ -0,0 +1,133 @@
++"""Active speech-level analysis and reference gain policy primitives."""
++
++from __future__ import annotations
++
++from dataclasses import dataclass
++
++import numpy as np
++
++from ._validation import validate_audio, validate_finite, validate_integer, validate_positive
++from .amplitude import apply_gain_db
++from .exceptions import InvalidParameterError
++
++
++@dataclass(frozen=True)
++class SpeechLevel:
++    """Active speech level and estimated active duration."""
++
++    level_db: float
++    active_seconds: float
++
++
++@dataclass(frozen=True)
++class ReferenceLevelResult:
++    """Audio and measurements resulting from reference-level normalization."""
++
++    audio: np.ndarray
++    measured_db: float
++    applied_gain_db: float
++    resulting_db: float
++
++
++def _frame_rms(audio: np.ndarray, frame_length: int, hop_length: int, floor: float) -> np.ndarray:
++    frame_count = 1 + (audio.size - frame_length) // hop_length
++    starts = np.arange(frame_count, dtype=np.int64) * hop_length
++    result = np.empty(frame_count, dtype=np.float64)
++    chunk_size = 1024
++    for chunk_start in range(0, frame_count, chunk_size):
++        chunk_stop = min(frame_count, chunk_start + chunk_size)
++        indices = starts[chunk_start:chunk_stop, None] + np.arange(frame_length)[None, :]
++        frames = audio[indices].astype(np.float64, copy=False)
++        scales = np.max(np.abs(frames), axis=1)
++        rms = np.zeros(scales.shape, dtype=np.float64)
++        nonzero = scales > 0.0
++        if np.any(nonzero):
++            scaled = frames[nonzero] / scales[nonzero, None]
++            rms[nonzero] = scales[nonzero] * np.sqrt(np.mean(np.square(scaled), axis=1))
++        result[chunk_start:chunk_stop] = np.maximum(rms, floor)
++    return result
++
++
++def speech_level(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    frame_seconds: float = 0.025,
++    hop_seconds: float = 0.010,
++    floor_quantile: float = 0.20,
++    activity_multiplier: float = 1.5,
++    floor_amplitude: float = 1e-6,
++) -> SpeechLevel:
++    """Measure active speech level independently of integrated loudness.
++
++    Frames are complete, uncentered windows. RMS is floored before percentile
++    selection, active frames exceed ``floor_quantile * activity_multiplier``,
++    and the lower median is used to match common tensor median semantics.
++    """
++    source, _ = validate_audio(audio, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    frame_duration = validate_positive(frame_seconds, "frame_seconds")
++    hop_duration = validate_positive(hop_seconds, "hop_seconds")
++    quantile = validate_finite(floor_quantile, "floor_quantile")
++    if not 0.0 <= quantile <= 1.0:
++        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
++    multiplier = validate_positive(activity_multiplier, "activity_multiplier")
++    floor = validate_positive(floor_amplitude, "floor_amplitude")
++    frame_length = int(rate * frame_duration)
++    hop_length = int(rate * hop_duration)
++    if frame_length < 1 or hop_length < 1:
++        raise InvalidParameterError("frame_seconds and hop_seconds must span at least one sample")
++
++    flat = source.reshape(-1).astype(np.float64, copy=False)
++    if flat.size < frame_length:
++        if flat.size == 0:
++            whole_rms = floor
++        else:
++            scale = float(np.max(np.abs(flat)))
++            whole_rms = (
++                0.0 if scale == 0.0 else scale * float(np.sqrt(np.mean(np.square(flat / scale))))
++            )
++            whole_rms = max(whole_rms, floor)
++        return SpeechLevel(level_db=float(20.0 * np.log10(whole_rms)), active_seconds=0.0)
++
++    frame_rms = _frame_rms(flat, frame_length, hop_length, floor)
++    threshold = float(np.quantile(frame_rms, quantile)) * multiplier
++    active = frame_rms[frame_rms > threshold]
++    if active.size == 0:
++        active = frame_rms
++    median_index = (active.size - 1) // 2
++    median_rms = float(np.partition(active, median_index)[median_index])
++    level_db = float(20.0 * np.log10(median_rms))
++    active_seconds = float(active.size * hop_length / rate)
++    return SpeechLevel(level_db=level_db, active_seconds=active_seconds)
++
++
++def normalize_reference_level(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    target_db: float = -19.8,
++    max_gain_db: float = 30.0,
++    peak_ceiling: float = 0.95,
++) -> ReferenceLevelResult:
++    """Boost a reference toward ``target_db`` subject to gain and peak limits."""
++    source, _ = validate_audio(audio, allow_empty=True)
++    target = validate_finite(target_db, "target_db")
++    maximum_gain = validate_finite(max_gain_db, "max_gain_db")
++    if maximum_gain < 0.0:
++        raise InvalidParameterError("max_gain_db must be non-negative")
++    ceiling = validate_positive(peak_ceiling, "peak_ceiling")
++    measured_db = speech_level(source, sample_rate=sample_rate).level_db
++    gain_db = min(max(target - measured_db, 0.0), maximum_gain)
++    if source.size:
++        peak = float(np.max(np.abs(source)))
++        if peak > 0.0:
++            peak_gain_db = max(0.0, 20.0 * np.log10(ceiling / peak))
++            gain_db = min(gain_db, peak_gain_db)
++    output = apply_gain_db(source, gain_db)
++    return ReferenceLevelResult(
++        audio=output,
++        measured_db=measured_db,
++        applied_gain_db=float(gain_db),
++        resulting_db=float(measured_db + gain_db),
++    )
+diff --git a/docs/advanced.md b/docs/advanced.md
+index e25056a..a2d78fe 100644
+--- a/docs/advanced.md
++++ b/docs/advanced.md
+@@ -143,6 +143,90 @@ print(metrics.true_peak_dbtp)   # dBTP
+
+ The stable release contract for downstream PyKokoro code is `audiosig>=0.1.3` for `LoudnessMetrics`, `integrated_loudness`, `sample_peak_dbfs`, `true_peak_dbtp`, and `measure_loudness`, plus the existing `apply_gain_db`. AudioSig supplies measurements and generic gain only; target LUFS and voice calibration remain application policy.
+
++## Compatibility-capable NumPy DSP
++
++The generic compatibility primitives reproduce selected reference DSP policies
++without changing the historical `resample()`, STFT, or mel defaults. Core runtime
++code depends on NumPy only; no Torch, Torchaudio, or SciPy implementation is
++loaded. These functions do not implement Sopro inference, model loading, or
++consumer-specific orchestration.
++
++### Resampling options
++
++`resample_windowed_sinc()` is the configurable, chunked primitive. Its default
++sample alignment, Kaiser window, anti-aliasing, zero boundary, normalized
++weights, and half-up rounded length are independent options. For the pinned
++half-sample raised-cosine reference, specify the compatibility recipe rather
++than changing `resample()`:
++
++```python
++from audiosig import resample_windowed_sinc
++
++waveform_16k = resample_windowed_sinc(
++    waveform_24k,
++    source_rate=24_000,
++    target_rate=16_000,
++    radius=16,
++    alignment="half_sample",
++    window="raised_cosine",
++    antialias=False,
++    normalize_weights=True,
++    boundary="zero",
++    length_mode="round",
++)
++```
++
++### Spectral configuration examples
++
++`stft`, `mel_filterbank`, and `mel_spectrogram` keep their prior defaults. The
++extra `win_length`, `pad_mode`, `window`, `frame_count`, `mel_scale`, and `norm`
++options allow explicit feature recipes. For example, the documented semantic
++recipe uses a periodic 400-point Hann, 160-sample hop, 80 Slaney-normalized
++bands, and explicit frame count; the speaker recipe uses a 1024-point FFT with
++a 400-sample window; the acoustic recipe uses 100 HTK bands and no mel
++normalization:
++
++```python
++from audiosig import mel_spectrogram
++
++semantic = mel_spectrogram(
++    waveform_16k, sample_rate=16_000, n_fft=400, win_length=400,
++    hop_length=160, n_mels=80, mel_scale="slaney", norm="slaney",
++    window="periodic", frame_count=semantic_frames + 2,
++)
++speaker_power = mel_spectrogram(
++    waveform_16k, sample_rate=16_000, n_fft=1024, win_length=400,
++    hop_length=160, n_mels=80, f_min=20, f_max=7_600,
++    mel_scale="slaney", norm="slaney", window="periodic",
++)
++acoustic_magnitude = mel_spectrogram(
++    waveform_24k, sample_rate=24_000, n_fft=1024, win_length=1024,
++    hop_length=256, n_mels=100, power=1, mel_scale="htk", norm=None,
++    window="periodic",
++)
++```
++
++These APIs compute generic spectra; callers remain responsible for any later
++log compression, per-frame normalization, interpolation, tokenization, or model
++input policy. Compatibility tests compare selected semantic, speaker, and
++acoustic feature samples against a pinned reference fixture.
++
++### Speech level, pauses, and output conditioning
++
++`speech_level()` measures active-frame RMS in dB and is intentionally distinct
++from BS.1770 integrated LUFS. `normalize_reference_level()` applies a boost-only
++target, a maximum gain, and a peak ceiling. `crop_on_pause()` takes a
++`PauseCropConfig`; its default room-tone completion is zero-valued. To generate
++noise, pass a local `room_tone_seed` or an RNG explicitly. Neither path uses
++process-global randomness.
++
++The general boundary tools are `speech_onset`, `energy_onset`,
++`energy_fraction`, `trim_lead`, and `trim_trail`. Output conditioning provides
++`fade_edges`, `join_with_edge_fades`, `soft_limit`, and `gain_for_level`. Fades
++are linear; joining fades adjacent segment edges without overlap-add; the soft
++limiter follows a configurable tanh knee. These primitives preserve caller
++ownership and are policy-free building blocks for applications.
++
+ ## VAD Algorithm Details
+
+ ### Normalized Energy VAD
+diff --git a/docs/api-reference.md b/docs/api-reference.md
+index 5dc61a1..201c701 100644
+--- a/docs/api-reference.md
++++ b/docs/api-reference.md
+@@ -210,6 +210,21 @@ exact = resample_to_length(audio_48k, 12_000)
+ faster = resample_speed(audio_48k, speed=1.25)
+ ```
+
++#### `resample_windowed_sinc(audio, *, source_rate, target_rate, axis=-1, radius=16, alignment='sample', window='kaiser', rolloff=1.0, antialias=True, normalize_weights=True, boundary='zero', length_mode='round')`
++
++The configurable NumPy windowed-sinc resampler. It preserves the input dtype,
++accepts arbitrary sample axes, and chunks its intermediate calculations. The
++radius selects `2 * radius` source taps. `alignment` is `sample` or
++`half_sample`; `window` is `kaiser` or `raised_cosine`; `boundary` is `zero` or
++`edge`. Anti-alias filtering is enabled by default and uses `rolloff`; weight
++normalization is enabled by default. `length_mode='round'` uses half-up sample
++sizing, while `ceil` rounds the requested output length upward. All options are
++independent; existing `resample()` defaults and output remain unchanged.
++
++For pinned half-sample behavior, explicitly choose `radius=16`,
++`alignment='half_sample'`, `window='raised_cosine'`, `antialias=False`,
++`normalize_weights=True`, `boundary='zero'`, and `length_mode='round'`.
++
+ ---
+
+ ### Amplitude Processing
+@@ -263,6 +278,62 @@ silent = np.zeros(1000, dtype=np.float32)
+ still_silent = peak_normalize(silent)
+ ```
+
++#### `fade_edges(audio, *, sample_rate, fade_in, fade_out, fade_seconds=0.01, axis=-1)`
++
++Return an independent copy with linear ramps on the selected edges. Fade length is
++`int(fade_seconds * sample_rate)`; segments no longer than twice that length are
++left unchanged. Dtype and non-sample dimensions are preserved.
++
++#### `join_with_edge_fades(parts, *, sample_rate, fade_seconds=0.01, axis=-1)`
++
++Validate matching non-sample dimensions, fade the outgoing edge of every part
++except the last and the incoming edge of every part except the first, then
++concatenate along the sample axis. This is edge-faded concatenation, not
++crossfade overlap-add.
++
++#### `soft_limit(audio, *, knee=0.9)`
++
++Apply the smooth tanh limiter above the knee, preserving values at or below it:
++`knee + (1-knee) * tanh((abs(x)-knee)/(1-knee))`, with the original sign.
++The knee must lie strictly between zero and one.
++
++#### `gain_for_level(source_db, target_db)`
++
++Return the linear multiplier `10 ** ((target_db - source_db) / 20)`; this helper
++does not apply the gain to audio.
++
++### Speech Level and Boundary Preparation
++
++#### `speech_level(audio, *, sample_rate, frame_seconds=0.025, hop_seconds=0.010, floor_quantile=0.20, activity_multiplier=1.5, floor_amplitude=1e-6)`
++
++Return a `SpeechLevel(level_db, active_seconds)` from complete, uncentered frames.
++The RMS floor and activity threshold select active frames, whose lower median is
++reported in dB. This is not integrated loudness or LUFS.
++
++#### `normalize_reference_level(audio, *, sample_rate, target_db=-19.8, max_gain_db=30.0, peak_ceiling=0.95)`
++
++Return `ReferenceLevelResult(audio, measured_db, applied_gain_db, resulting_db)`.
++The policy boosts only, limits gain, and protects the peak ceiling. It is a
++reference-preparation helper, not LUFS normalization.
++
++#### `crop_on_pause(audio, *, target_seconds, sample_rate, config=PauseCropConfig(), room_tone_rng=None, room_tone_seed=None, axis=-1)`
++
++Select a nearby qualifying pause or fit the requested sample count. A seed or
++explicit RNG enables room-tone completion; if neither is supplied, completion
++uses zeros and does not consult global random state. `PauseCropConfig` defaults
++define the 25-ms RMS frame, 10-ms hop, pause thresholds, search windows, 250-ms
++room-tone tail, and 20-ms fade.
++
++#### `speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`
++
++These generic boundary helpers use 10-ms non-overlapping RMS frames by default.
++Speech onset requires five active frames in a six-frame window; energy onset
++requires three consecutive energetic frames. `energy_fraction` reports the
++active-frame fraction in a sample interval. `trim_lead` retains 80 ms by default
++and caps trimming at a 20-ms onset safety margin; `trim_trail` retains 300 ms
++after the last active frame. All trimming helpers preserve the selected sample
++axis and return independent arrays.
++
+ ---
+
+ ### Loudness Measurement
+@@ -523,30 +594,19 @@ Calculate spectral flux between adjacent frames.
+
+ ## Spectral and Pitch Analysis
+
+-These stable submodule APIs are imported from `audiosig.spectral` and
+-`audiosig.pitch`; they are intentionally not re-exported through the root
+-namespace.
+-
+-### Spectral features (`audiosig.spectral`)
+-
+-- `stft(audio, *, n_fft, hop_length, center=True)` returns the existing
+-  Hann-windowed complex STFT with shape `(..., n_fft // 2 + 1, frames)`.
+-  It preserves the private spectral path's conventions.
+-- `istft(spectrum, *, n_fft, hop_length, length=None, center=True, dtype=np.float64)` uses the existing overlap-add inverse and returns
+-  `float32` or `float64` samples.
+-- `power_spectrogram(audio, *, n_fft, hop_length, center=True, power=2.0)`
+-  returns linear `abs(STFT) ** power`, without normalization or dB conversion.
+-- `mel_filterbank(*, sample_rate, n_fft, n_mels, f_min=0.0, f_max=None, mel_scale='slaney', norm='slaney')` creates Slaney mel triangles on exact
+-  real-FFT bin centers. `norm=None` disables area normalization.
+-- `mel_spectrogram(..., log=False, log_floor=1e-10)` returns linear mel power
+-  by default. `log=True` returns `ln(max(mel_power, log_floor))`; it does not
+-  apply a power-to-dB transform.
+-- `mfcc(..., n_fft=1024, hop_length=256, n_mfcc=13, n_mels=40, center=True, ...)` computes an orthonormal DCT-II of natural-log mel power. Output shape is
+-  `(..., n_mfcc, frames)`; coefficient zero is included.
+-- `frame_times(n_frames, *, sample_rate, hop_length, frame_length=None, center=True)` returns frame-center times in seconds. For `center=False`,
+-  `frame_length` is required.
+-- `match_frames(reference, estimate, *, frame_axis=-1)` accepts only arrays with
+-  identical shape. It validates correspondence and never crops or aligns.
++The spectral feature functions below are available from both `audiosig.spectral`
++and the package root. Pitch tracking remains in `audiosig.pitch`.
++
++### Spectral features
++
++- `stft(audio, *, n_fft, hop_length, center=True, win_length=None, pad_mode='reflect', window='symmetric', frame_count=None)` returns the Hann-windowed complex STFT with shape `(..., n_fft // 2 + 1, frames)`. The defaults preserve AudioSig's historical symmetric Hann and reflect padding. `window='periodic'` selects the periodic Hann used by compatible frontends; `frame_count` truncates or zero-pads output frames.
++- `istft(spectrum, *, n_fft, hop_length, length=None, center=True, dtype=np.float64)` uses the existing overlap-add inverse and returns `float32` or `float64` samples.
++- `power_spectrogram(..., power=2.0, win_length=None, pad_mode='reflect', window='symmetric', frame_count=None)` returns linear `abs(STFT) ** power`, without normalization or dB conversion.
++- `mel_filterbank(*, sample_rate, n_fft, n_mels, f_min=0.0, f_max=None, mel_scale='slaney', norm='slaney')` creates mel triangles on exact real-FFT bin centers. Choose `mel_scale='htk'` for HTK frequencies; `norm=None` disables Slaney area normalization.
++- `mel_spectrogram(..., mel_scale='slaney', norm='slaney', win_length=None, pad_mode='reflect', window='symmetric', frame_count=None, log=False, log_floor=1e-10)` returns linear mel power by default. `log=True` returns `ln(max(mel_power, log_floor))`; it does not apply a power-to-dB transform.
++- `mfcc(..., n_fft=1024, hop_length=256, n_mfcc=13, n_mels=40, center=True, ...)` computes an orthonormal DCT-II of natural-log mel power. Output shape is `(..., n_mfcc, frames)`; coefficient zero is included.
++- `frame_times(n_frames, *, sample_rate, hop_length, frame_length=None, center=True)` returns frame-center times in seconds. For `center=False`, `frame_length` is required.
++- `match_frames(reference, estimate, *, frame_axis=-1)` accepts only arrays with identical shape. It validates correspondence and never crops or aligns.
+
+ ### Pitch tracking (`audiosig.pitch`)
+
+diff --git a/tests/fixtures/sopro_reference_golden.json b/tests/fixtures/sopro_reference_golden.json
+new file mode 100644
+index 0000000..24eb770
+--- /dev/null
++++ b/tests/fixtures/sopro_reference_golden.json
+@@ -0,0 +1,290 @@
++{
++  "source": {
++    "repository": "samuel-vitorino/sopro",
++    "runtime_commit": "7bfcf9a0539d274f6593959a21da948f506ceee1",
++    "model_repository": "samuel-vitorino/sopro-v2-turbo-onnx",
++    "model_revision": "9fe97bddf52ed785af3634db86a032bb7e07bf18",
++    "tokenizer_sha256": "199e35f8f37235101138c5231464769ad4bf9b6dbecb9ae3b96b225f6c012394"
++  },
++  "frontend_config": {
++    "sample_rate": 24000,
++    "semantic_encoder": {
++      "sample_rate": 16000,
++      "n_fft": 400,
++      "hop_length": 160,
++      "n_mels": 80
++    },
++    "speaker_encoder": {
++      "sample_rate": 16000,
++      "n_fft": 1024,
++      "win_length": 400,
++      "hop_length": 160,
++      "n_mels": 80,
++      "f_min": 20.0,
++      "f_max": 7600.0,
++      "mel_log_floor": 1e-5
++    },
++    "model": {
++      "acoustic_mel_hop_length": 256,
++      "acoustic_mel_n_mels": 100
++    },
++    "vocoder": {
++      "n_fft": 1024
++    }
++  },
++  "tones": {
++    "steady": {
++      "sample_rate": 24000,
++      "samples": 19200,
++      "formula": "0.08*sin(2*pi*220*i/24000)+0.025*sin(2*pi*791*i/24000)",
++      "prepared_samples": 19200,
++      "level_db": -19.8,
++      "prepared": {
++        "0": 0.0,
++        "1": 0.01682509295642376,
++        "2": 0.03324460983276367,
++        "7": 0.09703461080789566,
++        "31": 0.14081740379333496,
++        "127": 0.158203125,
++        "9600": 0.025370072573423386,
++        "19198": -0.05882146954536438,
++        "19199": -0.05086562782526016
++      },
++      "features": {
++        "token_count": 19,
++        "semantic_shape": [80, 82],
++        "speaker_shape": [80, 81],
++        "acoustic_shape": [100, 76],
++        "semantic": {
++          "0": 0.8799790740013123,
++          "1": 0.3350710868835449,
++          "2": -0.06219983100891113,
++          "7": -0.06072735786437988,
++          "31": 0.005945384502410889,
++          "127": 0.09333020448684692,
++          "3280": 0.1619841456413269,
++          "6558": -0.22625064849853516,
++          "6559": -0.7406367063522339
++        },
++        "speaker": {
++          "0": 1.6796551942825317,
++          "1": 0.9726070761680603,
++          "2": 0.2873256504535675,
++          "7": 0.2913118302822113,
++          "31": 0.3824681043624878,
++          "127": 0.8116891384124756,
++          "3240": -0.15623818337917328,
++          "6478": -0.5883322954177856,
++          "6479": -1.0639361143112183
++        },
++        "acoustic": {
++          "0": 1.511038899421692,
++          "1": 0.8116431832313538,
++          "2": -3.8006432056427,
++          "7": -4.387173652648926,
++          "31": -3.744588851928711,
++          "127": -3.6046555042266846,
++          "3800": -0.9844640493392944,
++          "7598": -3.3841629028320312,
++          "7599": -2.6971375942230225
++        },
++        "interp_left": {
++          "0": 0,
++          "1": 2,
++          "2": 4,
++          "7": 15,
++          "9": 19,
++          "17": 36,
++          "18": 38
++        },
++        "interp_right": {
++          "0": 1,
++          "1": 3,
++          "2": 5,
++          "7": 16,
++          "9": 20,
++          "17": 37,
++          "18": 39
++        },
++        "interp_weight": {
++          "0": 0.5526315569877625,
++          "1": 0.6578947305679321,
++          "2": 0.7631579041481018,
++          "7": 0.28947368264198303,
++          "9": 0.5,
++          "17": 0.34210526943206787,
++          "18": 0.44736841320991516
++        }
++      }
++    },
++    "resampled_16k": {
++      "sample_rate": 16000,
++      "samples": 12800,
++      "formula": "0.08*sin(2*pi*220*i/16000)+0.025*sin(2*pi*791*i/16000)",
++      "resampled_samples": 19200,
++      "resampled": {
++        "0": -0.0010917759500443935,
++        "1": 0.005279900040477514,
++        "2": 0.0180958341807127,
++        "7": 0.05343899503350258,
++        "31": 0.08051092177629471,
++        "127": 0.0904916450381279,
++        "9600": 0.014569682069122791,
++        "19198": -0.03408857434988022,
++        "19199": -0.03143095597624779
++      },
++      "prepared_samples": 19200,
++      "level_db": -19.8,
++      "prepared": {
++        "0": -0.001885289908386767,
++        "1": 0.009117385372519493,
++        "2": 0.031248072162270546,
++        "7": 0.09227900207042694,
++        "31": 0.13902708888053894,
++        "127": 0.15626190602779388,
++        "9600": 0.0251590758562088,
++        "19198": -0.05886450037360191,
++        "19199": -0.05427529662847519
++      },
++      "features": {
++        "token_count": 19,
++        "semantic_shape": [80, 82],
++        "speaker_shape": [80, 81],
++        "acoustic_shape": [100, 76],
++        "semantic": {
++          "0": 0.8801876902580261,
++          "1": 0.335152804851532,
++          "2": -0.060044288635253906,
++          "7": -0.05853009223937988,
++          "31": 0.005262613296508789,
++          "127": 0.09335583448410034,
++          "3280": 0.16147780418395996,
++          "6558": -0.2092609405517578,
++          "6559": -0.7238470315933228
++        },
++        "speaker": {
++          "0": 1.6730084419250488,
++          "1": 0.973118245601654,
++          "2": 0.28990432620048523,
++          "7": 0.2939249277114868,
++          "31": 0.38141223788261414,
++          "127": 0.811346173286438,
++          "3240": -0.14721348881721497,
++          "6478": -0.5836406350135803,
++          "6479": -1.027072787284851
++        },
++        "acoustic": {
++          "0": 1.5111417770385742,
++          "1": 0.8117104172706604,
++          "2": -3.805163621902466,
++          "7": -4.368784427642822,
++          "31": -3.7450146675109863,
++          "127": -3.609110116958618,
++          "3800": -0.9702249765396118,
++          "7598": -4.981647968292236,
++          "7599": -4.294736862182617
++        }
++      }
++    },
++    "room_tone": {
++      "sample_rate": 24000,
++      "samples": 12000,
++      "active_from_sample": 3600,
++      "active_formula": "0.12*sin(2*pi*220*i/24000)",
++      "prepared_samples": 18000,
++      "level_db": -19.8,
++      "prepared": {
++        "0": 0.0,
++        "1": 0.0,
++        "2": 0.0,
++        "3598": 0.0,
++        "3599": 0.0,
++        "3600": 3.971639233853533e-15,
++        "3610": 0.0788177028298378,
++        "4079": 0.0916600152850151,
++        "4080": 0.08506162464618683,
++        "11999": 0.0,
++        "12000": 0.00000527841712028021,
++        "12001": 5.239787697064457e-7,
++        "12002": 0.0000010682302900022478,
++        "12005": 0.0000011544661902007647,
++        "12010": -6.831692189734895e-7,
++        "17998": -0.000003111908881692216,
++        "17999": -4.3323507270542905e-7
++      }
++    }
++  },
++  "reference_graph": {
++    "runtime": "onnxruntime 1.29.0 / Android aarch64 / CPUExecutionProvider",
++    "graph_sha256": "fb6f3def33e918a590d0a2d66697a5c8178cb5b252eb013f122a696959a2a0b3",
++    "external_data_sha256": "5ae19423d496681eed622c9ae372cdf60df9a5be106964c1f483eecd6cbe3ca1",
++    "inputs": {
++      "semantic_mel": { "dtype": "float32", "shape": [1, 80, 82] },
++      "interp_left": { "dtype": "int64", "shape": [19] },
++      "interp_right": { "dtype": "int64", "shape": [19] },
++      "interp_weight": { "dtype": "float32", "shape": [19] },
++      "speaker_mel": { "dtype": "float32", "shape": [1, 80, 81] }
++    },
++    "cond_vec": {
++      "dtype": "float32",
++      "shape": [1, 512],
++      "samples": {
++        "0": 0.8493598103523254,
++        "1": 0.3838888704776764,
++        "2": 0.14528556168079376,
++        "7": -0.12919291853904724,
++        "31": 0.27442800998687744,
++        "127": -0.8228769302368164,
++        "256": -0.008771408349275589,
++        "510": 0.3388670086860657,
++        "511": 0.17632070183753967
++      }
++    },
++    "semantic_tokens": {
++      "dtype": "int64",
++      "shape": [1, 19],
++      "values": [
++        849, 1284, 1277, 1312, 1312, 1312, 1340, 1340, 1340, 1340, 465, 465,
++        465, 472, 472, 472, 472, 472, 472
++      ]
++    }
++  },
++  "tokenization": [
++    {
++      "text": "hello, world!",
++      "language": "en",
++      "normalized": "<|lang_en|> Hello, world!",
++      "token_ids": [1, 276, 4, 6393, 264, 1670, 702, 2]
++    },
++    {
++      "text": "olá, mundo!",
++      "language": "pt",
++      "normalized": "<|lang_pt|> Olá, mundo!",
++      "token_ids": [1, 276, 5, 423, 326, 731, 264, 2157, 702, 2]
++    },
++    {
++      "text": "bonjour le monde!",
++      "language": "fr",
++      "normalized": "<|lang_fr|> Bonjour le monde!",
++      "token_ids": [1, 276, 6, 5170, 283, 1317, 702, 2]
++    },
++    {
++      "text": "hallo welt!",
++      "language": "de",
++      "normalized": "<|lang_de|> Hallo welt!",
++      "token_ids": [1, 276, 7, 5176, 349, 966, 702, 2]
++    },
++    {
++      "text": "  hello …  world  ",
++      "language": "auto",
++      "normalized": "Hello... world.",
++      "token_ids": [1, 6393, 394, 1670, 265, 2]
++    },
++    {
++      "text": "",
++      "language": "en",
++      "normalized": "<|lang_en|>",
++      "token_ids": [1, 276, 4, 2]
++    }
++  ]
++}
+diff --git a/tests/test_output_boundaries.py b/tests/test_output_boundaries.py
+new file mode 100644
+index 0000000..227ea61
+--- /dev/null
++++ b/tests/test_output_boundaries.py
+@@ -0,0 +1,82 @@
++from __future__ import annotations
++
++import numpy as np
++import pytest
++
++from audiosig import InvalidParameterError
++from audiosig.boundaries import energy_fraction, energy_onset, speech_onset, trim_lead, trim_trail
++
++_SAMPLE_RATE = 1_000
++
++
++def _speech() -> np.ndarray:
++    audio = np.zeros(1_200, dtype=np.float32)
++    audio[300:700] = 0.2
++    return audio
++
++
++def test_speech_onset_matches_sustained_window_policy() -> None:
++    assert speech_onset(_speech(), sample_rate=_SAMPLE_RATE) == 290
++    assert speech_onset(np.zeros(50, dtype=np.float32), sample_rate=_SAMPLE_RATE) is None
++
++
++def test_energy_onset_and_fraction_match_frame_equations() -> None:
++    source = _speech()
++    assert energy_onset(source, sample_rate=_SAMPLE_RATE) == 300
++    assert energy_onset(np.zeros(20, dtype=np.float32), sample_rate=_SAMPLE_RATE) is None
++    assert energy_fraction(source, sample_rate=_SAMPLE_RATE, start=200, end=500) == pytest.approx(
++        2 / 3
++    )
++    assert energy_fraction(source, sample_rate=_SAMPLE_RATE, start=700, end=900) == 0.0
++
++
++def test_lead_and_trail_trimming_preserve_requested_safety_and_trail() -> None:
++    source = _speech()
++    lead = trim_lead(source, sample_rate=_SAMPLE_RATE)
++    assert lead.shape == (990,)
++    np.testing.assert_array_equal(lead, source[210:])
++
++    no_lead = trim_lead(source, sample_rate=_SAMPLE_RATE, lead_seconds=0.0)
++    np.testing.assert_array_equal(no_lead, source[270:])
++    skipped = trim_lead(source, sample_rate=_SAMPLE_RATE, skip_seconds=0.5)
++    np.testing.assert_array_equal(skipped, source[270:])
++
++    trail = trim_trail(source, sample_rate=_SAMPLE_RATE)
++    assert trail.shape == (1_000,)
++    np.testing.assert_array_equal(trail, source[:1_000])
++    silent = np.zeros(200, dtype=np.float32)
++    unchanged = trim_trail(silent, sample_rate=_SAMPLE_RATE)
++    np.testing.assert_array_equal(unchanged, silent)
++    assert not np.shares_memory(unchanged, silent)
++
++
++def test_boundary_helpers_support_arbitrary_sample_axis() -> None:
++    source = np.stack([_speech(), _speech() * 0.5])
++    assert speech_onset(source, sample_rate=_SAMPLE_RATE, axis=1) == 290
++    assert energy_onset(source, sample_rate=_SAMPLE_RATE, axis=1) == 300
++    trimmed = trim_lead(source, sample_rate=_SAMPLE_RATE, axis=1)
++    assert trimmed.shape == (2, 990)
++    np.testing.assert_array_equal(trimmed, source[:, 210:])
++    trailed = trim_trail(source, sample_rate=_SAMPLE_RATE, axis=1)
++    assert trailed.shape == (2, 1_000)
++
++    empty_lanes = np.empty((0, 1_200), dtype=np.float32)
++    assert speech_onset(empty_lanes, sample_rate=_SAMPLE_RATE, axis=1) is None
++    assert energy_onset(empty_lanes, sample_rate=_SAMPLE_RATE, axis=1) is None
++    assert energy_fraction(empty_lanes, sample_rate=_SAMPLE_RATE, start=0, end=1_200, axis=1) == 0.0
++    assert trim_lead(empty_lanes, sample_rate=_SAMPLE_RATE, axis=1).shape == empty_lanes.shape
++    assert trim_trail(empty_lanes, sample_rate=_SAMPLE_RATE, axis=1).shape == empty_lanes.shape
++
++
++def test_boundary_helpers_validate_parameters_and_sample_ranges() -> None:
++    source = _speech()
++    with pytest.raises(InvalidParameterError, match="required_frames"):
++        speech_onset(source, sample_rate=_SAMPLE_RATE, window_frames=4, required_frames=5)
++    with pytest.raises(InvalidParameterError, match="floor_quantile"):
++        energy_onset(source, sample_rate=_SAMPLE_RATE, floor_quantile=1.1)
++    with pytest.raises(InvalidParameterError, match="end"):
++        energy_fraction(source, sample_rate=_SAMPLE_RATE, start=0, end=source.size + 1)
++    with pytest.raises(InvalidParameterError, match="non-negative"):
++        trim_lead(source, sample_rate=_SAMPLE_RATE, lead_seconds=-0.1)
++    with pytest.raises(InvalidParameterError, match="non-negative"):
++        trim_trail(source, sample_rate=_SAMPLE_RATE, trail_seconds=-0.1)
+diff --git a/tests/test_output_conditioning.py b/tests/test_output_conditioning.py
+new file mode 100644
+index 0000000..a0ac294
+--- /dev/null
++++ b/tests/test_output_conditioning.py
+@@ -0,0 +1,103 @@
++from __future__ import annotations
++
++from typing import cast
++
++import numpy as np
++import pytest
++
++from audiosig import AudioShapeError, InvalidParameterError
++from audiosig.amplitude import fade_edges, gain_for_level, join_with_edge_fades, soft_limit
++
++
++def test_fade_edges_apply_linear_ramps_without_mutating_input() -> None:
++    source = np.ones(100, dtype=np.float32)
++    result = fade_edges(
++        source,
++        sample_rate=1_000,
++        fade_in=True,
++        fade_out=True,
++        fade_seconds=0.01,
++    )
++    ramp = np.linspace(0.0, 1.0, 10)
++    np.testing.assert_allclose(result[:10], ramp, atol=1e-7)
++    np.testing.assert_allclose(result[-10:], ramp[::-1], atol=1e-7)
++    np.testing.assert_array_equal(result[10:-10], 1.0)
++    np.testing.assert_array_equal(source, 1.0)
++    assert result.dtype == source.dtype
++    assert not np.shares_memory(result, source)
++
++
++def test_fades_respect_axis_and_skip_short_segments() -> None:
++    source = np.ones((2, 100), dtype=np.float64)
++    faded = fade_edges(
++        source,
++        sample_rate=1_000,
++        fade_in=True,
++        fade_out=False,
++        fade_seconds=0.01,
++        axis=1,
++    )
++    np.testing.assert_allclose(faded[:, :10], np.tile(np.linspace(0, 1, 10), (2, 1)))
++    assert np.all(faded[:, 10:] == 1.0)
++
++    short = np.ones(20, dtype=np.float32)
++    unchanged = fade_edges(
++        short,
++        sample_rate=1_000,
++        fade_in=True,
++        fade_out=True,
++        fade_seconds=0.01,
++    )
++    np.testing.assert_array_equal(unchanged, short)
++    assert not np.shares_memory(unchanged, short)
++
++
++def test_join_fades_only_internal_segment_edges() -> None:
++    first = np.ones((2, 20), dtype=np.float32)
++    second = np.full((2, 20), 0.5, dtype=np.float32)
++    joined = join_with_edge_fades([first, second], sample_rate=1_000, fade_seconds=0.004, axis=1)
++    assert joined.shape == (2, 40)
++    np.testing.assert_array_equal(joined[:, :16], 1.0)
++    np.testing.assert_allclose(joined[:, 16:20], np.tile(np.linspace(1, 0, 4), (2, 1)))
++    np.testing.assert_allclose(joined[:, 20:24], np.tile(0.5 * np.linspace(0, 1, 4), (2, 1)))
++    np.testing.assert_array_equal(joined[:, 24:], 0.5)
++    np.testing.assert_array_equal(first, 1.0)
++    with pytest.raises(AudioShapeError, match="non-empty"):
++        join_with_edge_fades([], sample_rate=1_000)
++    with pytest.raises(AudioShapeError, match="non-sample"):
++        join_with_edge_fades([np.ones(10), np.ones((2, 10))], sample_rate=1_000)
++
++
++def test_soft_limiter_and_level_gain_follow_reference_formulas() -> None:
++    source = np.array([-1.0, -0.9, 0.0, 0.9, 1.0], dtype=np.float32)
++    original = source.copy()
++    limited = soft_limit(source)
++    expected_peak = 0.9 + 0.1 * np.tanh(1.0)
++    np.testing.assert_allclose(limited, [-expected_peak, -0.9, 0.0, 0.9, expected_peak], atol=1e-7)
++    assert limited.dtype == source.dtype
++    np.testing.assert_array_equal(source, original)
++    assert gain_for_level(-20.0, -10.0) == pytest.approx(10**0.5)
++    assert gain_for_level(-10.0, -20.0) == pytest.approx(10**-0.5)
++    with pytest.raises(InvalidParameterError, match="knee"):
++        soft_limit(source, knee=1.0)
++    with pytest.raises(InvalidParameterError, match="unrepresentable"):
++        gain_for_level(-1e308, 1e308)
++
++
++def test_output_conditioning_validates_fades() -> None:
++    source = np.ones(20, dtype=np.float32)
++    with pytest.raises(InvalidParameterError, match="fade_seconds"):
++        fade_edges(
++            source,
++            sample_rate=1_000,
++            fade_in=True,
++            fade_out=False,
++            fade_seconds=-0.1,
++        )
++    with pytest.raises(InvalidParameterError, match="fade_in"):
++        fade_edges(
++            source,
++            sample_rate=1_000,
++            fade_in=cast(bool, 1),
++            fade_out=False,
++        )
+diff --git a/tests/test_pause_crop.py b/tests/test_pause_crop.py
+new file mode 100644
+index 0000000..24fdaea
+--- /dev/null
++++ b/tests/test_pause_crop.py
+@@ -0,0 +1,178 @@
++from __future__ import annotations
++
++import json
++from pathlib import Path
++
++import numpy as np
++import pytest
++
++from audiosig import InvalidParameterError
++from audiosig.boundaries import PauseCropConfig, crop_on_pause
++from audiosig.speech_level import normalize_reference_level
++
++_SAMPLE_RATE = 1_000
++
++
++def _config(**overrides: float) -> PauseCropConfig:
++    values: dict[str, float] = {
++        "frame_seconds": 0.025,
++        "hop_seconds": 0.010,
++        "floor_quantile": 0.10,
++        "quiet_multiplier": 4.0,
++        "pause_min_seconds": 0.10,
++        "pause_keep_seconds": 0.15,
++        "search_forward_seconds": 5.0,
++        "search_backward_seconds": 5.0,
++        "min_keep_fraction": 0.75,
++        "room_tone_seconds": 0.25,
++        "fade_seconds": 0.02,
++    }
++    values.update(overrides)
++    return PauseCropConfig(**values)
++
++
++def _active_without_long_pause(length: int) -> np.ndarray:
++    phase = np.arange(length) % 100
++    return np.where(phase < 40, 0.001, 0.3).astype(np.float32)
++
++
++def test_crop_on_pause_selects_forward_pause_and_keeps_pause_tail() -> None:
++    source = np.concatenate([np.full(1_200, 0.2), np.zeros(250), np.full(550, 0.2)]).astype(
++        np.float32
++    )
++    actual = crop_on_pause(source, target_seconds=1.0, sample_rate=_SAMPLE_RATE, config=_config())
++    assert actual.shape == (1_375,)
++    np.testing.assert_array_equal(actual[:1_200], source[:1_200])
++    assert np.max(np.abs(actual[1_200:])) == 0.0
++
++
++def test_crop_on_pause_selects_nearby_backward_pause() -> None:
++    source = np.concatenate([np.full(600, 0.2), np.zeros(400), np.full(1_000, 0.2)]).astype(
++        np.float64
++    )
++    actual = crop_on_pause(source, target_seconds=1.0, sample_rate=_SAMPLE_RATE, config=_config())
++    assert actual.shape[0] < 1_000
++    assert actual.shape[0] > 600
++    assert np.max(np.abs(actual[600:])) == 0.0
++
++
++def test_crop_on_pause_no_pause_uses_seeded_room_tone() -> None:
++    source = _active_without_long_pause(2_000)
++    first = crop_on_pause(
++        source,
++        target_seconds=1.0,
++        sample_rate=_SAMPLE_RATE,
++        config=_config(),
++        room_tone_seed=19,
++    )
++    repeated = crop_on_pause(
++        source,
++        target_seconds=1.0,
++        sample_rate=_SAMPLE_RATE,
++        config=_config(),
++        room_tone_seed=19,
++    )
++    other = crop_on_pause(
++        source,
++        target_seconds=1.0,
++        sample_rate=_SAMPLE_RATE,
++        config=_config(),
++        room_tone_seed=20,
++    )
++    assert first.shape == (1_250,)
++    np.testing.assert_array_equal(first, repeated)
++    assert not np.array_equal(first, other)
++    assert first[999] == 0.0
++    assert np.std(first[1_000:]) == pytest.approx(0.001, rel=0.2)
++
++
++def test_short_and_already_short_reference_contracts() -> None:
++    short = np.linspace(-0.1, 0.1, 80, dtype=np.float32)
++    unchanged = crop_on_pause(
++        short, target_seconds=0.05, sample_rate=_SAMPLE_RATE, config=_config()
++    )
++    np.testing.assert_array_equal(unchanged, short)
++    assert not np.shares_memory(unchanged, short)
++
++    already_short_quiet = np.concatenate([np.full(1_200, 0.2), np.zeros(800)]).astype(np.float32)
++    quiet_result = crop_on_pause(
++        already_short_quiet,
++        target_seconds=3.0,
++        sample_rate=_SAMPLE_RATE,
++        config=_config(),
++        room_tone_seed=19,
++    )
++    np.testing.assert_array_equal(quiet_result, already_short_quiet)
++
++    already_short_active = _active_without_long_pause(1_000).astype(np.float64)
++    completed = crop_on_pause(
++        already_short_active,
++        target_seconds=2.0,
++        sample_rate=_SAMPLE_RATE,
++        config=_config(),
++        room_tone_seed=19,
++    )
++    assert completed.shape == (1_250,)
++    assert completed[999] == 0.0
++
++
++def test_crop_on_pause_supports_multichannel_axis_and_injected_rng() -> None:
++    source = np.broadcast_to(_active_without_long_pause(2_000), (2, 2_000)).copy()
++    rng = np.random.default_rng(5)
++    result = crop_on_pause(
++        source,
++        target_seconds=1.0,
++        sample_rate=_SAMPLE_RATE,
++        config=_config(),
++        room_tone_rng=rng,
++        axis=1,
++    )
++    assert result.shape == (2, 1_250)
++    assert result.dtype == source.dtype
++    assert np.isfinite(result).all()
++
++
++def test_crop_on_pause_validates_configuration_and_seed() -> None:
++    source = np.ones(200, dtype=np.float32)
++    with pytest.raises(InvalidParameterError, match="room_tone_seed"):
++        crop_on_pause(source, target_seconds=1.0, sample_rate=_SAMPLE_RATE, room_tone_seed=-1)
++    with pytest.raises(InvalidParameterError, match="either"):
++        crop_on_pause(
++            source,
++            target_seconds=1.0,
++            sample_rate=_SAMPLE_RATE,
++            room_tone_rng=np.random.default_rng(1),
++            room_tone_seed=1,
++        )
++    with pytest.raises(InvalidParameterError, match="min_keep_fraction"):
++        crop_on_pause(
++            source,
++            target_seconds=1.0,
++            sample_rate=_SAMPLE_RATE,
++            config=_config(min_keep_fraction=1.2),
++        )
++
++
++def test_pinned_sopro_room_tone_reference_golden() -> None:
++    fixture_path = Path(__file__).parent / "fixtures" / "sopro_reference_golden.json"
++    golden = json.loads(fixture_path.read_text(encoding="utf-8"))
++    expected = golden["tones"]["room_tone"]
++    sample_rate = expected["sample_rate"]
++    indices = np.arange(expected["samples"], dtype=np.float64)
++    source = np.zeros(expected["samples"], dtype=np.float32)
++    active_from = expected["active_from_sample"]
++    source[active_from:] = (
++        0.12 * np.sin(2.0 * np.pi * 220.0 * indices[active_from:] / sample_rate)
++    ).astype(np.float32)
++
++    cropped = crop_on_pause(
++        source,
++        target_seconds=10.0,
++        sample_rate=sample_rate,
++        room_tone_seed=1,
++    )
++    assert cropped.size == expected["prepared_samples"]
++    normalized = normalize_reference_level(cropped, sample_rate=sample_rate)
++    assert normalized.resulting_db == pytest.approx(expected["level_db"], abs=1e-6)
++    for index, value in expected["prepared"].items():
++        np.testing.assert_allclose(normalized.audio[int(index)], value, rtol=1e-5, atol=1e-8)
+diff --git a/tests/test_public_dsp.py b/tests/test_public_dsp.py
+new file mode 100644
+index 0000000..42b6371
+--- /dev/null
++++ b/tests/test_public_dsp.py
+@@ -0,0 +1,64 @@
++from __future__ import annotations
++
++import numpy as np
++
++import audiosig
++
++
++def test_new_dsp_primitives_are_available_from_the_package_root() -> None:
++    names = (
++        "resample_windowed_sinc",
++        "SpeechLevel",
++        "ReferenceLevelResult",
++        "speech_level",
++        "normalize_reference_level",
++        "PauseCropConfig",
++        "crop_on_pause",
++        "speech_onset",
++        "energy_onset",
++        "energy_fraction",
++        "trim_lead",
++        "trim_trail",
++        "fade_edges",
++        "join_with_edge_fades",
++        "soft_limit",
++        "gain_for_level",
++        "stft",
++        "istft",
++        "power_spectrogram",
++        "mel_filterbank",
++        "mel_spectrogram",
++        "mfcc",
++        "frame_times",
++        "match_frames",
++    )
++    assert len(audiosig.__all__) == len(set(audiosig.__all__))
++    for name in names:
++        assert name in audiosig.__all__
++        assert getattr(audiosig, name) is not None
++
++
++def test_public_compatibility_and_spectral_example() -> None:
++    source = np.sin(2 * np.pi * 440 * np.arange(240) / 24_000).astype(np.float32)
++    resampled = audiosig.resample_windowed_sinc(
++        source,
++        source_rate=24_000,
++        target_rate=16_000,
++        radius=16,
++        alignment="half_sample",
++        window="raised_cosine",
++        antialias=False,
++    )
++    assert resampled.shape == (160,)
++    mel = audiosig.mel_spectrogram(
++        resampled,
++        sample_rate=16_000,
++        n_fft=400,
++        win_length=400,
++        hop_length=160,
++        n_mels=80,
++        mel_scale="slaney",
++        norm="slaney",
++        window="periodic",
++    )
++    assert mel.shape[0] == 80
+diff --git a/tests/test_public_spectral.py b/tests/test_public_spectral.py
+index 8cc7b14..539c732 100644
+--- a/tests/test_public_spectral.py
++++ b/tests/test_public_spectral.py
+@@ -77,7 +77,7 @@ def test_mel_filterbank_validates_limits_and_scale() -> None:
+         public_spectral.mel_filterbank(sample_rate=16_000, n_fft=64, n_mels=4, f_max=8_001)
+     with pytest.raises(InvalidParameterError):
+         public_spectral.mel_filterbank(
+-            sample_rate=16_000, n_fft=64, n_mels=4, mel_scale=cast(Any, "htk")
++            sample_rate=16_000, n_fft=64, n_mels=4, mel_scale=cast(Any, "invalid")
+         )
+
+
+diff --git a/tests/test_resampling_compatibility.py b/tests/test_resampling_compatibility.py
+new file mode 100644
+index 0000000..3d1d2fe
+--- /dev/null
++++ b/tests/test_resampling_compatibility.py
+@@ -0,0 +1,172 @@
++from __future__ import annotations
++
++import json
++from pathlib import Path
++from typing import Any, cast
++
++import numpy as np
++import pytest
++
++from audiosig import InvalidParameterError
++from audiosig._resampling import resample_windowed_sinc
++
++
++def _pinned_half_sample_reference(
++    audio: np.ndarray, source_rate: float, target_rate: float, radius: int = 16
++) -> np.ndarray:
++    source = np.asarray(audio, dtype=np.float64)
++    length = max(1, int(np.floor(source.size * target_rate / source_rate + 0.5)))
++    offsets = np.arange(1 - radius, radius + 1)
++    output = np.empty(length, dtype=np.float64)
++    for index in range(length):
++        center = (index + 0.5) * source_rate / target_rate - 0.5
++        base = int(np.floor(center))
++        indices = base + offsets
++        distance = center - indices
++        weights = np.sinc(distance) * (0.5 + 0.5 * np.cos(np.pi * distance / radius))
++        valid = (indices >= 0) & (indices < source.size)
++        weights = np.where(valid, weights, 0.0)
++        output[index] = np.sum(source[np.clip(indices, 0, source.size - 1)] * weights) / np.sum(
++            weights
++        )
++    return output
++
++
++@pytest.mark.parametrize(
++    ("source_rate", "target_rate"),
++    [(16_000, 24_000), (24_000, 16_000), (44_100, 24_000), (48_000, 24_000)],
++)
++def test_sopro_half_sample_resampling_matches_pinned_formula(
++    source_rate: int, target_rate: int
++) -> None:
++    rng = np.random.default_rng(1729)
++    source = rng.normal(size=97).astype(np.float32)
++    actual = resample_windowed_sinc(
++        source,
++        source_rate=source_rate,
++        target_rate=target_rate,
++        alignment="half_sample",
++        window="raised_cosine",
++        rolloff=1.0,
++        antialias=False,
++        normalize_weights=True,
++        boundary="zero",
++        length_mode="round",
++    )
++    expected = _pinned_half_sample_reference(source, source_rate, target_rate)
++    assert actual.dtype == source.dtype
++    np.testing.assert_allclose(actual, expected, rtol=1e-6, atol=2e-6)
++
++
++@pytest.mark.parametrize("length", [1, 2, 7, 31])
++def test_compatibility_resampling_handles_very_short_and_constant_inputs(length: int) -> None:
++    source = np.full(length, 0.375, dtype=np.float64)
++    actual = resample_windowed_sinc(
++        source,
++        source_rate=16_000,
++        target_rate=24_000,
++        alignment="half_sample",
++        window="raised_cosine",
++        antialias=False,
++        boundary="zero",
++    )
++    np.testing.assert_allclose(actual, 0.375, rtol=1e-12, atol=1e-12)
++
++
++def test_resample_windowed_sinc_supports_arbitrary_axis_and_independent_copy() -> None:
++    source = np.arange(2 * 13 * 3, dtype=np.float32).reshape(2, 13, 3)
++    actual = resample_windowed_sinc(
++        source,
++        source_rate=16_000,
++        target_rate=24_000,
++        axis=1,
++        alignment="half_sample",
++        window="raised_cosine",
++        antialias=False,
++    )
++    assert actual.shape == (2, 20, 3)
++    assert actual.dtype == np.float32
++    assert actual.flags.c_contiguous
++    for row in range(source.shape[0]):
++        for channel in range(source.shape[2]):
++            expected = resample_windowed_sinc(
++                source[row, :, channel],
++                source_rate=16_000,
++                target_rate=24_000,
++                alignment="half_sample",
++                window="raised_cosine",
++                antialias=False,
++            )
++            np.testing.assert_array_equal(actual[row, :, channel], expected)
++
++    identity = resample_windowed_sinc(
++        source[:, ::2, :], source_rate=16_000, target_rate=16_000, axis=1
++    )
++    assert identity.flags.c_contiguous
++    assert not np.shares_memory(identity, source)
++    np.testing.assert_array_equal(identity, source[:, ::2, :])
++
++
++def test_resample_windowed_sinc_empty_input_returns_independent_copy() -> None:
++    source = np.empty((2, 0), dtype=np.float32)
++    result = resample_windowed_sinc(source, source_rate=16_000, target_rate=24_000)
++    assert result.shape == source.shape
++    assert result.flags.c_contiguous
++    assert not np.shares_memory(result, source)
++
++
++@pytest.mark.parametrize(
++    "options",
++    [
++        {"radius": 0},
++        {"alignment": "center"},
++        {"window": "hann"},
++        {"rolloff": 0.0},
++        {"antialias": 1},
++        {"normalize_weights": "yes"},
++        {"boundary": "reflect"},
++        {"length_mode": "floor"},
++    ],
++)
++def test_resample_windowed_sinc_validates_configuration(options: dict[str, object]) -> None:
++    with pytest.raises(InvalidParameterError):
++        resample_windowed_sinc(
++            np.ones(12, dtype=np.float32),
++            source_rate=16_000,
++            target_rate=24_000,
++            **cast(Any, options),
++        )
++
++
++def test_resample_windowed_sinc_rejects_invalid_rates() -> None:
++    source = np.ones(12, dtype=np.float32)
++    with pytest.raises(InvalidParameterError):
++        resample_windowed_sinc(source, source_rate=np.inf, target_rate=24_000)
++    with pytest.raises(InvalidParameterError):
++        resample_windowed_sinc(source, source_rate=16_000, target_rate=0)
++
++
++def test_pinned_sopro_source_rate_resampling_golden() -> None:
++    fixture_path = Path(__file__).parent / "fixtures" / "sopro_reference_golden.json"
++    golden = json.loads(fixture_path.read_text(encoding="utf-8"))
++    expected = golden["tones"]["resampled_16k"]
++    indices = np.arange(expected["samples"], dtype=np.float64)
++    source = (
++        0.08 * np.sin(2.0 * np.pi * 220.0 * indices / expected["sample_rate"])
++        + 0.025 * np.sin(2.0 * np.pi * 791.0 * indices / expected["sample_rate"])
++    ).astype(np.float32)
++    result = resample_windowed_sinc(
++        source,
++        source_rate=expected["sample_rate"],
++        target_rate=24_000,
++        radius=16,
++        alignment="half_sample",
++        window="raised_cosine",
++        antialias=False,
++        normalize_weights=True,
++        boundary="zero",
++        length_mode="round",
++    )
++    assert result.size == expected["resampled_samples"]
++    for index, value in expected["resampled"].items():
++        np.testing.assert_allclose(result[int(index)], value, rtol=1e-5, atol=1e-7)
+diff --git a/tests/test_spectral_compatibility.py b/tests/test_spectral_compatibility.py
+new file mode 100644
+index 0000000..53d808d
+--- /dev/null
++++ b/tests/test_spectral_compatibility.py
+@@ -0,0 +1,279 @@
++from __future__ import annotations
++
++import json
++from pathlib import Path
++from typing import Any, cast
++
++import numpy as np
++import pytest
++
++from audiosig import InvalidParameterError
++from audiosig._resampling import resample_windowed_sinc
++from audiosig.spectral import mel_filterbank, mel_spectrogram, stft
++from audiosig.speech_level import normalize_reference_level
++
++
++def _htk_mel(frequency: np.ndarray) -> np.ndarray:
++    return 2595.0 * np.log10(1.0 + frequency / 700.0)
++
++
++def _htk_hz(mel: np.ndarray) -> np.ndarray:
++    return 700.0 * (10.0 ** (mel / 2595.0) - 1.0)
++
++
++def test_periodic_hann_and_independent_win_length_match_direct_formula() -> None:
++    source = np.random.default_rng(11).normal(size=40).astype(np.float64)
++    n_fft, win_length, hop_length = 16, 8, 4
++    actual = stft(
++        source,
++        n_fft=n_fft,
++        hop_length=hop_length,
++        center=False,
++        win_length=win_length,
++        window="periodic",
++        pad_mode="constant",
++        frame_count=3,
++    )
++
++    window = 0.5 - 0.5 * np.cos(2.0 * np.pi * np.arange(win_length) / win_length)
++    left = (n_fft - win_length) // 2
++    window = np.pad(window, (left, n_fft - win_length - left))
++    expected = np.stack(
++        [
++            np.fft.rfft(source[index * hop_length : index * hop_length + n_fft] * window)
++            for index in range(3)
++        ],
++        axis=-1,
++    )
++    np.testing.assert_allclose(actual, expected, rtol=1e-13, atol=1e-13)
++    assert actual.shape == (n_fft // 2 + 1, 3)
++
++
++def test_stft_padding_mode_and_explicit_frame_count() -> None:
++    source = np.array([0.2, 0.4, -0.7, 0.1], dtype=np.float64)
++    reflected = stft(source, n_fft=8, hop_length=4, pad_mode="reflect", frame_count=1)
++    constant = stft(source, n_fft=8, hop_length=4, pad_mode="constant", frame_count=1)
++    assert not np.allclose(reflected, constant)
++
++    longer = stft(np.arange(20, dtype=np.float64), n_fft=8, hop_length=2, frame_count=14)
++    assert longer.shape[-1] == 14
++    np.testing.assert_array_equal(longer[..., -3:], 0.0)
++    shorter = stft(np.arange(20, dtype=np.float64), n_fft=8, hop_length=2, frame_count=2)
++    assert shorter.shape[-1] == 2
++
++
++def test_htk_filterbank_matches_direct_triangle_formula_and_norm_option() -> None:
++    sample_rate, n_fft, n_mels = 24_000, 32, 6
++    bank = mel_filterbank(
++        sample_rate=sample_rate,
++        n_fft=n_fft,
++        n_mels=n_mels,
++        f_min=20.0,
++        f_max=7_600.0,
++        mel_scale="htk",
++        norm=None,
++    )
++    edges = _htk_hz(
++        np.linspace(
++            _htk_mel(np.array([20.0]))[0],
++            _htk_mel(np.array([7_600.0]))[0],
++            n_mels + 2,
++        )
++    )
++    frequencies = np.fft.rfftfreq(n_fft, d=1.0 / sample_rate)
++    expected = np.maximum(
++        0.0,
++        np.minimum(
++            (frequencies[None, :] - edges[:-2, None]) / (edges[1:-1, None] - edges[:-2, None]),
++            (edges[2:, None] - frequencies[None, :]) / (edges[2:, None] - edges[1:-1, None]),
++        ),
++    )
++    np.testing.assert_allclose(bank, expected, rtol=1e-13, atol=1e-13)
++
++    normalized = mel_filterbank(
++        sample_rate=sample_rate,
++        n_fft=n_fft,
++        n_mels=n_mels,
++        f_min=20.0,
++        f_max=7_600.0,
++        mel_scale="htk",
++        norm="slaney",
++    )
++    np.testing.assert_allclose(normalized, bank * (2.0 / (edges[2:] - edges[:-2]))[:, None])
++    np.testing.assert_allclose(
++        _htk_hz(_htk_mel(np.array([0.0, 700.0, 1_000.0]))),
++        [0.0, 700.0, 1_000.0],
++    )
++
++
++def test_sopro_semantic_speaker_and_acoustic_mel_configurations_are_supported() -> None:
++    rng = np.random.default_rng(7)
++    semantic = rng.normal(size=16_000).astype(np.float32)
++    semantic_mel = mel_spectrogram(
++        semantic,
++        sample_rate=16_000,
++        n_fft=400,
++        win_length=400,
++        hop_length=160,
++        n_mels=80,
++        mel_scale="slaney",
++        norm="slaney",
++        power=2.0,
++        window="periodic",
++    )
++    assert semantic_mel.shape[0] == 80
++    assert np.isfinite(semantic_mel).all()
++
++    speaker_mel = mel_spectrogram(
++        semantic,
++        sample_rate=16_000,
++        n_fft=1024,
++        win_length=400,
++        hop_length=160,
++        n_mels=80,
++        f_min=20.0,
++        f_max=7_600.0,
++        mel_scale="slaney",
++        norm="slaney",
++        power=2.0,
++        window="periodic",
++    )
++    assert speaker_mel.shape[0] == 80
++    assert np.isfinite(speaker_mel).all()
++
++    acoustic = rng.normal(size=24_000).astype(np.float32)
++    acoustic_mel = mel_spectrogram(
++        acoustic,
++        sample_rate=24_000,
++        n_fft=1024,
++        win_length=1024,
++        hop_length=256,
++        n_mels=100,
++        mel_scale="htk",
++        norm=None,
++        power=1.0,
++        window="periodic",
++    )
++    assert acoustic_mel.shape[0] == 100
++    assert np.isfinite(acoustic_mel).all()
++
++
++def test_mel_frame_count_and_invalid_spectral_options() -> None:
++    source = np.ones(200, dtype=np.float32)
++    mel = mel_spectrogram(
++        source,
++        sample_rate=16_000,
++        n_fft=32,
++        win_length=16,
++        hop_length=8,
++        n_mels=4,
++        frame_count=5,
++    )
++    assert mel.shape == (4, 5)
++    with pytest.raises(InvalidParameterError, match="win_length"):
++        stft(source, n_fft=16, win_length=17, hop_length=4)
++    with pytest.raises(InvalidParameterError, match="pad_mode"):
++        stft(source, n_fft=16, hop_length=4, pad_mode=cast(Any, "edge"))
++    with pytest.raises(InvalidParameterError, match="window"):
++        stft(source, n_fft=16, hop_length=4, window=cast(Any, "hamming"))
++    with pytest.raises(InvalidParameterError, match="frame_count"):
++        stft(source, n_fft=16, hop_length=4, frame_count=-1)
++    with pytest.raises(InvalidParameterError, match="mel_scale"):
++        mel_filterbank(sample_rate=16_000, n_fft=64, n_mels=8, mel_scale=cast(Any, "slaney_linear"))
++
++
++def test_pinned_sopro_semantic_speaker_acoustic_mel_golden() -> None:
++    fixture_path = Path(__file__).parent / "fixtures" / "sopro_reference_golden.json"
++    golden = json.loads(fixture_path.read_text(encoding="utf-8"))
++    expected = golden["tones"]["steady"]
++    config = golden["frontend_config"]
++    sample_rate = expected["sample_rate"]
++    indices = np.arange(expected["samples"], dtype=np.float64)
++    source = (
++        0.08 * np.sin(2.0 * np.pi * 220.0 * indices / sample_rate)
++        + 0.025 * np.sin(2.0 * np.pi * 791.0 * indices / sample_rate)
++    ).astype(np.float32)
++    prepared = normalize_reference_level(source, sample_rate=sample_rate).audio
++    rate16 = resample_windowed_sinc(
++        prepared,
++        source_rate=sample_rate,
++        target_rate=16_000,
++        radius=16,
++        alignment="half_sample",
++        window="raised_cosine",
++        antialias=False,
++        normalize_weights=True,
++        boundary="zero",
++        length_mode="round",
++    )
++
++    semantic_cfg = config["semantic_encoder"]
++    semantic_frames = int(np.ceil(rate16.size / semantic_cfg["hop_length"]))
++    semantic_audio = np.pad(rate16, (0, semantic_cfg["n_fft"]))
++    semantic = mel_spectrogram(
++        semantic_audio,
++        sample_rate=semantic_cfg["sample_rate"],
++        n_fft=semantic_cfg["n_fft"],
++        win_length=semantic_cfg["n_fft"],
++        hop_length=semantic_cfg["hop_length"],
++        n_mels=semantic_cfg["n_mels"],
++        power=2.0,
++        mel_scale="slaney",
++        norm="slaney",
++        window="periodic",
++        frame_count=semantic_frames + 2,
++    )
++    semantic_log = np.log10(np.maximum(1.0e-10, semantic)).astype(np.float32)
++    maximum = float(np.max(semantic_log))
++    semantic = ((np.maximum(semantic_log, maximum - 8.0) + 4.0) / 4.0).astype(np.float32)
++
++    speaker_cfg = config["speaker_encoder"]
++    speaker = mel_spectrogram(
++        rate16,
++        sample_rate=speaker_cfg["sample_rate"],
++        n_fft=speaker_cfg["n_fft"],
++        win_length=speaker_cfg["win_length"],
++        hop_length=speaker_cfg["hop_length"],
++        n_mels=speaker_cfg["n_mels"],
++        f_min=speaker_cfg["f_min"],
++        f_max=speaker_cfg["f_max"],
++        power=2.0,
++        mel_scale="slaney",
++        norm="slaney",
++        window="periodic",
++    )
++    speaker = np.log(np.maximum(speaker_cfg["mel_log_floor"], speaker)).astype(np.float32)
++    for frame_index in range(speaker.shape[1]):
++        column = speaker[:, frame_index]
++        mean = float(np.sum(column, dtype=np.float64)) / speaker_cfg["n_mels"]
++        variance = (
++            float(np.sum((column.astype(np.float64) - mean) ** 2, dtype=np.float64))
++            / speaker_cfg["n_mels"]
++        )
++        speaker[:, frame_index] = ((column - mean) / np.sqrt(variance + 1.0e-5)).astype(np.float32)
++
++    acoustic = mel_spectrogram(
++        prepared,
++        sample_rate=sample_rate,
++        n_fft=config["vocoder"]["n_fft"],
++        win_length=config["vocoder"]["n_fft"],
++        hop_length=config["model"]["acoustic_mel_hop_length"],
++        n_mels=config["model"]["acoustic_mel_n_mels"],
++        power=1.0,
++        mel_scale="htk",
++        norm=None,
++        window="periodic",
++    )
++    acoustic = np.log(np.maximum(1.0e-7, acoustic)).astype(np.float32)
++
++    features = {
++        "semantic": semantic,
++        "speaker": speaker,
++        "acoustic": acoustic,
++    }
++    assert list(semantic.shape) == expected["features"]["semantic_shape"]
++    assert list(speaker.shape) == expected["features"]["speaker_shape"]
++    assert list(acoustic.shape) == expected["features"]["acoustic_shape"]
++    for name, feature in features.items():
++        for index, value in expected["features"][name].items():
++            np.testing.assert_allclose(feature.reshape(-1)[int(index)], value, rtol=1e-5, atol=2e-5)
+diff --git a/tests/test_speech_level.py b/tests/test_speech_level.py
+new file mode 100644
+index 0000000..8d2a3d0
+--- /dev/null
++++ b/tests/test_speech_level.py
+@@ -0,0 +1,90 @@
++from __future__ import annotations
++
++import numpy as np
++import pytest
++
++from audiosig import InvalidParameterError
++from audiosig.speech_level import normalize_reference_level, speech_level
++
++
++def test_speech_level_constant_signal_and_active_duration() -> None:
++    source = np.full(2_500, 0.1, dtype=np.float32)
++    result = speech_level(source, sample_rate=1_000)
++    assert result.level_db == pytest.approx(-20.0, abs=1e-6)
++    assert result.active_seconds == pytest.approx(2.48)
++
++
++def test_speech_level_short_input_uses_whole_waveform_rms() -> None:
++    source = np.array([0.03, 0.04], dtype=np.float64)
++    result = speech_level(source, sample_rate=1_000)
++    expected_rms = np.sqrt((0.03**2 + 0.04**2) / 2.0)
++    assert result.level_db == pytest.approx(20.0 * np.log10(expected_rms), abs=1e-12)
++    assert result.active_seconds == 0.0
++
++
++def test_speech_level_silence_uses_floor_and_all_frame_fallback() -> None:
++    short = speech_level(np.zeros(4, dtype=np.float32), sample_rate=1_000)
++    assert short.level_db == pytest.approx(-120.0)
++    assert short.active_seconds == 0.0
++
++    full = speech_level(np.zeros(1_000, dtype=np.float32), sample_rate=1_000)
++    assert full.level_db == pytest.approx(-120.0)
++    assert full.active_seconds == pytest.approx(0.98)
++
++
++def test_speech_level_discards_quiet_frames_and_uses_lower_median() -> None:
++    source = np.concatenate([np.zeros(500, dtype=np.float64), np.full(500, 0.2, dtype=np.float64)])
++    result = speech_level(source, sample_rate=1_000)
++    assert result.level_db == pytest.approx(20.0 * np.log10(0.2), abs=1e-12)
++    assert result.active_seconds < 0.98
++    assert result.active_seconds > 0.0
++
++
++def test_reference_normalization_boosts_only_and_reports_policy() -> None:
++    quiet = np.full(1_000, 0.05, dtype=np.float32)
++    quiet_result = normalize_reference_level(quiet, sample_rate=1_000)
++    assert quiet_result.measured_db == pytest.approx(-26.0205999, abs=1e-5)
++    assert quiet_result.applied_gain_db == pytest.approx(-19.8 - quiet_result.measured_db)
++    assert quiet_result.resulting_db == pytest.approx(-19.8)
++    assert quiet_result.audio.dtype == quiet.dtype
++    assert np.max(np.abs(quiet_result.audio)) < 0.95
++
++    loud_result = normalize_reference_level(np.full(1_000, 0.5), sample_rate=1_000)
++    assert loud_result.applied_gain_db == 0.0
++    assert loud_result.resulting_db == pytest.approx(loud_result.measured_db)
++
++
++def test_reference_normalization_obeys_gain_and_peak_limits() -> None:
++    gain_limited = normalize_reference_level(
++        np.full(1_000, 0.001, dtype=np.float64), sample_rate=1_000
++    )
++    assert gain_limited.applied_gain_db == 30.0
++    assert gain_limited.resulting_db == pytest.approx(-30.0)
++
++    peak_limited_source = np.zeros(1_600, dtype=np.float64)
++    peak_limited_source[400] = 0.8
++    peak_limited = normalize_reference_level(peak_limited_source, sample_rate=16_000)
++    assert peak_limited.applied_gain_db == pytest.approx(20.0 * np.log10(0.95 / 0.8))
++    assert np.max(np.abs(peak_limited.audio)) == pytest.approx(0.95)
++    assert peak_limited.resulting_db == pytest.approx(
++        peak_limited.measured_db + peak_limited.applied_gain_db
++    )
++
++
++def test_reference_normalization_empty_and_validation() -> None:
++    empty = np.empty(0, dtype=np.float32)
++    result = normalize_reference_level(empty, sample_rate=16_000)
++    assert result.audio.shape == empty.shape
++    assert result.measured_db == pytest.approx(-120.0)
++    assert result.applied_gain_db == 30.0
++
++    with pytest.raises(InvalidParameterError, match="max_gain_db"):
++        normalize_reference_level(
++            np.ones(10, dtype=np.float32), sample_rate=1_000, max_gain_db=-1.0
++        )
++    with pytest.raises(InvalidParameterError, match="peak_ceiling"):
++        normalize_reference_level(
++            np.ones(10, dtype=np.float32), sample_rate=1_000, peak_ceiling=0.0
++        )
++    with pytest.raises(InvalidParameterError, match="floor_quantile"):
++        speech_level(np.ones(10, dtype=np.float32), sample_rate=1_000, floor_quantile=1.1)

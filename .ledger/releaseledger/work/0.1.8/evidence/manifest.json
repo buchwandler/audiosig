@@ -1,0 +1,43 @@
+{
+  "candidate_count": 1,
+  "candidates": [
+    {
+      "additions": 2518,
+      "deletions": 55,
+      "patch_file": "757d69d.patch",
+      "patch_sha256": "370058ca82cd8a748faf8a7aa2b343f587a5a4ebfa8306fad2d13284270fe805",
+      "paths": [
+        "README.md",
+        "audiosig/__init__.py",
+        "audiosig/_resampling.py",
+        "audiosig/_spectral.py",
+        "audiosig/amplitude.py",
+        "audiosig/boundaries.py",
+        "audiosig/spectral.py",
+        "audiosig/speech_level.py",
+        "docs/advanced.md",
+        "docs/api-reference.md",
+        "tests/fixtures/sopro_reference_golden.json",
+        "tests/test_output_boundaries.py",
+        "tests/test_output_conditioning.py",
+        "tests/test_pause_crop.py",
+        "tests/test_public_dsp.py",
+        "tests/test_public_spectral.py",
+        "tests/test_resampling_compatibility.py",
+        "tests/test_spectral_compatibility.py",
+        "tests/test_speech_level.py"
+      ],
+      "sha": "757d69d6925e829b791034932d4fafb49cab1374",
+      "short_sha": "757d69d",
+      "source_ref": "git:757d69d6925e829b791034932d4fafb49cab1374"
+    }
+  ],
+  "git_base_ref": "c9eff43212a96c0289795e4c7055300391219290",
+  "git_base_sha": "c9eff43212a96c0289795e4c7055300391219290",
+  "git_head_ref": "757d69d6925e829b791034932d4fafb49cab1374",
+  "git_head_sha": "757d69d6925e829b791034932d4fafb49cab1374",
+  "include_merges": "nontrivial",
+  "object_type": "git_evidence_manifest",
+  "release_version": "0.1.8",
+  "schema_version": 1
+}
