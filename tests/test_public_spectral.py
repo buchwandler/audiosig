@@ -77,7 +77,7 @@ def test_mel_filterbank_validates_limits_and_scale() -> None:
         public_spectral.mel_filterbank(sample_rate=16_000, n_fft=64, n_mels=4, f_max=8_001)
     with pytest.raises(InvalidParameterError):
         public_spectral.mel_filterbank(
-            sample_rate=16_000, n_fft=64, n_mels=4, mel_scale=cast(Any, "htk")
+            sample_rate=16_000, n_fft=64, n_mels=4, mel_scale=cast(Any, "invalid")
         )
 
 

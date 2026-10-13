@@ -210,6 +210,21 @@ exact = resample_to_length(audio_48k, 12_000)
 faster = resample_speed(audio_48k, speed=1.25)
 ```
 
+#### `resample_windowed_sinc(audio, *, source_rate, target_rate, axis=-1, radius=16, alignment='sample', window='kaiser', rolloff=1.0, antialias=True, normalize_weights=True, boundary='zero', length_mode='round')`
+
+The configurable NumPy windowed-sinc resampler. It preserves the input dtype,
+accepts arbitrary sample axes, and chunks its intermediate calculations. The
+radius selects `2 * radius` source taps. `alignment` is `sample` or
+`half_sample`; `window` is `kaiser` or `raised_cosine`; `boundary` is `zero` or
+`edge`. Anti-alias filtering is enabled by default and uses `rolloff`; weight
+normalization is enabled by default. `length_mode='round'` uses half-up sample
+sizing, while `ceil` rounds the requested output length upward. All options are
+independent; existing `resample()` defaults and output remain unchanged.
+
+For pinned half-sample behavior, explicitly choose `radius=16`,
+`alignment='half_sample'`, `window='raised_cosine'`, `antialias=False`,
+`normalize_weights=True`, `boundary='zero'`, and `length_mode='round'`.
+
 ---
 
 ### Amplitude Processing
@@ -262,6 +277,62 @@ normalized = peak_normalize(audio, peak=0.9)
 silent = np.zeros(1000, dtype=np.float32)
 still_silent = peak_normalize(silent)
 ```
+
+#### `fade_edges(audio, *, sample_rate, fade_in, fade_out, fade_seconds=0.01, axis=-1)`
+
+Return an independent copy with linear ramps on the selected edges. Fade length is
+`int(fade_seconds * sample_rate)`; segments no longer than twice that length are
+left unchanged. Dtype and non-sample dimensions are preserved.
+
+#### `join_with_edge_fades(parts, *, sample_rate, fade_seconds=0.01, axis=-1)`
+
+Validate matching non-sample dimensions, fade the outgoing edge of every part
+except the last and the incoming edge of every part except the first, then
+concatenate along the sample axis. This is edge-faded concatenation, not
+crossfade overlap-add.
+
+#### `soft_limit(audio, *, knee=0.9)`
+
+Apply the smooth tanh limiter above the knee, preserving values at or below it:
+`knee + (1-knee) * tanh((abs(x)-knee)/(1-knee))`, with the original sign.
+The knee must lie strictly between zero and one.
+
+#### `gain_for_level(source_db, target_db)`
+
+Return the linear multiplier `10 ** ((target_db - source_db) / 20)`; this helper
+does not apply the gain to audio.
+
+### Speech Level and Boundary Preparation
+
+#### `speech_level(audio, *, sample_rate, frame_seconds=0.025, hop_seconds=0.010, floor_quantile=0.20, activity_multiplier=1.5, floor_amplitude=1e-6)`
+
+Return a `SpeechLevel(level_db, active_seconds)` from complete, uncentered frames.
+The RMS floor and activity threshold select active frames, whose lower median is
+reported in dB. This is not integrated loudness or LUFS.
+
+#### `normalize_reference_level(audio, *, sample_rate, target_db=-19.8, max_gain_db=30.0, peak_ceiling=0.95)`
+
+Return `ReferenceLevelResult(audio, measured_db, applied_gain_db, resulting_db)`.
+The policy boosts only, limits gain, and protects the peak ceiling. It is a
+reference-preparation helper, not LUFS normalization.
+
+#### `crop_on_pause(audio, *, target_seconds, sample_rate, config=PauseCropConfig(), room_tone_rng=None, room_tone_seed=None, axis=-1)`
+
+Select a nearby qualifying pause or fit the requested sample count. A seed or
+explicit RNG enables room-tone completion; if neither is supplied, completion
+uses zeros and does not consult global random state. `PauseCropConfig` defaults
+define the 25-ms RMS frame, 10-ms hop, pause thresholds, search windows, 250-ms
+room-tone tail, and 20-ms fade.
+
+#### `speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`
+
+These generic boundary helpers use 10-ms non-overlapping RMS frames by default.
+Speech onset requires five active frames in a six-frame window; energy onset
+requires three consecutive energetic frames. `energy_fraction` reports the
+active-frame fraction in a sample interval. `trim_lead` retains 80 ms by default
+and caps trimming at a 20-ms onset safety margin; `trim_trail` retains 300 ms
+after the last active frame. All trimming helpers preserve the selected sample
+axis and return independent arrays.
 
 ---
 
@@ -523,30 +594,19 @@ Calculate spectral flux between adjacent frames.
 
 ## Spectral and Pitch Analysis
 
-These stable submodule APIs are imported from `audiosig.spectral` and
-`audiosig.pitch`; they are intentionally not re-exported through the root
-namespace.
+The spectral feature functions below are available from both `audiosig.spectral`
+and the package root. Pitch tracking remains in `audiosig.pitch`.
 
-### Spectral features (`audiosig.spectral`)
+### Spectral features
 
-- `stft(audio, *, n_fft, hop_length, center=True)` returns the existing
-  Hann-windowed complex STFT with shape `(..., n_fft // 2 + 1, frames)`.
-  It preserves the private spectral path's conventions.
-- `istft(spectrum, *, n_fft, hop_length, length=None, center=True, dtype=np.float64)` uses the existing overlap-add inverse and returns
-  `float32` or `float64` samples.
-- `power_spectrogram(audio, *, n_fft, hop_length, center=True, power=2.0)`
-  returns linear `abs(STFT) ** power`, without normalization or dB conversion.
-- `mel_filterbank(*, sample_rate, n_fft, n_mels, f_min=0.0, f_max=None, mel_scale='slaney', norm='slaney')` creates Slaney mel triangles on exact
-  real-FFT bin centers. `norm=None` disables area normalization.
-- `mel_spectrogram(..., log=False, log_floor=1e-10)` returns linear mel power
-  by default. `log=True` returns `ln(max(mel_power, log_floor))`; it does not
-  apply a power-to-dB transform.
-- `mfcc(..., n_fft=1024, hop_length=256, n_mfcc=13, n_mels=40, center=True, ...)` computes an orthonormal DCT-II of natural-log mel power. Output shape is
-  `(..., n_mfcc, frames)`; coefficient zero is included.
-- `frame_times(n_frames, *, sample_rate, hop_length, frame_length=None, center=True)` returns frame-center times in seconds. For `center=False`,
-  `frame_length` is required.
-- `match_frames(reference, estimate, *, frame_axis=-1)` accepts only arrays with
-  identical shape. It validates correspondence and never crops or aligns.
+- `stft(audio, *, n_fft, hop_length, center=True, win_length=None, pad_mode='reflect', window='symmetric', frame_count=None)` returns the Hann-windowed complex STFT with shape `(..., n_fft // 2 + 1, frames)`. The defaults preserve AudioSig's historical symmetric Hann and reflect padding. `window='periodic'` selects the periodic Hann used by compatible frontends; `frame_count` truncates or zero-pads output frames.
+- `istft(spectrum, *, n_fft, hop_length, length=None, center=True, dtype=np.float64)` uses the existing overlap-add inverse and returns `float32` or `float64` samples.
+- `power_spectrogram(..., power=2.0, win_length=None, pad_mode='reflect', window='symmetric', frame_count=None)` returns linear `abs(STFT) ** power`, without normalization or dB conversion.
+- `mel_filterbank(*, sample_rate, n_fft, n_mels, f_min=0.0, f_max=None, mel_scale='slaney', norm='slaney')` creates mel triangles on exact real-FFT bin centers. Choose `mel_scale='htk'` for HTK frequencies; `norm=None` disables Slaney area normalization.
+- `mel_spectrogram(..., mel_scale='slaney', norm='slaney', win_length=None, pad_mode='reflect', window='symmetric', frame_count=None, log=False, log_floor=1e-10)` returns linear mel power by default. `log=True` returns `ln(max(mel_power, log_floor))`; it does not apply a power-to-dB transform.
+- `mfcc(..., n_fft=1024, hop_length=256, n_mfcc=13, n_mels=40, center=True, ...)` computes an orthonormal DCT-II of natural-log mel power. Output shape is `(..., n_mfcc, frames)`; coefficient zero is included.
+- `frame_times(n_frames, *, sample_rate, hop_length, frame_length=None, center=True)` returns frame-center times in seconds. For `center=False`, `frame_length` is required.
+- `match_frames(reference, estimate, *, frame_axis=-1)` accepts only arrays with identical shape. It validates correspondence and never crops or aligns.
 
 ### Pitch tracking (`audiosig.pitch`)
 

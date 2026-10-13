@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from ._framing import frame
-from ._validation import validate_audio, validate_integer, validate_positive
+from ._validation import validate_audio, validate_choices, validate_integer, validate_positive
 from .exceptions import AudioShapeError, InvalidParameterError
 
 _DEFAULT_DTYPE = np.dtype(np.float64)
@@ -19,14 +19,23 @@ def _fft_settings(n_fft: int, hop_length: int) -> tuple[int, int]:
     return fft_size, hop
 
 
-def _pad_for_stft(audio: np.ndarray, n_fft: int, hop_length: int, *, center: bool) -> np.ndarray:
+def _pad_for_stft(
+    audio: np.ndarray,
+    n_fft: int,
+    hop_length: int,
+    *,
+    center: bool,
+    pad_mode: str = "reflect",
+) -> np.ndarray:
     """Pad short arrays safely and add centered analysis padding."""
     source = audio
     if center:
         padding = n_fft // 2
-        mode = "reflect" if source.shape[-1] > 1 else "constant"
-        source = np.pad(  # type: ignore[call-overload]
-            source, [(0, 0)] * (source.ndim - 1) + [(padding, padding)], mode=mode
+        mode = pad_mode if source.shape[-1] > 1 or pad_mode == "constant" else "constant"
+        source = np.pad(
+            source,
+            [(0, 0)] * (source.ndim - 1) + [(padding, padding)],
+            mode=mode,
         )
     if source.shape[-1] < n_fft:
         source = np.pad(source, [(0, 0)] * (source.ndim - 1) + [(0, n_fft - source.shape[-1])])
@@ -42,20 +51,49 @@ def stft(
     n_fft: int,
     hop_length: int,
     center: bool = True,
+    win_length: int | None = None,
+    pad_mode: str = "reflect",
+    window: str = "symmetric",
+    frame_count: int | None = None,
 ) -> np.ndarray:
     """Compute a centered Hann-windowed real-input STFT.
 
-    The returned shape is ``(..., frequency_bins, frames)``.
+    The returned shape is ``(..., frequency_bins, frames)``. ``window`` may be
+    ``'symmetric'`` (the historical NumPy Hann) or ``'periodic'`` (the
+    ``0.5 - 0.5*cos(2*pi*i/win_length)`` convention used by some frontends).
+    When ``win_length < n_fft``, the window is centered in the FFT frame.
     """
     source, axis = validate_audio(audio)
     if axis != source.ndim - 1:
         source = np.moveaxis(source, axis, -1)
     fft_size, hop = _fft_settings(n_fft, hop_length)
-    padded = _pad_for_stft(source, fft_size, hop, center=center)
+    pad = validate_choices(pad_mode, ("reflect", "constant"), "pad_mode")
+    window_mode = validate_choices(window, ("symmetric", "periodic"), "window")
+    window_size = fft_size if win_length is None else validate_integer(win_length, "win_length")
+    if window_size > fft_size:
+        raise InvalidParameterError("win_length must not exceed n_fft")
+    requested_frames = (
+        None if frame_count is None else validate_integer(frame_count, "frame_count", minimum=0)
+    )
+    padded = _pad_for_stft(source, fft_size, hop, center=center, pad_mode=pad)
     frames = frame(padded, frame_length=fft_size, hop_length=hop)
-    window = np.hanning(fft_size).astype(source.dtype, copy=False)
-    spectrum = np.fft.rfft(frames * window, n=fft_size, axis=-1)
-    return np.moveaxis(spectrum, -1, -2)
+    sample_indices = np.arange(window_size, dtype=np.float64)
+    if window_mode == "periodic":
+        analysis_window = 0.5 - 0.5 * np.cos(2.0 * np.pi * sample_indices / window_size)
+    else:
+        analysis_window = np.hanning(window_size)
+    left = (fft_size - window_size) // 2
+    right = fft_size - window_size - left
+    analysis_window = np.pad(analysis_window, (left, right)).astype(source.dtype, copy=False)
+    spectrum = np.fft.rfft(frames * analysis_window, n=fft_size, axis=-1)
+    spectrum = np.moveaxis(spectrum, -1, -2)
+    if requested_frames is not None:
+        if spectrum.shape[-1] > requested_frames:
+            spectrum = spectrum[..., :requested_frames]
+        elif spectrum.shape[-1] < requested_frames:
+            padding = requested_frames - spectrum.shape[-1]
+            spectrum = np.pad(spectrum, [(0, 0)] * (spectrum.ndim - 1) + [(0, padding)])
+    return spectrum
 
 
 def istft(

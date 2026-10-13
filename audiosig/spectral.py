@@ -9,6 +9,7 @@ import numpy as np
 from . import _spectral
 from ._validation import (
     validate_boolean,
+    validate_choices,
     validate_finite,
     validate_integer,
     validate_positive,
@@ -24,10 +25,28 @@ def stft(
     n_fft: int,
     hop_length: int,
     center: bool = True,
+    win_length: int | None = None,
+    pad_mode: Literal["reflect", "constant"] = "reflect",
+    window: Literal["symmetric", "periodic"] = "symmetric",
+    frame_count: int | None = None,
 ) -> np.ndarray:
-    """Return the private Hann-windowed STFT as ``(..., bins, frames)``."""
+    """Return a Hann-windowed STFT as ``(..., bins, frames)``.
+
+    The defaults retain AudioSig's historical symmetric Hann and centered
+    reflect-padding behavior. ``window='periodic'`` opts into the periodic Hann
+    convention used by compatible TTS frontends.
+    """
     validate_boolean(center, "center")
-    return _spectral.stft(audio, n_fft=n_fft, hop_length=hop_length, center=center)
+    return _spectral.stft(
+        audio,
+        n_fft=n_fft,
+        hop_length=hop_length,
+        center=center,
+        win_length=win_length,
+        pad_mode=pad_mode,
+        window=window,
+        frame_count=frame_count,
+    )
 
 
 def istft(
@@ -64,10 +83,23 @@ def power_spectrogram(
     hop_length: int,
     center: bool = True,
     power: float = 2.0,
+    win_length: int | None = None,
+    pad_mode: Literal["reflect", "constant"] = "reflect",
+    window: Literal["symmetric", "periodic"] = "symmetric",
+    frame_count: int | None = None,
 ) -> np.ndarray:
-    """Compute ``abs(STFT) ** power`` in float64, without normalization or dB conversion."""
+    """Compute ``abs(STFT) ** power`` in float64 without dB conversion."""
     exponent = validate_positive(power, "power")
-    spectrum = stft(audio, n_fft=n_fft, hop_length=hop_length, center=center)
+    spectrum = stft(
+        audio,
+        n_fft=n_fft,
+        hop_length=hop_length,
+        center=center,
+        win_length=win_length,
+        pad_mode=pad_mode,
+        window=window,
+        frame_count=frame_count,
+    )
     return np.power(np.abs(spectrum).astype(np.float64, copy=False), exponent)
 
 
@@ -95,6 +127,18 @@ def _mel_to_hz_slaney(mel_values: np.ndarray) -> np.ndarray:
     return frequencies
 
 
+def _hz_to_mel_htk(frequencies_hz: np.ndarray) -> np.ndarray:
+    """Convert frequencies to the HTK mel scale."""
+    frequencies = np.asarray(frequencies_hz, dtype=np.float64)
+    return 2595.0 * np.log10(1.0 + frequencies / 700.0)
+
+
+def _mel_to_hz_htk(mel_values: np.ndarray) -> np.ndarray:
+    """Convert HTK mel values to frequencies in Hz."""
+    mel = np.asarray(mel_values, dtype=np.float64)
+    return 700.0 * (np.power(10.0, mel / 2595.0) - 1.0)
+
+
 def _frequency_limits(
     *, sample_rate: int, f_min: float, f_max: float | None
 ) -> tuple[int, float, float]:
@@ -116,25 +160,26 @@ def mel_filterbank(
     n_mels: int,
     f_min: float = 0.0,
     f_max: float | None = None,
-    mel_scale: Literal["slaney"] = "slaney",
+    mel_scale: Literal["slaney", "htk"] = "slaney",
     norm: Literal["slaney"] | None = "slaney",
 ) -> np.ndarray:
-    """Build Slaney mel triangles against exact real-FFT bin-center frequencies."""
+    """Build mel triangles against exact real-FFT bin-center frequencies."""
     _, minimum, maximum = _frequency_limits(sample_rate=sample_rate, f_min=f_min, f_max=f_max)
     fft_size = validate_integer(n_fft, "n_fft", minimum=2)
     mel_count = validate_integer(n_mels, "n_mels")
-    if mel_scale != "slaney":
-        raise InvalidParameterError("mel_scale must be 'slaney'")
+    scale = validate_choices(mel_scale, ("slaney", "htk"), "mel_scale")
     if norm not in ("slaney", None):
         raise InvalidParameterError("norm must be 'slaney' or None")
 
+    hz_to_mel = _hz_to_mel_slaney if scale == "slaney" else _hz_to_mel_htk
+    mel_to_hz = _mel_to_hz_slaney if scale == "slaney" else _mel_to_hz_htk
     mel_edges = np.linspace(
-        _hz_to_mel_slaney(np.array([minimum]))[0],
-        _hz_to_mel_slaney(np.array([maximum]))[0],
+        hz_to_mel(np.array([minimum]))[0],
+        hz_to_mel(np.array([maximum]))[0],
         mel_count + 2,
         dtype=np.float64,
     )
-    hz_edges = _mel_to_hz_slaney(mel_edges)
+    hz_edges = mel_to_hz(mel_edges)
     frequencies = np.fft.rfftfreq(fft_size, d=1.0 / sample_rate)
     lower = hz_edges[:-2, np.newaxis]
     center = hz_edges[1:-1, np.newaxis]
@@ -162,16 +207,33 @@ def mel_spectrogram(
     power: float = 2.0,
     f_min: float = 0.0,
     f_max: float | None = None,
-    mel_scale: Literal["slaney"] = "slaney",
+    mel_scale: Literal["slaney", "htk"] = "slaney",
     norm: Literal["slaney"] | None = "slaney",
+    win_length: int | None = None,
+    pad_mode: Literal["reflect", "constant"] = "reflect",
+    window: Literal["symmetric", "periodic"] = "symmetric",
+    frame_count: int | None = None,
     log: bool = False,
     log_floor: float = 1e-10,
 ) -> np.ndarray:
-    """Return linear mel power, or its natural logarithm when ``log=True``."""
+    """Return linear mel power, or its natural logarithm when ``log=True``.
+
+    ``frame_count`` optionally fixes the number of output frames by truncating
+    extra frames or zero-padding missing ones. The defaults preserve historical
+    AudioSig feature values; ``window='periodic'`` and HTK are explicit options.
+    """
     validate_boolean(log, "log")
     floor = validate_positive(log_floor, "log_floor")
     power_spec = power_spectrogram(
-        audio, n_fft=n_fft, hop_length=hop_length, center=center, power=power
+        audio,
+        n_fft=n_fft,
+        hop_length=hop_length,
+        center=center,
+        power=power,
+        win_length=win_length,
+        pad_mode=pad_mode,
+        window=window,
+        frame_count=frame_count,
     )
     bank = mel_filterbank(
         sample_rate=sample_rate,

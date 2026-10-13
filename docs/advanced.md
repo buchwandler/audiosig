@@ -143,6 +143,90 @@ print(metrics.true_peak_dbtp)   # dBTP
 
 The stable release contract for downstream PyKokoro code is `audiosig>=0.1.3` for `LoudnessMetrics`, `integrated_loudness`, `sample_peak_dbfs`, `true_peak_dbtp`, and `measure_loudness`, plus the existing `apply_gain_db`. AudioSig supplies measurements and generic gain only; target LUFS and voice calibration remain application policy.
 
+## Compatibility-capable NumPy DSP
+
+The generic compatibility primitives reproduce selected reference DSP policies
+without changing the historical `resample()`, STFT, or mel defaults. Core runtime
+code depends on NumPy only; no Torch, Torchaudio, or SciPy implementation is
+loaded. These functions do not implement Sopro inference, model loading, or
+consumer-specific orchestration.
+
+### Resampling options
+
+`resample_windowed_sinc()` is the configurable, chunked primitive. Its default
+sample alignment, Kaiser window, anti-aliasing, zero boundary, normalized
+weights, and half-up rounded length are independent options. For the pinned
+half-sample raised-cosine reference, specify the compatibility recipe rather
+than changing `resample()`:
+
+```python
+from audiosig import resample_windowed_sinc
+
+waveform_16k = resample_windowed_sinc(
+    waveform_24k,
+    source_rate=24_000,
+    target_rate=16_000,
+    radius=16,
+    alignment="half_sample",
+    window="raised_cosine",
+    antialias=False,
+    normalize_weights=True,
+    boundary="zero",
+    length_mode="round",
+)
+```
+
+### Spectral configuration examples
+
+`stft`, `mel_filterbank`, and `mel_spectrogram` keep their prior defaults. The
+extra `win_length`, `pad_mode`, `window`, `frame_count`, `mel_scale`, and `norm`
+options allow explicit feature recipes. For example, the documented semantic
+recipe uses a periodic 400-point Hann, 160-sample hop, 80 Slaney-normalized
+bands, and explicit frame count; the speaker recipe uses a 1024-point FFT with
+a 400-sample window; the acoustic recipe uses 100 HTK bands and no mel
+normalization:
+
+```python
+from audiosig import mel_spectrogram
+
+semantic = mel_spectrogram(
+    waveform_16k, sample_rate=16_000, n_fft=400, win_length=400,
+    hop_length=160, n_mels=80, mel_scale="slaney", norm="slaney",
+    window="periodic", frame_count=semantic_frames + 2,
+)
+speaker_power = mel_spectrogram(
+    waveform_16k, sample_rate=16_000, n_fft=1024, win_length=400,
+    hop_length=160, n_mels=80, f_min=20, f_max=7_600,
+    mel_scale="slaney", norm="slaney", window="periodic",
+)
+acoustic_magnitude = mel_spectrogram(
+    waveform_24k, sample_rate=24_000, n_fft=1024, win_length=1024,
+    hop_length=256, n_mels=100, power=1, mel_scale="htk", norm=None,
+    window="periodic",
+)
+```
+
+These APIs compute generic spectra; callers remain responsible for any later
+log compression, per-frame normalization, interpolation, tokenization, or model
+input policy. Compatibility tests compare selected semantic, speaker, and
+acoustic feature samples against a pinned reference fixture.
+
+### Speech level, pauses, and output conditioning
+
+`speech_level()` measures active-frame RMS in dB and is intentionally distinct
+from BS.1770 integrated LUFS. `normalize_reference_level()` applies a boost-only
+target, a maximum gain, and a peak ceiling. `crop_on_pause()` takes a
+`PauseCropConfig`; its default room-tone completion is zero-valued. To generate
+noise, pass a local `room_tone_seed` or an RNG explicitly. Neither path uses
+process-global randomness.
+
+The general boundary tools are `speech_onset`, `energy_onset`,
+`energy_fraction`, `trim_lead`, and `trim_trail`. Output conditioning provides
+`fade_edges`, `join_with_edge_fades`, `soft_limit`, and `gain_for_level`. Fades
+are linear; joining fades adjacent segment edges without overlap-add; the soft
+limiter follows a configurable tanh knee. These primitives preserve caller
+ownership and are policy-free building blocks for applications.
+
 ## VAD Algorithm Details
 
 ### Normalized Energy VAD

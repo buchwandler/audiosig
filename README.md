@@ -155,6 +155,58 @@ See the [API reference](docs/api-reference.md) and [quality evaluation
 notes](docs/quality-evaluation.md) for definitions, limitations, and
 independent numerical checks.
 
+## Compatibility-capable speech DSP
+
+AudioSig's existing `resample()` and spectral defaults are unchanged. The opt-in
+`resample_windowed_sinc()` exposes alignment, window, anti-aliasing, boundary,
+weight-normalization, and output-length policies. For pinned half-sample
+windowed-sinc behavior, select the options explicitly:
+
+```python
+from audiosig import resample_windowed_sinc
+
+waveform_16k = resample_windowed_sinc(
+    audio_24k,
+    source_rate=24_000,
+    target_rate=16_000,
+    radius=16,
+    alignment="half_sample",
+    window="raised_cosine",
+    antialias=False,
+    normalize_weights=True,
+    boundary="zero",
+    length_mode="round",
+)
+```
+
+The spectral APIs are also available from the package root. `stft()` and
+`mel_spectrogram()` retain AudioSig's historical symmetric-Hann and reflect
+padding defaults; `window="periodic"`, `win_length`, `pad_mode`, `frame_count`,
+HTK mel, and `norm=None` are explicit options. Speech-level measurement is a
+separate active-frame statistic, not integrated LUFS. Reference normalization
+boosts toward -19.8 dB under configurable gain and peak limits:
+
+```python
+from audiosig import crop_on_pause, normalize_reference_level, speech_level
+
+level = speech_level(audio, sample_rate=24_000)  # active speech-level dB
+normalized = normalize_reference_level(audio, sample_rate=24_000).audio
+prepared = crop_on_pause(
+    normalized,
+    target_seconds=10.0,
+    sample_rate=24_000,
+    room_tone_seed=1,  # explicit local randomness; no global RNG state
+)
+```
+
+With neither a room-tone seed nor injected RNG, crop completion uses zeros.
+`PauseCropConfig` makes pause thresholds and durations configurable. Generic
+`speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`,
+`fade_edges`, `join_with_edge_fades`, `soft_limit`, and `gain_for_level` helpers
+are available for application-owned workflows. These are numeric DSP
+primitives only: AudioSig does not implement Sopro inference, load models, or
+choose application-specific speech/chapter policies.
+
 ## Silence trimming and VAD
 
 ```python
