@@ -1,0 +1,12 @@
+{
+  "candidate_count": 0,
+  "candidates": [],
+  "git_base_ref": "fc87d829991d44b2ccc20685d4577019e628ee90",
+  "git_base_sha": "fc87d829991d44b2ccc20685d4577019e628ee90",
+  "git_head_ref": "fc87d829991d44b2ccc20685d4577019e628ee90",
+  "git_head_sha": "fc87d829991d44b2ccc20685d4577019e628ee90",
+  "include_merges": "nontrivial",
+  "object_type": "git_evidence_manifest",
+  "release_version": "0.1.9",
+  "schema_version": 1
+}

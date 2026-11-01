@@ -1,0 +1,12 @@
+rows:
+  - sha: fc87d829991d44b2ccc20685d4577019e628ee90
+    inspected: true
+    inspected_paths:
+      - docs/changelog.md
+    observed_behavior: "Generated the 0.1.8 changelog from accepted entries and persisted Releaseledger state; no separate product behavior was added."
+    public_impact: none
+    decision: internal
+    target_entry_key: null
+    target_entry_id: null
+    notes: "The generated section reflects already-covered changes; release records and audit state were reviewed through Releaseledger CLI views, without inspecting raw ledger storage."
+    stale: false

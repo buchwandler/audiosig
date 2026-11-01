@@ -1,0 +1,11 @@
+schema: releaseledger.entry-batch.v1
+operation: create
+schema_version: 1
+object_type: release_entry_batch
+release_version: 0.1.9
+git_base_ref: fc87d829991d44b2ccc20685d4577019e628ee90
+git_base_sha: fc87d829991d44b2ccc20685d4577019e628ee90
+git_head_ref: fc87d829991d44b2ccc20685d4577019e628ee90
+git_head_sha: fc87d829991d44b2ccc20685d4577019e628ee90
+include_merges: nontrivial
+entries: []

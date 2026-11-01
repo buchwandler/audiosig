@@ -338,21 +338,29 @@ axis and return independent arrays.
 
 ### Loudness Measurement
 
-#### `integrated_loudness(audio, *, sample_rate, axis=-1)`
+#### `LoudnessProgress`
 
-Return BS.1770-style integrated programme loudness in LUFS. Audio is K-weighted, divided into complete 400 ms blocks with a 100 ms hop, then processed with the -70 LUFS absolute gate and -10 LU relative gate. Signals shorter than one complete block return `-math.inf` without invented padding. V1 accepts one-dimensional mono `float32`/`float64` arrays; the mandatory sample rate is 24,000 Hz, and 44,100 and 48,000 Hz are also supported. Digital silence returns `-math.inf`.
+Frozen, slotted progress event with `phase` (`"integrated_loudness"`, `"sample_peak"`, or `"true_peak"`), `completed_frames`, `total_frames`, and `phase_fraction` in `[0.0, 1.0]`. Events are synchronous, are not persisted or part of metric identity, and do not provide an ETA. Optional `on_progress` callbacks run at work-chunk boundaries; callback exceptions propagate.
+
+#### `integrated_loudness(audio, *, sample_rate, axis=-1, on_progress=None)`
+
+Return BS.1770-style integrated programme loudness in LUFS. Audio is K-weighted in bounded chunks, divided into complete 400 ms blocks with a 100 ms hop, then processed with the -70 LUFS absolute gate and -10 LU relative gate. Chunk boundaries do not change block placement. Signals shorter than one complete block return `-math.inf` without padding. V1 accepts one-dimensional mono `float32`/`float64` arrays; supported rates are 24,000, 44,100, and 48,000 Hz. Digital silence returns `-math.inf`. When supplied, `on_progress` receives `integrated_loudness` events at chunk boundaries, ending with `completed_frames == total_frames`.
 
 #### `sample_peak_dbfs(audio, *, axis=-1)`
 
 Return `20 * log10(max(abs(audio)))` in dBFS. Digital silence returns `-math.inf`. This is a sample peak measurement, not a loudness normalization operation.
 
-#### `true_peak_dbtp(audio, *, sample_rate, axis=-1, oversample=4)`
+#### `true_peak_dbtp(audio, *, sample_rate, axis=-1, oversample=4, on_progress=None)`
 
-Estimate inter-sample peak in dBTP using AudioSig's NumPy windowed-sinc resampler. `oversample` must be a positive integer; `1` is equivalent to sample peak. The function never clips, limits, or modifies the source audio. Digital silence returns `-math.inf`.
+Estimate inter-sample peak in dBTP. The standard 4x path uses AudioSig's 48-tap, 4-phase BS.1770 FIR and converts bounded input chunks to float64; other oversample factors retain the general-purpose NumPy resampler behavior. `oversample` must be a positive integer; `1` is equivalent to sample peak. The function never clips, limits, or modifies source audio. Digital silence returns `-math.inf`. Optional `on_progress` reports `true_peak` work by input chunk, with exact terminal completion.
 
-#### `LoudnessMetrics` and `measure_loudness(audio, *, sample_rate, axis=-1, true_peak_oversample=4)`
+#### `analyze_loudness(audio, *, sample_rate, axis=-1, integrated=True, sample_peak=True, true_peak=True, true_peak_oversample=4, on_progress=None)`
 
-`LoudnessMetrics` is an immutable dataclass containing `integrated_lufs`, `sample_peak_dbfs`, and `true_peak_dbtp`. `measure_loudness` composes the three measurements without applying policy or changing the input. Stable imports are available from `audiosig`; the PyKokoro minimum release is `0.1.3`.
+Selectively compute metrics and retain reusable block energies. Unrequested metrics are `None`; temporary work follows the selected metrics. When sample peak and standard 4x true peak are both selected, the chunk traversal supplies both values. A sample-peak-only selection emits one terminal `sample_peak` event.
+
+#### `LoudnessMetrics` and `measure_loudness(audio, *, sample_rate, axis=-1, true_peak_oversample=4, on_progress=None)`
+
+`LoudnessMetrics` is an immutable dataclass containing `integrated_lufs`, `sample_peak_dbfs`, and `true_peak_dbtp`. `measure_loudness` composes the three measurements without applying policy or changing the input. Stable imports are available from `audiosig`; the PyKokoro minimum release for the original measurement API is `0.1.3`. Callback behavior is described under `LoudnessProgress`.
 
 ## Silence Detection
 

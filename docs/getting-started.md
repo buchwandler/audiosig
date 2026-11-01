@@ -137,7 +137,18 @@ after = audiosig.integrated_loudness(
 assert abs((after - before) - 3.0) < 0.05
 ```
 
-`integrated_loudness` follows BS.1770-style K-weighting and gated 400 ms blocks. `sample_peak_dbfs` is the discrete sample maximum; `true_peak_dbtp` uses configurable oversampling (4x by default) to estimate inter-sample overshoot. These functions measure only: they do not clip, limit, or normalize audio. V1 accepts mono one-dimensional arrays and validates the mandatory 24 kHz case, plus 44.1 and 48 kHz. Silence returns `-math.inf`; empty, non-finite, and inputs shorter than 400 ms have explicit validation/deterministic behavior documented in the API reference.
+`integrated_loudness` follows BS.1770-style K-weighting and gated 400 ms blocks with a 100 ms hop. K-weighting and block-energy accumulation are processed in bounded chunks; the standard 4x `true_peak_dbtp` path converts bounded input chunks to float64. `analyze_loudness()` is selective, so disable metrics you do not need. AudioSig preserves the existing mono/rate validation, silence and short-input behavior, and does not clip, limit, or normalize audio.
+
+The loudness APIs accept an optional `on_progress` callback. Each immutable `LoudnessProgress` event reports a generic phase, completed/total frames, and a phase fraction. Events are synchronous chunk-boundary updates and terminal completion reaches 100%; they do not estimate an ETA, and callback exceptions propagate. Applications decide their targets, ceilings, and metric-selection policy.
+
+```python
+def report_progress(event: audiosig.LoudnessProgress) -> None:
+    print(f"{event.phase}: {event.phase_fraction:.0%}")
+
+peak = audiosig.true_peak_dbtp(
+    audio, sample_rate=24_000, on_progress=report_progress
+)
+```
 
 ## Understanding the API
 

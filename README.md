@@ -88,11 +88,11 @@ AudioSig provides measurement primitives for comparing audio levels without modi
 
 - `sample_peak_dbfs` reports the largest discrete sample in dBFS.
 - `peak_normalize` scales to a requested sample peak; it is not perceived-loudness normalization.
-- RMS and short-time energy describe signal energy over a selected window, but are not LUFS.
+- RMS and short-time energy describe a chosen window, but are not LUFS.
 - `integrated_loudness` applies BS.1770-style K-weighting and absolute/relative gating to report LUFS.
-- `true_peak_dbtp` oversamples to estimate inter-sample peak in dBTP.
+- `true_peak_dbtp` estimates inter-sample peak in dBTP.
 
-The v1 loudness meter accepts finite one-dimensional mono `float32` or `float64` arrays. It uses 400 ms blocks with a 100 ms hop, returns `-math.inf` for digital silence, and does not pad signals shorter than one complete block:
+The meter accepts finite one-dimensional mono `float32` or `float64` arrays; supported sample rates are 24,000, 44,100, and 48,000 Hz. Integrated loudness uses complete 400 ms blocks with a 100 ms hop and processes K-weighting in bounded chunks. It returns `-math.inf` for digital silence and does not pad signals shorter than one complete block. The standard 4x true-peak FIR converts bounded input chunks to float64; other oversampling factors retain the general-purpose resampler path. `analyze_loudness()` is selective: request only the metrics you need, and it avoids full-waveform float64 copies for unrequested work.
 
 ```python
 import audiosig
@@ -106,9 +106,22 @@ before = audiosig.integrated_loudness(audio, sample_rate=24_000)
 louder = audiosig.apply_gain_db(audio, 3.0)
 after = audiosig.integrated_loudness(louder, sample_rate=24_000)
 assert abs((after - before) - 3.0) < 0.05
+
+# Optional callbacks report generic analysis work, not an ETA.
+def report_progress(event):
+    print(f"{event.phase}: {event.phase_fraction:.0%}")
+
+analysis = audiosig.analyze_loudness(
+    audio,
+    sample_rate=24_000,
+    integrated=False,
+    sample_peak=False,
+    true_peak=True,
+    on_progress=report_progress,
+)
 ```
 
-The stable PyKokoro handoff imports are `LoudnessMetrics`, `integrated_loudness`, `sample_peak_dbfs`, `true_peak_dbtp`, and `measure_loudness` from `audiosig`; the minimum release containing this API is `0.1.3`. AudioSig only measures and applies generic gain. It does not choose a target LUFS, normalize every segment, or implement voice calibration.
+`LoudnessProgress` is an immutable event with `phase`, `completed_frames`, `total_frames`, and `phase_fraction`. Optional `on_progress` callbacks are synchronous and run at chunk boundaries; terminal events reach 100%, and callback exceptions propagate. AudioSig does not estimate time remaining. Its existing stable handoff imports remain available from `audiosig`; the minimum release containing the original measurement API is `0.1.3`. AudioSig only measures and applies generic gain. Applications choose targets, ceilings, and which metrics to request; AudioSig does not choose a target LUFS or normalize every segment.
 
 ## Spectral analysis, pitch tracking, and metrics
 
