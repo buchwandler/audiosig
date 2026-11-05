@@ -19,3 +19,7 @@ Time- and Pitch-Scale Modification of Speech Signals,” arXiv:1801.06492
 or test vectors were copied from the authors’ MATLAB repository or from
 unlicensed third-party ESOLA repositories. This notice is provenance guidance,
 not a claim about perceptual superiority or legal advice.
+
+## Speech-end design inspiration
+
+AudioSig's `speech_end()` is an original NumPy-only endpoint policy informed by endpointing concepts in the public Silero VAD timestamping state machine at commit `066409f3d9db45a30d21dfcbf9147826ffdd7052` ([upstream source](https://github.com/snakers4/silero-vad/blob/066409f3d9db45a30d21dfcbf9147826ffdd7052/src/silero_vad/utils_vad.py)). The design borrows the general ideas of separate activation/release thresholds, provisional endpoint tracking, and minimum-silence confirmation; no Silero implementation text, model, weights, neural inference, or runtime is included.

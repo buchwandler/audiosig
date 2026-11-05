@@ -214,11 +214,13 @@ prepared = crop_on_pause(
 
 With neither a room-tone seed nor injected RNG, crop completion uses zeros.
 `PauseCropConfig` makes pause thresholds and durations configurable. Generic
-`speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`,
+`speech_onset`, `speech_end`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`,
 `fade_edges`, `join_with_edge_fades`, `soft_limit`, and `gain_for_level` helpers
 are available for application-owned workflows. These are numeric DSP
 primitives only: AudioSig does not implement Sopro inference, load models, or
 choose application-specific speech/chapter policies.
+
+`speech_end()` requires sustained speech activation, then confirms an endpoint after continuous silence below a lower release threshold (100 ms by default). It returns the unpadded start of that silence, `None` when no speech is confirmed, or the sample count if speech remains active or its silence is unconfirmed at EOF; later unconfirmed transients do not replace an earlier endpoint. `trim_trail()` retains 300 ms after that endpoint by default; confirmation silence and retained trail are separate controls.
 
 ## Silence trimming and VAD
 

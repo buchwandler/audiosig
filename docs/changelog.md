@@ -6,6 +6,10 @@
 
 ## [0.1.9] - Unreleased
 
+### Added
+
+- Added hysteresis-based speech-end detection and confirmed-silence trail trimming
+
 ### Changed
 
 - Changed long-form loudness processing to use bounded chunks and added generic progress callbacks

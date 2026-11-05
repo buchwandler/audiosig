@@ -324,15 +324,19 @@ uses zeros and does not consult global random state. `PauseCropConfig` defaults
 define the 25-ms RMS frame, 10-ms hop, pause thresholds, search windows, 250-ms
 room-tone tail, and 20-ms fade.
 
-#### `speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`
+#### `speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`
 
-These generic boundary helpers use 10-ms non-overlapping RMS frames by default.
-Speech onset requires five active frames in a six-frame window; energy onset
-requires three consecutive energetic frames. `energy_fraction` reports the
-active-frame fraction in a sample interval. `trim_lead` retains 80 ms by default
-and caps trimming at a 20-ms onset safety margin; `trim_trail` retains 300 ms
-after the last active frame. All trimming helpers preserve the selected sample
-axis and return independent arrays.
+These boundary helpers use 10-ms non-overlapping RMS frames by default. Speech onset requires five active frames in a six-frame window; energy onset requires three consecutive energetic frames. `energy_fraction` reports the active-frame fraction in a sample interval. `trim_lead` retains 80 ms by default and caps trimming at a 20-ms onset safety margin. Trimming helpers preserve the selected sample axis and return independent arrays.
+
+#### `speech_end(audio, *, sample_rate, absolute_threshold_db=-45.0, floor_quantile=0.10, over_floor_db=15.0, hysteresis_db=6.0, min_silence_seconds=0.10, frame_seconds=0.010, window_frames=6, required_frames=5, axis=-1)`
+
+Confirm the start of terminal silence after the last sustained speech segment. Entry uses the existing absolute/adaptive RMS threshold and requires `required_frames` above it within `window_frames`. Once speech is established, the release threshold is `hysteresis_db` below the entry threshold; energy above release cancels a provisional endpoint. Silence must remain at or below release for at least `min_silence_seconds` (rounded up to whole frames). The detector analyzes a final partial frame using its actual sample count and preserves the existing lane aggregation.
+
+**Returns:** `int | None` — the unpadded sample index at the first release frame once silence is confirmed; the sample count if speech remains active at EOF or its pending silence is too short; an unconfirmed post-end transient does not replace an earlier endpoint; `None` if no sustained speech segment was confirmed.
+
+#### `trim_trail(audio, *, sample_rate, trail_seconds=0.30, absolute_threshold_db=-45.0, floor_quantile=0.10, over_floor_db=15.0, hysteresis_db=6.0, min_silence_seconds=0.10, frame_seconds=0.010, window_frames=6, required_frames=5, axis=-1)`
+
+Use `speech_end()` to locate the confirmed endpoint, then retain `trail_seconds` of audio after that point. `min_silence_seconds` is the evidence required to confirm the endpoint; `trail_seconds` is the output material retained after it. If no speech is confirmed, the full input is returned. Outputs preserve dtype and sample-axis placement and are independent, C-contiguous arrays.
 
 ---
 

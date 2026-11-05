@@ -372,16 +372,29 @@ def crop_on_pause(
     return np.ascontiguousarray(np.moveaxis(result, -1, normalized_axis), dtype=source.dtype)
 
 
-def _nonoverlap_frame_rms(audio: np.ndarray, frame_length: int) -> np.ndarray:
+def _nonoverlap_frame_rms(
+    audio: np.ndarray, frame_length: int, *, include_partial: bool = False
+) -> np.ndarray:
     sample_count = audio.shape[-1]
-    frame_count = sample_count // frame_length
+    full_frame_count, remainder = divmod(sample_count, frame_length)
+    frame_count = full_frame_count + int(include_partial and remainder > 0)
     if frame_count == 0:
         return np.empty(0, dtype=np.float64)
     if audio.size == 0:
         return np.zeros(frame_count, dtype=np.float64)
     flat = audio.reshape((-1, sample_count)).astype(np.float64, copy=False)
-    frames = flat[:, : frame_count * frame_length].reshape(-1, frame_count, frame_length)
-    return np.sqrt(np.mean(np.square(frames), axis=(0, 2), dtype=np.float64))
+    if full_frame_count:
+        frames = flat[:, : full_frame_count * frame_length].reshape(
+            -1, full_frame_count, frame_length
+        )
+        full_rms = np.sqrt(np.mean(np.square(frames), axis=(0, 2), dtype=np.float64))
+    else:
+        full_rms = np.empty(0, dtype=np.float64)
+    if include_partial and remainder:
+        tail = flat[:, full_frame_count * frame_length :]
+        tail_rms = np.sqrt(np.mean(np.square(tail), dtype=np.float64))
+        return np.concatenate((full_rms, np.asarray([tail_rms], dtype=np.float64)))
+    return full_rms
 
 
 def _db_amplitude(db: float, name: str) -> float:
@@ -452,6 +465,105 @@ def speech_onset(
     counts = np.convolve(above, np.ones(window_count, dtype=np.int64), mode="valid")
     hits = np.flatnonzero(counts >= required_count)
     return None if hits.size == 0 else int(hits[0] * frame_length)
+
+
+def speech_end(
+    audio: np.ndarray,
+    *,
+    sample_rate: int,
+    absolute_threshold_db: float = -45.0,
+    floor_quantile: float = 0.10,
+    over_floor_db: float = 15.0,
+    hysteresis_db: float = 6.0,
+    min_silence_seconds: float = 0.10,
+    frame_seconds: float = 0.010,
+    window_frames: int = 6,
+    required_frames: int = 5,
+    axis: int = -1,
+) -> int | None:
+    """Return the start of confirmed terminal silence after the last speech segment.
+
+    Speech must first satisfy the configured sustained activation window. Once
+    active, energy at or below the lower release threshold starts a provisional
+    endpoint; any rise above that threshold cancels it. A confirmed endpoint is
+    returned only after the required continuous silence. If speech remains active
+    or the silence is too short at EOF, the sample count is returned. ``None``
+    means no speech segment was confirmed.
+    """
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
+    rate = validate_integer(sample_rate, "sample_rate")
+    frame_duration = validate_positive(frame_seconds, "frame_seconds")
+    absolute_db = validate_finite(absolute_threshold_db, "absolute_threshold_db")
+    quantile = validate_finite(floor_quantile, "floor_quantile")
+    over_db = validate_finite(over_floor_db, "over_floor_db")
+    hysteresis = validate_finite(hysteresis_db, "hysteresis_db")
+    minimum_silence = validate_finite(min_silence_seconds, "min_silence_seconds")
+    if hysteresis < 0.0:
+        raise InvalidParameterError("hysteresis_db must be non-negative")
+    if minimum_silence < 0.0:
+        raise InvalidParameterError("min_silence_seconds must be non-negative")
+    if not 0.0 <= quantile <= 1.0:
+        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
+    window_count = validate_integer(window_frames, "window_frames")
+    required_count = validate_integer(required_frames, "required_frames")
+    if required_count > window_count:
+        raise InvalidParameterError("required_frames must not exceed window_frames")
+    frame_length = int(rate * frame_duration)
+    if frame_length < 1:
+        raise InvalidParameterError("frame_seconds must span at least one sample")
+
+    moved = np.moveaxis(source, normalized_axis, -1)
+    sample_count = int(moved.shape[-1])
+    rms = _nonoverlap_frame_rms(moved, frame_length, include_partial=True)
+    if rms.size == 0:
+        return None
+    enter_threshold = _speech_onset_threshold(
+        rms,
+        absolute_threshold_db=absolute_db,
+        floor_quantile=quantile,
+        over_floor_db=over_db,
+    )
+    release_threshold = enter_threshold * _db_amplitude(-hysteresis, "hysteresis_db")
+    silence_ratio = minimum_silence / frame_duration
+    minimum_silence_frames = (
+        rms.size + 1 if not np.isfinite(silence_ratio) else int(np.ceil(silence_ratio))
+    )
+
+    triggered = False
+    candidate_end: int | None = None
+    last_committed_end: int | None = None
+    activation_history: list[bool] = []
+    for frame_index, level in enumerate(rms):
+        if not triggered:
+            activation_history.append(bool(level > enter_threshold))
+            if len(activation_history) > window_count:
+                activation_history.pop(0)
+            if (
+                len(activation_history) == window_count
+                and sum(activation_history) >= required_count
+            ):
+                triggered = True
+                candidate_end = None
+                activation_history.clear()
+            continue
+
+        if level <= release_threshold:
+            if candidate_end is None:
+                candidate_end = frame_index
+            silence_frames = frame_index - candidate_end + 1
+            if silence_frames >= minimum_silence_frames:
+                last_committed_end = candidate_end * frame_length
+                triggered = False
+                candidate_end = None
+                activation_history.clear()
+            continue
+
+        # Weak energy above release cancels a provisional endpoint as well.
+        candidate_end = None
+
+    if triggered:
+        return sample_count
+    return last_committed_end
 
 
 def energy_onset(
@@ -586,36 +698,39 @@ def trim_trail(
     absolute_threshold_db: float = -45.0,
     floor_quantile: float = 0.10,
     over_floor_db: float = 15.0,
+    hysteresis_db: float = 6.0,
+    min_silence_seconds: float = 0.10,
     frame_seconds: float = 0.010,
+    window_frames: int = 6,
+    required_frames: int = 5,
     axis: int = -1,
 ) -> np.ndarray:
-    """Trim trailing silence after the last active frame plus a requested trail."""
+    """Keep a requested trail after confirmed speech-end silence."""
     source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
     rate = validate_integer(sample_rate, "sample_rate")
     trail = validate_finite(trail_seconds, "trail_seconds")
     if trail < 0.0:
         raise InvalidParameterError("trail_seconds must be non-negative")
-    frame_duration = validate_positive(frame_seconds, "frame_seconds")
-    absolute_db = validate_finite(absolute_threshold_db, "absolute_threshold_db")
-    quantile = validate_finite(floor_quantile, "floor_quantile")
-    over_db = validate_finite(over_floor_db, "over_floor_db")
-    if not 0.0 <= quantile <= 1.0:
-        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
-    frame_length = int(rate * frame_duration)
-    if frame_length < 1:
-        raise InvalidParameterError("frame_seconds must span at least one sample")
-    moved = np.moveaxis(source, normalized_axis, -1)
-    rms = _nonoverlap_frame_rms(moved, frame_length)
-    if rms.size == 0:
-        return np.array(source, copy=True, order="C")
-    threshold = _speech_onset_threshold(
-        rms,
-        absolute_threshold_db=absolute_db,
-        floor_quantile=quantile,
-        over_floor_db=over_db,
+    endpoint = speech_end(
+        source,
+        sample_rate=rate,
+        absolute_threshold_db=absolute_threshold_db,
+        floor_quantile=floor_quantile,
+        over_floor_db=over_floor_db,
+        hysteresis_db=hysteresis_db,
+        min_silence_seconds=min_silence_seconds,
+        frame_seconds=frame_seconds,
+        window_frames=window_frames,
+        required_frames=required_frames,
+        axis=normalized_axis,
     )
-    active = np.flatnonzero(rms > threshold)
-    if active.size == 0:
+    if endpoint is None:
         return np.array(source, copy=True, order="C")
-    end = min(moved.shape[-1], (int(active[-1]) + 1) * frame_length + int(trail * rate))
-    return np.ascontiguousarray(np.moveaxis(moved[..., :end], -1, normalized_axis))
+
+    sample_count = source.shape[normalized_axis]
+    requested_trail = trail * rate
+    trail_samples = sample_count if requested_trail >= sample_count else int(requested_trail)
+    end = min(sample_count, endpoint + trail_samples)
+    moved = np.moveaxis(source, normalized_axis, -1)
+    result = np.moveaxis(moved[..., :end], -1, normalized_axis)
+    return np.array(result, copy=True, order="C")
