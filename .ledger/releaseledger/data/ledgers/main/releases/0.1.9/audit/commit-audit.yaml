@@ -2,12 +2,73 @@ schema_version: 1
 object_type: commit_audit_sheet
 versioning:
   schema_version: 1
-  revision: 1
+  revision: 3
 release_version: 0.1.9
 git_base_ref: v0.1.8
 git_base_sha: fc87d829991d44b2ccc20685d4577019e628ee90
-git_head_ref: HEAD
-git_head_sha: fc87d829991d44b2ccc20685d4577019e628ee90
-git_range: fc87d829991d44b2ccc20685d4577019e628ee90..fc87d829991d44b2ccc20685d4577019e628ee90
-commit_count: 0
-rows: []
+git_head_ref: v0.1.9
+git_head_sha: 6bc3abe3f04eaf747213a20b80a7f5e50f8e5fb0
+git_range: fc87d829991d44b2ccc20685d4577019e628ee90..6bc3abe3f04eaf747213a20b80a7f5e50f8e5fb0
+commit_count: 1
+rows:
+  - sha: 6bc3abe3f04eaf747213a20b80a7f5e50f8e5fb0
+    source_ref: git:6bc3abe3f04eaf747213a20b80a7f5e50f8e5fb0
+    short_sha: 6bc3abe
+    changed_paths:
+      - .ledger/releaseledger/data/ledgers/main/events/events.jsonl
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.8/audit/commit-audit.yaml
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.8/release.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.9/audit/commit-audit.yaml
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.9/entries/entry-0001.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.9/release.md
+      - .ledger/releaseledger/work/0.1.8/audit-decisions-refresh.yaml
+      - .ledger/releaseledger/work/0.1.9/audit-decisions.yaml
+      - .ledger/releaseledger/work/0.1.9/audit.yaml
+      - .ledger/releaseledger/work/0.1.9/entries.yaml
+      - .ledger/releaseledger/work/0.1.9/evidence/manifest.json
+      - .ledger/releaseledger/work/0.1.9/range.json
+      - README.md
+      - audiosig/__init__.py
+      - audiosig/loudness.py
+      - benchmarks/bench_loudness.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - docs/changelog.md
+      - docs/getting-started.md
+      - tests/test_loudness.py
+    stats:
+      files_changed: 21
+      insertions: 1075
+      deletions: 144
+    inspected: true
+    inspected_paths:
+      - .ledger/releaseledger/data/ledgers/main/events/events.jsonl
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.8/audit/commit-audit.yaml
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.8/release.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.9/audit/commit-audit.yaml
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.9/entries/entry-0001.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.9/release.md
+      - .ledger/releaseledger/work/0.1.8/audit-decisions-refresh.yaml
+      - .ledger/releaseledger/work/0.1.9/audit-decisions.yaml
+      - .ledger/releaseledger/work/0.1.9/audit.yaml
+      - .ledger/releaseledger/work/0.1.9/entries.yaml
+      - .ledger/releaseledger/work/0.1.9/evidence/manifest.json
+      - .ledger/releaseledger/work/0.1.9/range.json
+      - README.md
+      - audiosig/__init__.py
+      - audiosig/loudness.py
+      - benchmarks/bench_loudness.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - docs/changelog.md
+      - docs/getting-started.md
+      - tests/test_loudness.py
+    observed_behavior:
+      Bounded, stateful loudness processing and selective metrics preserve
+      analysis behavior while progress callbacks report phase completion.
+    public_impact: public
+    decision: accepted
+    stale: false
+    evidence_subject: "feat: improved loudness processing"
+    target_entry_id: entry-0001
+    notes: ""

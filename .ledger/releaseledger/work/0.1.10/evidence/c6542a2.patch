@@ -1,0 +1,532 @@
+ .../data/ledgers/main/events/events.jsonl          |   1 +
+ .../main/releases/0.1.9/entries/entry-0002.md      |  26 ++++
+ .../data/ledgers/main/releases/0.1.9/release.md    |   4 +-
+ README.md                                          |   4 +-
+ THIRD_PARTY_NOTICES.md                             |   4 +
+ audiosig/__init__.py                               |   2 +
+ audiosig/boundaries.py                             | 169 +++++++++++++++++----
+ docs/api-reference.md                              |  22 +--
+ docs/changelog.md                                  |   4 +
+ tests/test_output_boundaries.py                    | 133 +++++++++++++++-
+ 10 files changed, 328 insertions(+), 41 deletions(-)
+
+diff --git a/.ledger/releaseledger/data/ledgers/main/events/events.jsonl b/.ledger/releaseledger/data/ledgers/main/events/events.jsonl
+index 4eceb3b..e3a2b96 100644
+--- a/.ledger/releaseledger/data/ledgers/main/events/events.jsonl
++++ b/.ledger/releaseledger/data/ledgers/main/events/events.jsonl
+@@ -103,3 +103,4 @@
+ {"data":{"row_count":0},"event":"audit.created","event_id":"event-0103","record_revisions":{"commit_audit_sheet":1},"release_version":"0.1.9","schema_version":2}
+ {"data":{"kind":"changed","status":"accepted"},"entry_id":"entry-0001","event":"entry.added","event_id":"event-0104","record_revisions":{"entry:0.1.9/entry-0001":1,"release:0.1.9":3},"release_version":"0.1.9","schema_version":2}
+ {"data":{"added_source_refs":[],"fields":["summary"],"reason":"Use an action phrase that matches the managed entry kind.","removed_source_refs":[],"source_refs_mode":"unchanged"},"entry_id":"entry-0001","event":"entry.updated","event_id":"event-0105","record_revisions":{"entry:0.1.9/entry-0001":2},"release_version":"0.1.9","schema_version":2}
++{"data":{"kind":"added","status":"accepted"},"entry_id":"entry-0002","event":"entry.added","event_id":"event-0106","record_revisions":{"entry:0.1.9/entry-0002":1,"release:0.1.9":4},"release_version":"0.1.9","schema_version":2}
+diff --git a/.ledger/releaseledger/data/ledgers/main/releases/0.1.9/entries/entry-0002.md b/.ledger/releaseledger/data/ledgers/main/releases/0.1.9/entries/entry-0002.md
+new file mode 100644
+index 0000000..39ec8cc
+--- /dev/null
++++ b/.ledger/releaseledger/data/ledgers/main/releases/0.1.9/entries/entry-0002.md
+@@ -0,0 +1,26 @@
++---
++schema_version: 2
++object_type: release_entry
++versioning:
++  schema_version: 1
++  revision: 1
++entry_id: entry-0002
++release_version: 0.1.9
++kind: added
++summary: Added hysteresis-based speech-end detection and confirmed-silence trail trimming
++status: accepted
++audience: null
++scopes: []
++source_refs:
++  - tl:task-0025
++paths:
++  - audiosig/boundaries.py
++  - audiosig/__init__.py
++issues: []
++prs: []
++sources: []
++contributors: []
++breaking: false
++internal: false
++order: 2
++---
+diff --git a/.ledger/releaseledger/data/ledgers/main/releases/0.1.9/release.md b/.ledger/releaseledger/data/ledgers/main/releases/0.1.9/release.md
+index 006b48d..3325ac7 100644
+--- a/.ledger/releaseledger/data/ledgers/main/releases/0.1.9/release.md
++++ b/.ledger/releaseledger/data/ledgers/main/releases/0.1.9/release.md
+@@ -3,7 +3,7 @@ schema_version: 2
+ object_type: release
+ versioning:
+   schema_version: 1
+-  revision: 3
++  revision: 4
+ version: 0.1.9
+ status: planned
+ history_state: curated
+@@ -16,7 +16,7 @@ changelog_file: null
+ boundary_ref: null
+ source_refs: []
+ source_count: null
+-entry_count: 1
++entry_count: 2
+ artifact_count: 0
+ git_base_ref: v0.1.8
+ git_base_sha: fc87d829991d44b2ccc20685d4577019e628ee90
+diff --git a/README.md b/README.md
+index 3085c53..82aea45 100644
+--- a/README.md
++++ b/README.md
+@@ -214,12 +214,14 @@ prepared = crop_on_pause(
+
+ With neither a room-tone seed nor injected RNG, crop completion uses zeros.
+ `PauseCropConfig` makes pause thresholds and durations configurable. Generic
+-`speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`,
++`speech_onset`, `speech_end`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`,
+ `fade_edges`, `join_with_edge_fades`, `soft_limit`, and `gain_for_level` helpers
+ are available for application-owned workflows. These are numeric DSP
+ primitives only: AudioSig does not implement Sopro inference, load models, or
+ choose application-specific speech/chapter policies.
+
++`speech_end()` requires sustained speech activation, then confirms an endpoint after continuous silence below a lower release threshold (100 ms by default). It returns the unpadded start of that silence, `None` when no speech is confirmed, or the sample count if speech remains active or its silence is unconfirmed at EOF; later unconfirmed transients do not replace an earlier endpoint. `trim_trail()` retains 300 ms after that endpoint by default; confirmation silence and retained trail are separate controls.
++
+ ## Silence trimming and VAD
+
+ ```python
+diff --git a/THIRD_PARTY_NOTICES.md b/THIRD_PARTY_NOTICES.md
+index 7fa0c80..499fe86 100644
+--- a/THIRD_PARTY_NOTICES.md
++++ b/THIRD_PARTY_NOTICES.md
+@@ -19,3 +19,7 @@ Time- and Pitch-Scale Modification of Speech Signals,” arXiv:1801.06492
+ or test vectors were copied from the authors’ MATLAB repository or from
+ unlicensed third-party ESOLA repositories. This notice is provenance guidance,
+ not a claim about perceptual superiority or legal advice.
++
++## Speech-end design inspiration
++
++AudioSig's `speech_end()` is an original NumPy-only endpoint policy informed by endpointing concepts in the public Silero VAD timestamping state machine at commit `066409f3d9db45a30d21dfcbf9147826ffdd7052` ([upstream source](https://github.com/snakers4/silero-vad/blob/066409f3d9db45a30d21dfcbf9147826ffdd7052/src/silero_vad/utils_vad.py)). The design borrows the general ideas of separate activation/release thresholds, provisional endpoint tracking, and minimum-silence confirmation; no Silero implementation text, model, weights, neural inference, or runtime is included.
+diff --git a/audiosig/__init__.py b/audiosig/__init__.py
+index 6e736ff..d1463d7 100644
+--- a/audiosig/__init__.py
++++ b/audiosig/__init__.py
+@@ -28,6 +28,7 @@ from .boundaries import (
+     energy_fraction,
+     energy_onset,
+     find_smooth_cut_point,
++    speech_end,
+     speech_onset,
+     trim_lead,
+     trim_trail,
+@@ -160,6 +161,7 @@ __all__ = [
+     "soft_limit",
+     "spectral_flux",
+     "speech_effects_output_frames",
++    "speech_end",
+     "speech_level",
+     "speech_onset",
+     "split",
+diff --git a/audiosig/boundaries.py b/audiosig/boundaries.py
+index fa9a9f7..59df515 100644
+--- a/audiosig/boundaries.py
++++ b/audiosig/boundaries.py
+@@ -372,16 +372,29 @@ def crop_on_pause(
+     return np.ascontiguousarray(np.moveaxis(result, -1, normalized_axis), dtype=source.dtype)
+
+
+-def _nonoverlap_frame_rms(audio: np.ndarray, frame_length: int) -> np.ndarray:
++def _nonoverlap_frame_rms(
++    audio: np.ndarray, frame_length: int, *, include_partial: bool = False
++) -> np.ndarray:
+     sample_count = audio.shape[-1]
+-    frame_count = sample_count // frame_length
++    full_frame_count, remainder = divmod(sample_count, frame_length)
++    frame_count = full_frame_count + int(include_partial and remainder > 0)
+     if frame_count == 0:
+         return np.empty(0, dtype=np.float64)
+     if audio.size == 0:
+         return np.zeros(frame_count, dtype=np.float64)
+     flat = audio.reshape((-1, sample_count)).astype(np.float64, copy=False)
+-    frames = flat[:, : frame_count * frame_length].reshape(-1, frame_count, frame_length)
+-    return np.sqrt(np.mean(np.square(frames), axis=(0, 2), dtype=np.float64))
++    if full_frame_count:
++        frames = flat[:, : full_frame_count * frame_length].reshape(
++            -1, full_frame_count, frame_length
++        )
++        full_rms = np.sqrt(np.mean(np.square(frames), axis=(0, 2), dtype=np.float64))
++    else:
++        full_rms = np.empty(0, dtype=np.float64)
++    if include_partial and remainder:
++        tail = flat[:, full_frame_count * frame_length :]
++        tail_rms = np.sqrt(np.mean(np.square(tail), dtype=np.float64))
++        return np.concatenate((full_rms, np.asarray([tail_rms], dtype=np.float64)))
++    return full_rms
+
+
+ def _db_amplitude(db: float, name: str) -> float:
+@@ -454,6 +467,105 @@ def speech_onset(
+     return None if hits.size == 0 else int(hits[0] * frame_length)
+
+
++def speech_end(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    absolute_threshold_db: float = -45.0,
++    floor_quantile: float = 0.10,
++    over_floor_db: float = 15.0,
++    hysteresis_db: float = 6.0,
++    min_silence_seconds: float = 0.10,
++    frame_seconds: float = 0.010,
++    window_frames: int = 6,
++    required_frames: int = 5,
++    axis: int = -1,
++) -> int | None:
++    """Return the start of confirmed terminal silence after the last speech segment.
++
++    Speech must first satisfy the configured sustained activation window. Once
++    active, energy at or below the lower release threshold starts a provisional
++    endpoint; any rise above that threshold cancels it. A confirmed endpoint is
++    returned only after the required continuous silence. If speech remains active
++    or the silence is too short at EOF, the sample count is returned. ``None``
++    means no speech segment was confirmed.
++    """
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    frame_duration = validate_positive(frame_seconds, "frame_seconds")
++    absolute_db = validate_finite(absolute_threshold_db, "absolute_threshold_db")
++    quantile = validate_finite(floor_quantile, "floor_quantile")
++    over_db = validate_finite(over_floor_db, "over_floor_db")
++    hysteresis = validate_finite(hysteresis_db, "hysteresis_db")
++    minimum_silence = validate_finite(min_silence_seconds, "min_silence_seconds")
++    if hysteresis < 0.0:
++        raise InvalidParameterError("hysteresis_db must be non-negative")
++    if minimum_silence < 0.0:
++        raise InvalidParameterError("min_silence_seconds must be non-negative")
++    if not 0.0 <= quantile <= 1.0:
++        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
++    window_count = validate_integer(window_frames, "window_frames")
++    required_count = validate_integer(required_frames, "required_frames")
++    if required_count > window_count:
++        raise InvalidParameterError("required_frames must not exceed window_frames")
++    frame_length = int(rate * frame_duration)
++    if frame_length < 1:
++        raise InvalidParameterError("frame_seconds must span at least one sample")
++
++    moved = np.moveaxis(source, normalized_axis, -1)
++    sample_count = int(moved.shape[-1])
++    rms = _nonoverlap_frame_rms(moved, frame_length, include_partial=True)
++    if rms.size == 0:
++        return None
++    enter_threshold = _speech_onset_threshold(
++        rms,
++        absolute_threshold_db=absolute_db,
++        floor_quantile=quantile,
++        over_floor_db=over_db,
++    )
++    release_threshold = enter_threshold * _db_amplitude(-hysteresis, "hysteresis_db")
++    silence_ratio = minimum_silence / frame_duration
++    minimum_silence_frames = (
++        rms.size + 1 if not np.isfinite(silence_ratio) else int(np.ceil(silence_ratio))
++    )
++
++    triggered = False
++    candidate_end: int | None = None
++    last_committed_end: int | None = None
++    activation_history: list[bool] = []
++    for frame_index, level in enumerate(rms):
++        if not triggered:
++            activation_history.append(bool(level > enter_threshold))
++            if len(activation_history) > window_count:
++                activation_history.pop(0)
++            if (
++                len(activation_history) == window_count
++                and sum(activation_history) >= required_count
++            ):
++                triggered = True
++                candidate_end = None
++                activation_history.clear()
++            continue
++
++        if level <= release_threshold:
++            if candidate_end is None:
++                candidate_end = frame_index
++            silence_frames = frame_index - candidate_end + 1
++            if silence_frames >= minimum_silence_frames:
++                last_committed_end = candidate_end * frame_length
++                triggered = False
++                candidate_end = None
++                activation_history.clear()
++            continue
++
++        # Weak energy above release cancels a provisional endpoint as well.
++        candidate_end = None
++
++    if triggered:
++        return sample_count
++    return last_committed_end
++
++
+ def energy_onset(
+     audio: np.ndarray,
+     *,
+@@ -586,36 +698,39 @@ def trim_trail(
+     absolute_threshold_db: float = -45.0,
+     floor_quantile: float = 0.10,
+     over_floor_db: float = 15.0,
++    hysteresis_db: float = 6.0,
++    min_silence_seconds: float = 0.10,
+     frame_seconds: float = 0.010,
++    window_frames: int = 6,
++    required_frames: int = 5,
+     axis: int = -1,
+ ) -> np.ndarray:
+-    """Trim trailing silence after the last active frame plus a requested trail."""
++    """Keep a requested trail after confirmed speech-end silence."""
+     source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
+     rate = validate_integer(sample_rate, "sample_rate")
+     trail = validate_finite(trail_seconds, "trail_seconds")
+     if trail < 0.0:
+         raise InvalidParameterError("trail_seconds must be non-negative")
+-    frame_duration = validate_positive(frame_seconds, "frame_seconds")
+-    absolute_db = validate_finite(absolute_threshold_db, "absolute_threshold_db")
+-    quantile = validate_finite(floor_quantile, "floor_quantile")
+-    over_db = validate_finite(over_floor_db, "over_floor_db")
+-    if not 0.0 <= quantile <= 1.0:
+-        raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
+-    frame_length = int(rate * frame_duration)
+-    if frame_length < 1:
+-        raise InvalidParameterError("frame_seconds must span at least one sample")
+-    moved = np.moveaxis(source, normalized_axis, -1)
+-    rms = _nonoverlap_frame_rms(moved, frame_length)
+-    if rms.size == 0:
+-        return np.array(source, copy=True, order="C")
+-    threshold = _speech_onset_threshold(
+-        rms,
+-        absolute_threshold_db=absolute_db,
+-        floor_quantile=quantile,
+-        over_floor_db=over_db,
++    endpoint = speech_end(
++        source,
++        sample_rate=rate,
++        absolute_threshold_db=absolute_threshold_db,
++        floor_quantile=floor_quantile,
++        over_floor_db=over_floor_db,
++        hysteresis_db=hysteresis_db,
++        min_silence_seconds=min_silence_seconds,
++        frame_seconds=frame_seconds,
++        window_frames=window_frames,
++        required_frames=required_frames,
++        axis=normalized_axis,
+     )
+-    active = np.flatnonzero(rms > threshold)
+-    if active.size == 0:
++    if endpoint is None:
+         return np.array(source, copy=True, order="C")
+-    end = min(moved.shape[-1], (int(active[-1]) + 1) * frame_length + int(trail * rate))
+-    return np.ascontiguousarray(np.moveaxis(moved[..., :end], -1, normalized_axis))
++
++    sample_count = source.shape[normalized_axis]
++    requested_trail = trail * rate
++    trail_samples = sample_count if requested_trail >= sample_count else int(requested_trail)
++    end = min(sample_count, endpoint + trail_samples)
++    moved = np.moveaxis(source, normalized_axis, -1)
++    result = np.moveaxis(moved[..., :end], -1, normalized_axis)
++    return np.array(result, copy=True, order="C")
+diff --git a/docs/api-reference.md b/docs/api-reference.md
+index 1ac51d2..d54e292 100644
+--- a/docs/api-reference.md
++++ b/docs/api-reference.md
+@@ -324,15 +324,19 @@ uses zeros and does not consult global random state. `PauseCropConfig` defaults
+ define the 25-ms RMS frame, 10-ms hop, pause thresholds, search windows, 250-ms
+ room-tone tail, and 20-ms fade.
+
+-#### `speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`, `trim_trail`
+-
+-These generic boundary helpers use 10-ms non-overlapping RMS frames by default.
+-Speech onset requires five active frames in a six-frame window; energy onset
+-requires three consecutive energetic frames. `energy_fraction` reports the
+-active-frame fraction in a sample interval. `trim_lead` retains 80 ms by default
+-and caps trimming at a 20-ms onset safety margin; `trim_trail` retains 300 ms
+-after the last active frame. All trimming helpers preserve the selected sample
+-axis and return independent arrays.
++#### `speech_onset`, `energy_onset`, `energy_fraction`, `trim_lead`
++
++These boundary helpers use 10-ms non-overlapping RMS frames by default. Speech onset requires five active frames in a six-frame window; energy onset requires three consecutive energetic frames. `energy_fraction` reports the active-frame fraction in a sample interval. `trim_lead` retains 80 ms by default and caps trimming at a 20-ms onset safety margin. Trimming helpers preserve the selected sample axis and return independent arrays.
++
++#### `speech_end(audio, *, sample_rate, absolute_threshold_db=-45.0, floor_quantile=0.10, over_floor_db=15.0, hysteresis_db=6.0, min_silence_seconds=0.10, frame_seconds=0.010, window_frames=6, required_frames=5, axis=-1)`
++
++Confirm the start of terminal silence after the last sustained speech segment. Entry uses the existing absolute/adaptive RMS threshold and requires `required_frames` above it within `window_frames`. Once speech is established, the release threshold is `hysteresis_db` below the entry threshold; energy above release cancels a provisional endpoint. Silence must remain at or below release for at least `min_silence_seconds` (rounded up to whole frames). The detector analyzes a final partial frame using its actual sample count and preserves the existing lane aggregation.
++
++**Returns:** `int | None` — the unpadded sample index at the first release frame once silence is confirmed; the sample count if speech remains active at EOF or its pending silence is too short; an unconfirmed post-end transient does not replace an earlier endpoint; `None` if no sustained speech segment was confirmed.
++
++#### `trim_trail(audio, *, sample_rate, trail_seconds=0.30, absolute_threshold_db=-45.0, floor_quantile=0.10, over_floor_db=15.0, hysteresis_db=6.0, min_silence_seconds=0.10, frame_seconds=0.010, window_frames=6, required_frames=5, axis=-1)`
++
++Use `speech_end()` to locate the confirmed endpoint, then retain `trail_seconds` of audio after that point. `min_silence_seconds` is the evidence required to confirm the endpoint; `trail_seconds` is the output material retained after it. If no speech is confirmed, the full input is returned. Outputs preserve dtype and sample-axis placement and are independent, C-contiguous arrays.
+
+ ---
+
+diff --git a/docs/changelog.md b/docs/changelog.md
+index 17bbac4..3d09c8e 100644
+--- a/docs/changelog.md
++++ b/docs/changelog.md
+@@ -6,6 +6,10 @@
+
+ ## [0.1.9] - Unreleased
+
++### Added
++
++- Added hysteresis-based speech-end detection and confirmed-silence trail trimming
++
+ ### Changed
+
+ - Changed long-form loudness processing to use bounded chunks and added generic progress callbacks
+diff --git a/tests/test_output_boundaries.py b/tests/test_output_boundaries.py
+index 227ea61..04e301b 100644
+--- a/tests/test_output_boundaries.py
++++ b/tests/test_output_boundaries.py
+@@ -1,10 +1,19 @@
+ from __future__ import annotations
+
++from collections.abc import Callable
++
+ import numpy as np
+ import pytest
+
+-from audiosig import InvalidParameterError
+-from audiosig.boundaries import energy_fraction, energy_onset, speech_onset, trim_lead, trim_trail
++from audiosig import AudioShapeError, InvalidParameterError, speech_end
++from audiosig.boundaries import (
++    _nonoverlap_frame_rms,
++    energy_fraction,
++    energy_onset,
++    speech_onset,
++    trim_lead,
++    trim_trail,
++)
+
+ _SAMPLE_RATE = 1_000
+
+@@ -80,3 +89,123 @@ def test_boundary_helpers_validate_parameters_and_sample_ranges() -> None:
+         trim_lead(source, sample_rate=_SAMPLE_RATE, lead_seconds=-0.1)
+     with pytest.raises(InvalidParameterError, match="non-negative"):
+         trim_trail(source, sample_rate=_SAMPLE_RATE, trail_seconds=-0.1)
++
++
++def test_speech_end_returns_confirmed_silence_start_and_conservative_eof() -> None:
++    assert speech_end(_speech(), sample_rate=_SAMPLE_RATE) == 700
++    assert speech_end(np.zeros(1_000, dtype=np.float32), sample_rate=_SAMPLE_RATE) is None
++
++    active_to_eof = np.zeros(1_000, dtype=np.float32)
++    active_to_eof[300:] = 0.2
++    assert speech_end(active_to_eof, sample_rate=_SAMPLE_RATE) == active_to_eof.size
++
++    short_silence = np.zeros(750, dtype=np.float32)
++    short_silence[300:700] = 0.2
++    assert speech_end(short_silence, sample_rate=_SAMPLE_RATE) == short_silence.size
++
++
++def test_speech_end_preserves_weak_tail_and_cancels_short_internal_pause() -> None:
++    weak_tail = np.zeros(1_200, dtype=np.float32)
++    weak_tail[300:600] = 0.2
++    weak_tail[600:760] = 0.004
++    assert speech_end(weak_tail, sample_rate=_SAMPLE_RATE) == 760
++
++    internal_pause = np.zeros(1_200, dtype=np.float32)
++    internal_pause[300:600] = 0.2
++    internal_pause[640:700] = 0.004
++    assert speech_end(internal_pause, sample_rate=_SAMPLE_RATE) == 700
++
++
++def test_speech_end_ignores_isolated_click_but_accepts_sustained_later_speech() -> None:
++    click_after_speech = np.zeros(1_400, dtype=np.float32)
++    click_after_speech[300:700] = 0.2
++    click_after_speech[1_000:1_010] = 1.0
++    assert speech_end(click_after_speech, sample_rate=_SAMPLE_RATE) == 700
++
++    resumed_speech = np.zeros(1_400, dtype=np.float32)
++    resumed_speech[300:700] = 0.2
++    resumed_speech[850:1_050] = 0.2
++    assert speech_end(resumed_speech, sample_rate=_SAMPLE_RATE) == 1_050
++
++
++def test_trim_trail_applies_trail_after_confirmed_endpoint() -> None:
++    click_after_speech = np.zeros(1_400, dtype=np.float32)
++    click_after_speech[300:700] = 0.2
++    click_after_speech[1_000:1_010] = 1.0
++    trimmed_click = trim_trail(click_after_speech, sample_rate=_SAMPLE_RATE)
++    assert trimmed_click.shape == (1_000,)
++    assert not np.shares_memory(trimmed_click, click_after_speech)
++
++    weak_tail = np.zeros(1_200, dtype=np.float32)
++    weak_tail[300:600] = 0.2
++    weak_tail[600:760] = 0.004
++    assert trim_trail(weak_tail, sample_rate=_SAMPLE_RATE).shape == (1_060,)
++    assert trim_trail(weak_tail, sample_rate=_SAMPLE_RATE, trail_seconds=0.0).shape == (760,)
++
++
++def test_speech_end_analyzes_partial_frame_and_allows_zero_durations() -> None:
++    framed = np.concatenate((np.zeros(10), np.ones(2)))
++    np.testing.assert_array_equal(
++        _nonoverlap_frame_rms(framed, 10, include_partial=True), np.array([0.0, 1.0])
++    )
++    assert _nonoverlap_frame_rms(framed, 10).shape == (1,)
++
++    partial_silence = np.zeros(805, dtype=np.float32)
++    partial_silence[300:800] = 0.2
++    assert speech_end(partial_silence, sample_rate=_SAMPLE_RATE, min_silence_seconds=0.005) == 800
++
++    short_silence = np.zeros(705, dtype=np.float32)
++    short_silence[300:700] = 0.2
++    assert speech_end(short_silence, sample_rate=_SAMPLE_RATE) == short_silence.size
++    assert speech_end(short_silence, sample_rate=_SAMPLE_RATE, min_silence_seconds=0.0) == 700
++    assert speech_end(_speech(), sample_rate=_SAMPLE_RATE, hysteresis_db=0.0) == 700
++
++
++def test_speech_end_and_trim_trail_preserve_axis_dtype_and_contiguity() -> None:
++    source = np.stack((_speech(), _speech() * 0.5))
++    assert speech_end(source, sample_rate=_SAMPLE_RATE, axis=1) == 700
++    trimmed = trim_trail(source, sample_rate=_SAMPLE_RATE, axis=1)
++    assert trimmed.shape == (2, 1_000)
++    assert trimmed.dtype == source.dtype
++    assert trimmed.flags.c_contiguous
++    assert not np.shares_memory(trimmed, source)
++
++
++@pytest.mark.parametrize(
++    ("invalid_call", "message"),
++    [
++        (
++            lambda: speech_end(_speech(), sample_rate=_SAMPLE_RATE, hysteresis_db=-1.0),
++            "hysteresis_db",
++        ),
++        (
++            lambda: speech_end(_speech(), sample_rate=_SAMPLE_RATE, min_silence_seconds=-0.1),
++            "min_silence_seconds",
++        ),
++        (
++            lambda: speech_end(
++                _speech(), sample_rate=_SAMPLE_RATE, required_frames=7, window_frames=6
++            ),
++            "required_frames",
++        ),
++        (lambda: speech_end(_speech(), sample_rate=0), "sample_rate"),
++        (
++            lambda: speech_end(_speech(), sample_rate=_SAMPLE_RATE, frame_seconds=0.0),
++            "frame_seconds",
++        ),
++        (
++            lambda: speech_end(_speech(), sample_rate=_SAMPLE_RATE, floor_quantile=1.1),
++            "floor_quantile",
++        ),
++    ],
++)
++def test_speech_end_rejects_invalid_parameters(
++    invalid_call: Callable[[], int | None], message: str
++) -> None:
++    with pytest.raises(InvalidParameterError, match=message):
++        invalid_call()
++
++
++def test_speech_end_rejects_invalid_axis() -> None:
++    with pytest.raises(AudioShapeError, match="axis"):
++        speech_end(_speech(), sample_rate=_SAMPLE_RATE, axis=2)

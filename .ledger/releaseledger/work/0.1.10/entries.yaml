@@ -1,0 +1,29 @@
+schema: releaseledger.entry-batch.v1
+operation: create
+schema_version: 1
+object_type: release_entry_batch
+release_version: 0.1.10
+git_base_ref: 6bc3abe3f04eaf747213a20b80a7f5e50f8e5fb0
+git_base_sha: 6bc3abe3f04eaf747213a20b80a7f5e50f8e5fb0
+git_head_ref: c6542a290cc5ce32330bd6ead45c6d29f0977ad8
+git_head_sha: c6542a290cc5ce32330bd6ead45c6d29f0977ad8
+include_merges: nontrivial
+entries:
+  - kind: added
+    summary: Added hysteresis-based speech-end detection and confirmed-silence trail trimming
+    status: accepted
+    source_refs:
+      - git:c6542a290cc5ce32330bd6ead45c6d29f0977ad8
+      - tl:task-0025
+    paths:
+      - README.md
+      - THIRD_PARTY_NOTICES.md
+      - audiosig/__init__.py
+      - audiosig/boundaries.py
+      - docs/api-reference.md
+      - docs/changelog.md
+      - tests/test_output_boundaries.py
+    sources: []
+    issues: []
+    contributors:
+      - "@holgern"

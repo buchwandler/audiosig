@@ -1,0 +1,21 @@
+rows:
+  - sha: c6542a290cc5ce32330bd6ead45c6d29f0977ad8
+    inspected: true
+    inspected_paths:
+      - .ledger/releaseledger/data/ledgers/main/events/events.jsonl
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.9/entries/entry-0002.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.9/release.md
+      - README.md
+      - THIRD_PARTY_NOTICES.md
+      - audiosig/__init__.py
+      - audiosig/boundaries.py
+      - docs/api-reference.md
+      - docs/changelog.md
+      - tests/test_output_boundaries.py
+    observed_behavior: "Sustained activation establishes speech; hysteresis and confirmed silence locate terminal endpoints, and trim_trail preserves configured audio after the endpoint."
+    public_impact: public
+    decision: accepted
+    target_entry_key: null
+    target_entry_id: null
+    notes: ""
+    stale: false

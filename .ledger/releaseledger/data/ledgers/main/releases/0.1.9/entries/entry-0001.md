@@ -3,7 +3,7 @@ schema_version: 2
 object_type: release_entry
 versioning:
   schema_version: 1
-  revision: 2
+  revision: 3
 entry_id: entry-0001
 release_version: 0.1.9
 kind: changed
@@ -15,6 +15,7 @@ audience: null
 scopes: []
 source_refs:
   - tl:task-0024
+  - git:6bc3abe3f04eaf747213a20b80a7f5e50f8e5fb0
 paths:
   - audiosig/loudness.py
   - audiosig/__init__.py
