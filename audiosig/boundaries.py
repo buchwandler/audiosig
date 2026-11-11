@@ -476,19 +476,19 @@ def speech_end(
     over_floor_db: float = 15.0,
     hysteresis_db: float = 6.0,
     min_silence_seconds: float = 0.10,
+    min_activity_seconds: float = 0.03,
     frame_seconds: float = 0.010,
     window_frames: int = 6,
     required_frames: int = 5,
     axis: int = -1,
 ) -> int | None:
-    """Return the start of confirmed terminal silence after the last speech segment.
+    """Return start of confirmed terminal silence after the last qualifying activity.
 
-    Speech must first satisfy the configured sustained activation window. Once
-    active, energy at or below the lower release threshold starts a provisional
-    endpoint; any rise above that threshold cancels it. A confirmed endpoint is
-    returned only after the required continuous silence. If speech remains active
-    or the silence is too short at EOF, the sample count is returned. ``None``
-    means no speech segment was confirmed.
+    An initial sustained high-threshold activation confirms speech or activity.
+    The full signal is then scanned for release-level activity islands, including
+    weak or short resumed phrases. ``min_activity_seconds`` rejects transient
+    islands, while ``min_silence_seconds`` confirms the final terminal gap. This
+    is an energy-based boundary detector, not a linguistic voice-activity detector.
     """
     source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
     rate = validate_integer(sample_rate, "sample_rate")
@@ -498,10 +498,13 @@ def speech_end(
     over_db = validate_finite(over_floor_db, "over_floor_db")
     hysteresis = validate_finite(hysteresis_db, "hysteresis_db")
     minimum_silence = validate_finite(min_silence_seconds, "min_silence_seconds")
+    minimum_activity = validate_finite(min_activity_seconds, "min_activity_seconds")
     if hysteresis < 0.0:
         raise InvalidParameterError("hysteresis_db must be non-negative")
     if minimum_silence < 0.0:
         raise InvalidParameterError("min_silence_seconds must be non-negative")
+    if minimum_activity < 0.0:
+        raise InvalidParameterError("min_activity_seconds must be non-negative")
     if not 0.0 <= quantile <= 1.0:
         raise InvalidParameterError("floor_quantile must be in the interval [0, 1]")
     window_count = validate_integer(window_frames, "window_frames")
@@ -515,8 +518,9 @@ def speech_end(
     moved = np.moveaxis(source, normalized_axis, -1)
     sample_count = int(moved.shape[-1])
     rms = _nonoverlap_frame_rms(moved, frame_length, include_partial=True)
-    if rms.size == 0:
+    if rms.size < window_count:
         return None
+
     enter_threshold = _speech_onset_threshold(
         rms,
         absolute_threshold_db=absolute_db,
@@ -524,46 +528,50 @@ def speech_end(
         over_floor_db=over_db,
     )
     release_threshold = enter_threshold * _db_amplitude(-hysteresis, "hysteresis_db")
+    strong = rms > enter_threshold
+    release_active = rms > release_threshold
+    activation_counts = np.convolve(
+        strong.astype(np.int64), np.ones(window_count, dtype=np.int64), mode="valid"
+    )
+    seed_windows = np.flatnonzero(activation_counts >= required_count)
+    if seed_windows.size == 0:
+        return None
+
+    seed_start = int(seed_windows[0])
+    seed_end = seed_start + window_count
     silence_ratio = minimum_silence / frame_duration
     minimum_silence_frames = (
         rms.size + 1 if not np.isfinite(silence_ratio) else int(np.ceil(silence_ratio))
     )
+    activity_ratio = minimum_activity / frame_duration
+    minimum_activity_frames = (
+        rms.size + 1 if not np.isfinite(activity_ratio) else int(np.ceil(activity_ratio))
+    )
 
-    triggered = False
-    candidate_end: int | None = None
-    last_committed_end: int | None = None
-    activation_history: list[bool] = []
-    for frame_index, level in enumerate(rms):
-        if not triggered:
-            activation_history.append(bool(level > enter_threshold))
-            if len(activation_history) > window_count:
-                activation_history.pop(0)
-            if (
-                len(activation_history) == window_count
-                and sum(activation_history) >= required_count
-            ):
-                triggered = True
-                candidate_end = None
-                activation_history.clear()
+    edges = np.diff(np.concatenate(([False], release_active, [False])).astype(np.int8))
+    run_starts = np.flatnonzero(edges == 1)
+    run_ends = np.flatnonzero(edges == -1)
+    confirmed_windows = activation_counts >= required_count
+    last_qualifying_end = 0
+    for run_start, run_end in zip(run_starts, run_ends, strict=True):
+        run_start = int(run_start)
+        run_end = int(run_end)
+        if run_end <= seed_start:
             continue
 
-        if level <= release_threshold:
-            if candidate_end is None:
-                candidate_end = frame_index
-            silence_frames = frame_index - candidate_end + 1
-            if silence_frames >= minimum_silence_frames:
-                last_committed_end = candidate_end * frame_length
-                triggered = False
-                candidate_end = None
-                activation_history.clear()
-            continue
+        overlaps_seed = run_start < seed_end and run_end > seed_start
+        qualifying_window_end = run_end - window_count + 1
+        has_confirmed_activation = qualifying_window_end > run_start and bool(
+            np.any(confirmed_windows[run_start:qualifying_window_end])
+        )
+        sustained_activity = run_end - run_start >= minimum_activity_frames
+        if overlaps_seed or has_confirmed_activation or sustained_activity:
+            last_qualifying_end = run_end
 
-        # Weak energy above release cancels a provisional endpoint as well.
-        candidate_end = None
-
-    if triggered:
+    terminal_silence_frames = rms.size - last_qualifying_end
+    if terminal_silence_frames < minimum_silence_frames:
         return sample_count
-    return last_committed_end
+    return min(last_qualifying_end * frame_length, sample_count)
 
 
 def energy_onset(
@@ -700,6 +708,7 @@ def trim_trail(
     over_floor_db: float = 15.0,
     hysteresis_db: float = 6.0,
     min_silence_seconds: float = 0.10,
+    min_activity_seconds: float = 0.03,
     frame_seconds: float = 0.010,
     window_frames: int = 6,
     required_frames: int = 5,
@@ -719,6 +728,7 @@ def trim_trail(
         over_floor_db=over_floor_db,
         hysteresis_db=hysteresis_db,
         min_silence_seconds=min_silence_seconds,
+        min_activity_seconds=min_activity_seconds,
         frame_seconds=frame_seconds,
         window_frames=window_frames,
         required_frames=required_frames,

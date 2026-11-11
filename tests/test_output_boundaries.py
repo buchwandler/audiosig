@@ -209,3 +209,96 @@ def test_speech_end_rejects_invalid_parameters(
 def test_speech_end_rejects_invalid_axis() -> None:
     with pytest.raises(AudioShapeError, match="axis"):
         speech_end(_speech(), sample_rate=_SAMPLE_RATE, axis=2)
+
+
+def test_speech_end_preserves_weak_resumed_activity_after_internal_pause() -> None:
+    source = np.zeros(1_200, dtype=np.float32)
+    source[300:600] = 0.2
+    source[750:950] = 0.004
+
+    assert speech_end(source, sample_rate=_SAMPLE_RATE) == 950
+    trimmed = trim_trail(source, sample_rate=_SAMPLE_RATE, trail_seconds=0.0)
+    np.testing.assert_array_equal(trimmed, source[:950])
+
+    extended = np.concatenate((source, np.zeros(300, dtype=np.float32)))
+    assert speech_end(extended, sample_rate=_SAMPLE_RATE) == 950
+
+
+def test_speech_end_preserves_short_final_phrase_above_minimum_duration() -> None:
+    source = np.zeros(1_200, dtype=np.float32)
+    source[300:600] = 0.2
+    source[750:790] = 0.2
+
+    assert speech_end(source, sample_rate=_SAMPLE_RATE) == 790
+    assert speech_end(source, sample_rate=_SAMPLE_RATE, min_activity_seconds=0.05) == 600
+
+
+def test_speech_end_ignores_one_frame_click_after_internal_pause() -> None:
+    source = np.zeros(1_200, dtype=np.float32)
+    source[300:600] = 0.2
+    source[750:760] = 1.0
+
+    assert speech_end(source, sample_rate=_SAMPLE_RATE) == 600
+
+
+def test_speech_end_tracks_the_last_of_multiple_activity_islands() -> None:
+    source = np.zeros(1_400, dtype=np.float32)
+    source[300:600] = 0.2
+    source[750:850] = 0.2
+    source[950:1_100] = 0.004
+
+    assert speech_end(source, sample_rate=_SAMPLE_RATE) == 1_100
+
+
+def test_trim_trail_preserves_active_eof_and_exact_terminal_trail_lengths() -> None:
+    active_to_eof = np.zeros(1_000, dtype=np.float32)
+    active_to_eof[300:] = 0.2
+    np.testing.assert_array_equal(
+        trim_trail(active_to_eof, sample_rate=_SAMPLE_RATE, trail_seconds=0.0),
+        active_to_eof,
+    )
+
+    source = _speech()
+    no_trail = trim_trail(source, sample_rate=_SAMPLE_RATE, trail_seconds=0.0)
+    short_trail = trim_trail(source, sample_rate=_SAMPLE_RATE, trail_seconds=0.05)
+    np.testing.assert_array_equal(no_trail, source[:700])
+    np.testing.assert_array_equal(short_trail, source[:750])
+
+
+def test_speech_end_bounds_partial_final_frame_and_multichannel_activity() -> None:
+    partial = np.zeros(805, dtype=np.float32)
+    partial[300:800] = 0.2
+    endpoint = speech_end(partial, sample_rate=_SAMPLE_RATE, min_silence_seconds=0.005)
+    assert endpoint == 800
+    assert endpoint <= partial.size
+    trimmed = trim_trail(
+        partial,
+        sample_rate=_SAMPLE_RATE,
+        trail_seconds=0.0,
+        min_silence_seconds=0.005,
+    )
+    np.testing.assert_array_equal(trimmed, partial[:800])
+
+    multichannel = np.zeros((2, 1_200), dtype=np.float32)
+    multichannel[0, 300:600] = 0.2
+    multichannel[1, 750:950] = 0.2
+    assert speech_end(multichannel, sample_rate=_SAMPLE_RATE, axis=1) == 950
+
+
+def test_min_activity_seconds_rejects_invalid_values_in_both_public_functions() -> None:
+    for duration in (-0.01, np.nan, np.inf):
+        with pytest.raises(InvalidParameterError, match="min_activity_seconds"):
+            speech_end(_speech(), sample_rate=_SAMPLE_RATE, min_activity_seconds=duration)
+        with pytest.raises(InvalidParameterError, match="min_activity_seconds"):
+            trim_trail(_speech(), sample_rate=_SAMPLE_RATE, min_activity_seconds=duration)
+
+
+def test_trim_trail_is_an_independent_prefix_copy_after_resumed_activity() -> None:
+    source = np.zeros(1_200, dtype=np.float32)
+    source[300:600] = 0.2
+    source[750:950] = 0.004
+
+    trimmed = trim_trail(source, sample_rate=_SAMPLE_RATE, trail_seconds=0.05)
+    np.testing.assert_array_equal(trimmed, source[:1_000])
+    assert trimmed.flags.c_contiguous
+    assert not np.shares_memory(trimmed, source)

@@ -220,7 +220,7 @@ are available for application-owned workflows. These are numeric DSP
 primitives only: AudioSig does not implement Sopro inference, load models, or
 choose application-specific speech/chapter policies.
 
-`speech_end()` requires sustained speech activation, then confirms an endpoint after continuous silence below a lower release threshold (100 ms by default). It returns the unpadded start of that silence, `None` when no speech is confirmed, or the sample count if speech remains active or its silence is unconfirmed at EOF; later unconfirmed transients do not replace an earlier endpoint. `trim_trail()` retains 300 ms after that endpoint by default; confirmation silence and retained trail are separate controls.
+`speech_end()` confirms an initial sustained activation, then scans the complete signal for the last qualifying activity island. The enter threshold confirms speech or activity; the lower release threshold tracks continuation. Later release-level islands qualify through a confirmed strong activation or at least 30 ms of sustained activity, rejecting isolated clicks while retaining weak or short resumed phrases. A terminal gap must remain below release for 100 ms by default. The function returns that gap's unpadded start, `None` when no speech is confirmed, or the sample count when activity reaches EOF or terminal silence is too short. It is an energy-based terminal-boundary detector, not a linguistic VAD. `trim_trail()` retains 300 ms after the endpoint by default; `min_activity_seconds` and `min_silence_seconds` are separate controls from the retained trail.
 
 ## Silence trimming and VAD
 
