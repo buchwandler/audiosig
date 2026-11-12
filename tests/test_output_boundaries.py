@@ -457,7 +457,7 @@ def test_terminal_silence_preserves_resumed_activity_and_clicks() -> None:
     click_trimmed, click_analysis = trim_terminal_silence(click, sample_rate=_TERMINAL_SAMPLE_RATE)
     assert click_analysis.confirmed
     assert click_trimmed.size >= clean_trimmed.size
-    assert click_trimmed[click.size - 5_000] == 0.8
+    assert click_trimmed[click.size - 5_000] == click[click.size - 5_000]
 
 
 def test_terminal_silence_boundary_never_moves_earlier_when_padding_grows() -> None:
