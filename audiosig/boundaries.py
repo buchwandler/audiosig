@@ -760,7 +760,7 @@ def trim_terminal_silence(
     audio: np.ndarray,
     *,
     sample_rate: int,
-    keep_seconds: float = 0.150,
+    keep_seconds: float = 0.250,
     frame_seconds: float = 0.005,
     tail_reference_seconds: float = 0.080,
     min_silence_seconds: float = 0.150,

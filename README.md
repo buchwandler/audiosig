@@ -224,14 +224,14 @@ choose application-specific speech/chapter policies.
 
 ### Conservative terminal-silence trimming
 
-`analyze_terminal_silence()` and `trim_terminal_silence()` are separate from `speech_end()` and `trim_trail()`. They use adaptive terminal-floor and activity references plus RMS, peak, contiguous-run, and boundary-transition checks. Trimming is fail-closed: if terminal padding is not clearly separable from possible speech, the complete source is preserved. This is a waveform padding detector, not linguistic speech recognition or a replacement for general endpoint estimation. The default retains 150 ms after the estimated start of floor-like padding as a content-protection reserve. It requires 150 ms of terminal evidence by default; `min_silence_seconds` and `keep_seconds` control evidence and retained audio separately. The default prioritizes avoiding content truncation over removing residual silence. `confirmed=True` does not prove earlier samples are speech or later samples are silence.
+`analyze_terminal_silence()` and `trim_terminal_silence()` are separate from `speech_end()` and `trim_trail()`. They use adaptive terminal-floor and activity references plus RMS, peak, contiguous-run, and boundary-transition checks. Trimming is fail-closed: if terminal padding is not clearly separable from possible speech, the complete source is preserved. This is a waveform padding detector, not linguistic speech recognition or a replacement for general endpoint estimation. The default retains 250 ms after the estimated start of floor-like padding as a content-protection reserve. It requires 150 ms of terminal evidence by default; `min_silence_seconds` and `keep_seconds` control evidence and retained audio separately. The default prioritizes avoiding content truncation over removing residual silence. `confirmed=True` does not prove earlier samples are speech or later samples are silence.
 
 ```python
 from audiosig import analyze_terminal_silence, trim_terminal_silence
 
 analysis = analyze_terminal_silence(audio, sample_rate=24_000)
 trimmed, analysis = trim_terminal_silence(
-    audio, sample_rate=24_000, keep_seconds=0.150
+    audio, sample_rate=24_000, keep_seconds=0.250
 )
 ```
 

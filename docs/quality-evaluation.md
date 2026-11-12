@@ -123,7 +123,7 @@ weights, and never transforms metric inputs implicitly.
 
 ## Conservative terminal-boundary quality evaluation
 
-The destructive trimmer estimates the start of confidently floor-like padding. It is not linguistic endpoint recognition. Its default retains 150 ms after the estimate as a content-protection reserve, and requires 150 ms of terminal evidence before confirming padding. The primary quality objective is no negative boundary error for known protected content. Residual silence is a lower-cost error than removing a final consonant, aspiration, release, or decay. A confirmed boundary is not proof that all earlier samples are speech or all later samples are non-speech.
+The destructive trimmer estimates the start of confidently floor-like padding. It is not linguistic endpoint recognition. Its default retains 250 ms after the estimate as a content-protection reserve, and requires 150 ms of terminal evidence before confirming padding. The primary quality objective is no negative boundary error for known protected content. Residual silence is a lower-cost error than removing a final consonant, aspiration, release, or decay. A confirmed boundary is not proof that all earlier samples are speech or all later samples are non-speech.
 
 Synthetic boundary regressions live in `tests/test_output_boundaries.py`. They cover clean and stationary-noise padding, weak noise-like and high-frequency finals, sparse bursts, gradual decay, different event durations and event-to-floor ratios, resumed activity, clicks, all-silence input, active-through-EOF signals, and gain-scaled variants. For labeled content, tests calculate `end_error_samples = trim_end_sample - protected_end_sample` and forbid negative values.
 

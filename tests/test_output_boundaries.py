@@ -562,5 +562,5 @@ def test_terminal_boundary_evaluator_reports_asymmetric_metrics(tmp_path) -> Non
         "25ms": 1,
         "50ms": 1,
     }
-    assert summary["mean_retained_tail_ms"] == pytest.approx(75.0)
-    assert summary["p95_retained_tail_ms"] == pytest.approx(142.5)
+    assert summary["mean_retained_tail_ms"] == pytest.approx(125.0)
+    assert summary["p95_retained_tail_ms"] == pytest.approx(237.5)
