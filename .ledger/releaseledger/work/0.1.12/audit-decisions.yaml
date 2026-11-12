@@ -1,0 +1,18 @@
+rows:
+  - sha: afb18ade711964b7892c9d747cad45248531f5ad
+    inspected: true
+    inspected_paths:
+      - README.md
+      - audiosig/__init__.py
+      - audiosig/boundaries.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - tests/test_output_boundaries.py
+      - tests/test_public_dsp.py
+    observed_behavior: "Added public analysis and trimming APIs for conservative terminal padding removal. Adaptive RMS and peak references identify a sustained floor-like tail with a credible transition; ambiguous audio is preserved, and confirmed trimming retains a configurable hangover."
+    public_impact: public
+    decision: accepted
+    target_entry_key: null
+    target_entry_id: null
+    notes: ""
+    stale: false

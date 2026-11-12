@@ -120,3 +120,34 @@ The independent fixture is broadband noise rather than speech, so it checks
 numerical agreement only; it does not establish predictive validity or human
 perceptual quality. AudioSig emits no MOS, loads no neural model, downloads no
 weights, and never transforms metric inputs implicitly.
+
+## Conservative terminal-boundary quality evaluation
+
+The destructive trimmer estimates the start of confidently floor-like padding. It is not linguistic endpoint recognition. Its default retains 150 ms after the estimate as a content-protection reserve, and requires 150 ms of terminal evidence before confirming padding. The primary quality objective is no negative boundary error for known protected content. Residual silence is a lower-cost error than removing a final consonant, aspiration, release, or decay. A confirmed boundary is not proof that all earlier samples are speech or all later samples are non-speech.
+
+Synthetic boundary regressions live in `tests/test_output_boundaries.py`. They cover clean and stationary-noise padding, weak noise-like and high-frequency finals, sparse bursts, gradual decay, different event durations and event-to-floor ratios, resumed activity, clicks, all-silence input, active-through-EOF signals, and gain-scaled variants. For labeled content, tests calculate `end_error_samples = trim_end_sample - protected_end_sample` and forbid negative values.
+
+For local TTS evaluation, create a JSON annotation file outside the repository. Each `protected_end_sample` must be manually reviewed against the audio and each row must set `reviewed` to `true`:
+
+```json
+{
+  "items": [
+    {
+      "audio_path": "utterance-001.wav",
+      "protected_end_sample": 123456,
+      "reviewed": true
+    }
+  ]
+}
+```
+
+Run the evaluator on caller-supplied mono 16-bit PCM WAV files. Audio and annotations are not included in AudioSig:
+
+```bash
+python scripts/evaluate_terminal_boundaries.py \
+  --audio-dir /private/tts/chapter \
+  --annotations /private/terminal-boundaries.json \
+  --output /tmp/terminal-boundary-report.json
+```
+
+The report gives counts where end error is below 0 ms, -10 ms, -25 ms, and -50 ms, plus mean and p95 retained tail after the protected endpoint. A reviewed corpus should have zero negative end errors. The report is specific to its manually reviewed utterances and does not establish safety for other voices, languages, or synthesis settings.

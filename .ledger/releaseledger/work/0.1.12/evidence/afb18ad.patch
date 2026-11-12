@@ -1,0 +1,663 @@
+ .../data/ledgers/main/events/events.jsonl          |   1 +
+ .../main/releases/0.1.11/entries/entry-0002.md     |  26 +++
+ .../data/ledgers/main/releases/0.1.11/release.md   |   4 +-
+ README.md                                          |  15 ++
+ audiosig/__init__.py                               |   6 +
+ audiosig/boundaries.py                             | 239 ++++++++++++++++++++-
+ docs/advanced.md                                   |   2 +
+ docs/api-reference.md                              |  14 ++
+ docs/changelog.md                                  |   4 +
+ tests/test_output_boundaries.py                    | 171 ++++++++++++++-
+ tests/test_public_dsp.py                           |   3 +
+ 11 files changed, 481 insertions(+), 4 deletions(-)
+
+diff --git a/.ledger/releaseledger/data/ledgers/main/events/events.jsonl b/.ledger/releaseledger/data/ledgers/main/events/events.jsonl
+index 573a634..cae216c 100644
+--- a/.ledger/releaseledger/data/ledgers/main/events/events.jsonl
++++ b/.ledger/releaseledger/data/ledgers/main/events/events.jsonl
+@@ -120,3 +120,4 @@
+ {"data":{"fields":["git_base_ref","git_base_sha","git_commit_count","git_head_ref","git_head_sha","git_range"]},"event":"release.updated","event_id":"event-0120","record_revisions":{"release:0.1.11":2},"release_version":"0.1.11","schema_version":2}
+ {"data":{"row_count":0},"event":"audit.created","event_id":"event-0121","record_revisions":{"commit_audit_sheet":1},"release_version":"0.1.11","schema_version":2}
+ {"data":{"kind":"fixed","status":"accepted"},"entry_id":"entry-0001","event":"entry.added","event_id":"event-0122","record_revisions":{"entry:0.1.11/entry-0001":1,"release:0.1.11":3},"release_version":"0.1.11","schema_version":2}
++{"data":{"kind":"added","status":"accepted"},"entry_id":"entry-0002","event":"entry.added","event_id":"event-0123","record_revisions":{"entry:0.1.11/entry-0002":1,"release:0.1.11":4},"release_version":"0.1.11","schema_version":2}
+diff --git a/.ledger/releaseledger/data/ledgers/main/releases/0.1.11/entries/entry-0002.md b/.ledger/releaseledger/data/ledgers/main/releases/0.1.11/entries/entry-0002.md
+new file mode 100644
+index 0000000..d620fcc
+--- /dev/null
++++ b/.ledger/releaseledger/data/ledgers/main/releases/0.1.11/entries/entry-0002.md
+@@ -0,0 +1,26 @@
++---
++schema_version: 2
++object_type: release_entry
++versioning:
++  schema_version: 1
++  revision: 1
++entry_id: entry-0002
++release_version: 0.1.11
++kind: added
++summary: Added conservative terminal-silence analysis and trimming
++status: accepted
++audience: null
++scopes: []
++source_refs:
++  - tl:task-0027
++paths:
++  - audiosig/boundaries.py
++  - audiosig/__init__.py
++issues: []
++prs: []
++sources: []
++contributors: []
++breaking: false
++internal: false
++order: 2
++---
+diff --git a/.ledger/releaseledger/data/ledgers/main/releases/0.1.11/release.md b/.ledger/releaseledger/data/ledgers/main/releases/0.1.11/release.md
+index 9789147..c7951b6 100644
+--- a/.ledger/releaseledger/data/ledgers/main/releases/0.1.11/release.md
++++ b/.ledger/releaseledger/data/ledgers/main/releases/0.1.11/release.md
+@@ -3,7 +3,7 @@ schema_version: 2
+ object_type: release
+ versioning:
+   schema_version: 1
+-  revision: 3
++  revision: 4
+ version: 0.1.11
+ status: planned
+ history_state: curated
+@@ -16,7 +16,7 @@ changelog_file: null
+ boundary_ref: null
+ source_refs: []
+ source_count: null
+-entry_count: 1
++entry_count: 2
+ artifact_count: 0
+ git_base_ref: v0.1.10
+ git_base_sha: 07ce093be7be3e87ecbf958abfa7040084efe62b
+diff --git a/README.md b/README.md
+index 84c116d..9c630a7 100644
+--- a/README.md
++++ b/README.md
+@@ -222,6 +222,21 @@ choose application-specific speech/chapter policies.
+
+ `speech_end()` confirms an initial sustained activation, then scans the complete signal for the last qualifying activity island. The enter threshold confirms speech or activity; the lower release threshold tracks continuation. Later release-level islands qualify through a confirmed strong activation or at least 30 ms of sustained activity, rejecting isolated clicks while retaining weak or short resumed phrases. A terminal gap must remain below release for 100 ms by default. The function returns that gap's unpadded start, `None` when no speech is confirmed, or the sample count when activity reaches EOF or terminal silence is too short. It is an energy-based terminal-boundary detector, not a linguistic VAD. `trim_trail()` retains 300 ms after the endpoint by default; `min_activity_seconds` and `min_silence_seconds` are separate controls from the retained trail.
+
++### Conservative terminal-silence trimming
++
++`analyze_terminal_silence()` and `trim_terminal_silence()` are separate from `speech_end()` and `trim_trail()`. They use adaptive terminal-floor and activity references plus RMS, peak, contiguous-run, and boundary-transition checks. Trimming is fail-closed: if terminal padding is not clearly separable from possible speech, the complete source is preserved. This is a waveform padding detector, not linguistic speech recognition or a replacement for general endpoint estimation.
++
++```python
++from audiosig import analyze_terminal_silence, trim_terminal_silence
++
++analysis = analyze_terminal_silence(audio, sample_rate=24_000)
++trimmed, analysis = trim_terminal_silence(
++    audio, sample_rate=24_000, keep_seconds=0.08
++)
++```
++
++The immutable analysis reports its confirmation, boundary, removable sample count, and adaptive RMS and peak diagnostics. Both functions support an arbitrary sample axis. The trim helper returns an independent C-contiguous array with the input dtype and retains a post-boundary hangover when trimming is confirmed.
++
+ ## Silence trimming and VAD
+
+ ```python
+diff --git a/audiosig/__init__.py b/audiosig/__init__.py
+index d1463d7..b512357 100644
+--- a/audiosig/__init__.py
++++ b/audiosig/__init__.py
+@@ -24,6 +24,8 @@ from .amplitude import (
+ from .basic import downmix_to_mono, generate_silence
+ from .boundaries import (
+     PauseCropConfig,
++    TerminalSilenceAnalysis,
++    analyze_terminal_silence,
+     crop_on_pause,
+     energy_fraction,
+     energy_onset,
+@@ -31,6 +33,7 @@ from .boundaries import (
+     speech_end,
+     speech_onset,
+     trim_lead,
++    trim_terminal_silence,
+     trim_trail,
+ )
+ from .effects import PitchShiftMethod, TimeStretchMethod, pitch_shift, time_stretch
+@@ -109,12 +112,14 @@ __all__ = [
+     "SpeechEffectsEnvelopeMethod",
+     "SpeechEffectsMethod",
+     "SpeechLevel",
++    "TerminalSilenceAnalysis",
+     "TimeStretchMethod",
+     "__version__",
+     "abs2",
+     "activity_to_intervals",
+     "amplitude_to_db",
+     "analyze_loudness",
++    "analyze_terminal_silence",
+     "apply_gain_db",
+     "apply_speech_effects",
+     "apply_speech_effects_envelope",
+@@ -169,6 +174,7 @@ __all__ = [
+     "time_stretch",
+     "trim",
+     "trim_lead",
++    "trim_terminal_silence",
+     "trim_trail",
+     "true_peak_dbtp",
+     "zero_crossing_rate",
+diff --git a/audiosig/boundaries.py b/audiosig/boundaries.py
+index 6a9e1a5..6cfeef7 100644
+--- a/audiosig/boundaries.py
++++ b/audiosig/boundaries.py
+@@ -2,7 +2,7 @@
+
+ from __future__ import annotations
+
+-from dataclasses import dataclass
++from dataclasses import dataclass, replace
+ from typing import Protocol
+
+ import numpy as np
+@@ -16,6 +16,24 @@ _BOUNDARY_SLOPE_WEIGHT = 0.10
+ _ANCHOR_DISTANCE_WEIGHT = 0.15
+
+
++@dataclass(frozen=True, slots=True)
++class TerminalSilenceAnalysis:
++    """Diagnostics for conservative destructive terminal-padding removal."""
++
++    sample_count: int
++    confirmed: bool
++    silence_start_sample: int | None
++    trim_end_sample: int
++    removable_samples: int
++    activity_reference_rms: float
++    tail_floor_rms: float
++    silence_threshold_rms: float
++    activity_reference_peak: float = 0.0
++    tail_floor_peak: float = 0.0
++    silence_threshold_peak: float = 0.0
++    separation_db: float = 0.0
++
++
+ def _normalize_cost(values: np.ndarray) -> np.ndarray:
+     """Normalize candidate costs to ``[0, 1]`` without dividing by zero."""
+     minimum = float(np.min(values))
+@@ -574,6 +592,225 @@ def speech_end(
+     return min(last_qualifying_end * frame_length, sample_count)
+
+
++def _terminal_frame_features(
++    audio: np.ndarray, frame_length: int
++) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
++    sample_count = audio.shape[-1]
++    frame_count = (sample_count + frame_length - 1) // frame_length
++    rms = np.empty(frame_count, dtype=np.float64)
++    peaks = np.empty(frame_count, dtype=np.float64)
++    starts = np.arange(frame_count, dtype=np.int64) * frame_length
++    ends = np.minimum(starts + frame_length, sample_count)
++    for index, (start, end) in enumerate(zip(starts, ends, strict=True)):
++        frame = audio[..., start:end].astype(np.float64, copy=False)
++        rms[index] = float(np.max(np.sqrt(np.mean(np.square(frame), axis=-1))))
++        peaks[index] = float(np.max(np.abs(frame)))
++    return rms, peaks, starts, ends
++
++
++def analyze_terminal_silence(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    frame_seconds: float = 0.005,
++    tail_reference_seconds: float = 0.080,
++    min_silence_seconds: float = 0.120,
++    floor_margin_db: float = 4.0,
++    min_separation_db: float = 18.0,
++    transition_margin_db: float = 6.0,
++    axis: int = -1,
++) -> TerminalSilenceAnalysis:
++    """Confirm only a clearly separated, floor-like terminal padding region.
++
++    This is a conservative destructive-trimming analysis, not a linguistic
++    voice-activity detector. Ambiguous signals return an unconfirmed full-length
++    boundary so callers can preserve their source audio.
++    """
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    frame_duration = validate_positive(frame_seconds, "frame_seconds")
++    tail_duration = validate_positive(tail_reference_seconds, "tail_reference_seconds")
++    minimum_silence = validate_finite(min_silence_seconds, "min_silence_seconds")
++    floor_margin = validate_finite(floor_margin_db, "floor_margin_db")
++    minimum_separation = validate_finite(min_separation_db, "min_separation_db")
++    transition_margin = validate_finite(transition_margin_db, "transition_margin_db")
++    if minimum_silence < 0.0:
++        raise InvalidParameterError("min_silence_seconds must be non-negative")
++    if floor_margin < 0.0:
++        raise InvalidParameterError("floor_margin_db must be non-negative")
++    if minimum_separation < 0.0:
++        raise InvalidParameterError("min_separation_db must be non-negative")
++    if transition_margin < 0.0:
++        raise InvalidParameterError("transition_margin_db must be non-negative")
++
++    frame_samples_float = frame_duration * rate
++    tail_samples_float = tail_duration * rate
++    silence_samples_float = minimum_silence * rate
++    if not np.isfinite(frame_samples_float) or frame_samples_float > np.iinfo(np.intp).max:
++        raise InvalidParameterError("frame_seconds is too large")
++    if not np.isfinite(tail_samples_float) or tail_samples_float > np.iinfo(np.intp).max:
++        raise InvalidParameterError("tail_reference_seconds is too large")
++    if not np.isfinite(silence_samples_float) or silence_samples_float > np.iinfo(np.intp).max:
++        raise InvalidParameterError("min_silence_seconds is too large")
++
++    frame_length = max(1, int(np.floor(frame_samples_float + 0.5)))
++    tail_samples = max(1, int(np.floor(tail_samples_float + 0.5)))
++    minimum_silence_samples = int(np.ceil(silence_samples_float))
++    moved = np.moveaxis(source, normalized_axis, -1)
++    sample_count = int(moved.shape[-1])
++    if sample_count == 0 or source.size == 0:
++        return TerminalSilenceAnalysis(sample_count, False, None, sample_count, 0, 0.0, 0.0, 0.0)
++
++    rms, peaks, starts, ends = _terminal_frame_features(moved, frame_length)
++    activity_reference_rms = float(np.quantile(rms, 0.90))
++    activity_reference_peak = float(np.quantile(peaks, 0.90))
++    tail_start = max(0, sample_count - tail_samples)
++    tail_frames = ends > tail_start
++    tail_floor_rms = float(np.quantile(rms[tail_frames], 0.90))
++    tail_floor_peak = float(np.quantile(peaks[tail_frames], 0.95))
++    if activity_reference_rms <= 0.0:
++        return TerminalSilenceAnalysis(
++            sample_count,
++            False,
++            None,
++            sample_count,
++            0,
++            activity_reference_rms,
++            tail_floor_rms,
++            0.0,
++            activity_reference_peak,
++            tail_floor_peak,
++            0.0,
++            0.0,
++        )
++
++    numerical_floor = max(activity_reference_rms * 1.0e-12, np.finfo(np.float64).tiny)
++    separation_db = 20.0 * np.log10(activity_reference_rms / max(tail_floor_rms, numerical_floor))
++    separation_cap = _db_amplitude(-minimum_separation, "min_separation_db")
++    rms_cap = activity_reference_rms * separation_cap
++    rms_threshold = min(
++        max(tail_floor_rms * _db_amplitude(floor_margin, "floor_margin_db"), numerical_floor),
++        rms_cap,
++    )
++    peak_scale = max(activity_reference_peak, np.finfo(np.float64).tiny)
++    peak_floor = max(activity_reference_peak * 1.0e-12, np.finfo(np.float64).tiny)
++    peak_cap = peak_scale * separation_cap
++    peak_threshold = min(
++        max(tail_floor_peak * _db_amplitude(floor_margin, "floor_margin_db"), peak_floor),
++        peak_cap,
++    )
++
++    def unconfirmed() -> TerminalSilenceAnalysis:
++        return TerminalSilenceAnalysis(
++            sample_count,
++            False,
++            None,
++            sample_count,
++            0,
++            activity_reference_rms,
++            tail_floor_rms,
++            rms_threshold,
++            activity_reference_peak,
++            tail_floor_peak,
++            peak_threshold,
++            float(separation_db),
++        )
++
++    if separation_db < minimum_separation:
++        return unconfirmed()
++
++    quiet = (rms <= rms_threshold) & (peaks <= peak_threshold)
++    if not bool(quiet[-1]):
++        return unconfirmed()
++    run_start = quiet.size - 1
++    while run_start > 0 and bool(quiet[run_start - 1]):
++        run_start -= 1
++    silence_start = int(starts[run_start])
++    if sample_count - silence_start < minimum_silence_samples or run_start == 0:
++        return unconfirmed()
++
++    transition_start = max(0, run_start - 3)
++    transition_rms = rms[transition_start:run_start]
++    transition_peaks = peaks[transition_start:run_start]
++    transition_factor = _db_amplitude(transition_margin, "transition_margin_db")
++    credible_transition = bool(
++        np.any(transition_rms > rms_threshold * transition_factor)
++        or np.any(transition_peaks > peak_threshold * transition_factor)
++    )
++    if not credible_transition:
++        return unconfirmed()
++
++    return TerminalSilenceAnalysis(
++        sample_count,
++        True,
++        silence_start,
++        silence_start,
++        sample_count - silence_start,
++        activity_reference_rms,
++        tail_floor_rms,
++        rms_threshold,
++        activity_reference_peak,
++        tail_floor_peak,
++        peak_threshold,
++        float(separation_db),
++    )
++
++
++def trim_terminal_silence(
++    audio: np.ndarray,
++    *,
++    sample_rate: int,
++    keep_seconds: float = 0.080,
++    frame_seconds: float = 0.005,
++    tail_reference_seconds: float = 0.080,
++    min_silence_seconds: float = 0.120,
++    floor_margin_db: float = 4.0,
++    min_separation_db: float = 18.0,
++    transition_margin_db: float = 6.0,
++    axis: int = -1,
++) -> tuple[np.ndarray, TerminalSilenceAnalysis]:
++    """Remove confirmed terminal padding while retaining a safety hangover.
++
++    When the analysis is unconfirmed, the complete source is returned in an
++    independent C-contiguous array. The attached analysis reports the actual
++    output boundary after applying ``keep_seconds``.
++    """
++    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
++    rate = validate_integer(sample_rate, "sample_rate")
++    keep = validate_finite(keep_seconds, "keep_seconds")
++    if keep < 0.0:
++        raise InvalidParameterError("keep_seconds must be non-negative")
++    analysis = analyze_terminal_silence(
++        source,
++        sample_rate=rate,
++        frame_seconds=frame_seconds,
++        tail_reference_seconds=tail_reference_seconds,
++        min_silence_seconds=min_silence_seconds,
++        floor_margin_db=floor_margin_db,
++        min_separation_db=min_separation_db,
++        transition_margin_db=transition_margin_db,
++        axis=normalized_axis,
++    )
++    sample_count = analysis.sample_count
++    if analysis.confirmed and analysis.silence_start_sample is not None:
++        remaining = sample_count - analysis.silence_start_sample
++        if keep >= remaining / rate:
++            end = sample_count
++        else:
++            keep_samples = int(np.floor(keep * rate + 0.5))
++            end = min(sample_count, analysis.silence_start_sample + keep_samples)
++    else:
++        end = sample_count
++    result = np.moveaxis(np.moveaxis(source, normalized_axis, -1)[..., :end], -1, normalized_axis)
++    trimmed = np.array(result, copy=True, order="C")
++    reported_analysis = replace(
++        analysis,
++        trim_end_sample=end,
++        removable_samples=sample_count - end,
++    )
++    return trimmed, reported_analysis
++
++
+ def energy_onset(
+     audio: np.ndarray,
+     *,
+diff --git a/docs/advanced.md b/docs/advanced.md
+index 503f1a3..565c23e 100644
+--- a/docs/advanced.md
++++ b/docs/advanced.md
+@@ -240,6 +240,8 @@ are linear; joining fades adjacent segment edges without overlap-add; the soft
+ limiter follows a configurable tanh knee. These primitives preserve caller
+ ownership and are policy-free building blocks for applications.
+
++For destructive removal of renderer padding, use `analyze_terminal_silence()` or `trim_terminal_silence()` instead of treating `speech_end()` as a safe cut. The new detector compares a robust terminal floor with scale-relative activity, scans only contiguous floor-like frames, and requires both a minimum quiet run and a credible transition. RMS and peak features jointly protect weak bursts. Ambiguous material is preserved, including all-silent input and activity that continues to EOF. The trim helper retains a configurable hangover and returns caller-owned contiguous output. This is a conservative waveform policy, not linguistic speech detection; see the API reference for the result fields and controls.
++
+ ## VAD Algorithm Details
+
+ ### Normalized Energy VAD
+diff --git a/docs/api-reference.md b/docs/api-reference.md
+index f5f29dc..6ccc1c7 100644
+--- a/docs/api-reference.md
++++ b/docs/api-reference.md
+@@ -338,6 +338,20 @@ Find an initial speech/activity seed using `required_frames` above the enter thr
+
+ Use `speech_end()` to locate the final qualifying activity boundary, then retain `trail_seconds` of audio after it. `min_activity_seconds` rejects transient activity islands; `min_silence_seconds` is the minimum terminal gap required to confirm an endpoint; `trail_seconds` controls the output material retained after that endpoint. A long internal pause is ignored when qualifying activity resumes. If no initial speech is confirmed, the full input is returned. Outputs preserve dtype and sample-axis placement and are independent, C-contiguous prefixes of the source.
+
++#### `TerminalSilenceAnalysis`
++
++Frozen, slotted diagnostics returned by the conservative terminal-padding APIs. `sample_count` is the source length; `confirmed` states whether a safe terminal floor was identified; `silence_start_sample` is that candidate boundary or `None`; `trim_end_sample` and `removable_samples` describe the recommended output boundary and removed count. The result also reports the activity-reference RMS, terminal-floor RMS, quiet RMS threshold, corresponding peak statistics, and `separation_db`. Analysis returns the boundary before a retained hangover; the result returned by `trim_terminal_silence()` reflects the actual output boundary after its hangover is applied.
++
++#### `analyze_terminal_silence(audio, *, sample_rate, frame_seconds=0.005, tail_reference_seconds=0.080, min_silence_seconds=0.120, floor_margin_db=4.0, min_separation_db=18.0, transition_margin_db=6.0, axis=-1)`
++
++Analyze terminal padding for conservative destructive trimming. Short non-overlapping frames include RMS and absolute peak, with the maximum across non-sample lanes used conservatively. The default detector uses the 90th percentile of the final reference frames for the RMS floor, the 95th percentile for the peak floor, and the 90th percentile across the segment for scale-relative activity references. It scans backward through only contiguous floor-like frames, requires the minimum terminal duration and relative separation, and checks for a clear transition immediately before the candidate. The threshold is based on the observed floor with a small margin and is capped relative to the activity level. A peak veto protects short, low-RMS events.
++
++The function returns `TerminalSilenceAnalysis`. If the signal is ambiguous, all-silent, active through EOF, or lacks a sufficiently long quiet run and credible transition, it is unconfirmed: `trim_end_sample == sample_count` and `removable_samples == 0`. This is not linguistic VAD, and no waveform-only energy method can prove that content acoustically indistinguishable from the local floor is not speech. Inputs use AudioSig's finite float32/float64 array and arbitrary-axis conventions. Frames are rounded to the nearest sample; the minimum silence duration is rounded up to samples.
++
++#### `trim_terminal_silence(audio, *, sample_rate, keep_seconds=0.080, frame_seconds=0.005, tail_reference_seconds=0.080, min_silence_seconds=0.120, floor_margin_db=4.0, min_separation_db=18.0, transition_margin_db=6.0, axis=-1)`
++
++Apply the conservative terminal analysis and retain `keep_seconds` after the confirmed boundary, rounded half-up to samples. It returns `(trimmed_audio, analysis)`. If unconfirmed, the complete input is preserved. The result is an independent C-contiguous array with source dtype and the selected sample-axis geometry; the returned analysis reports the actual output end and removable count. The duration controls are calibration parameters, not promises of speech recognition. Lower trim sensitivity is preferred over cutting uncertain material.
++
+ ---
+
+ ### Loudness Measurement
+diff --git a/docs/changelog.md b/docs/changelog.md
+index c6b3d44..e324fb7 100644
+--- a/docs/changelog.md
++++ b/docs/changelog.md
+@@ -6,6 +6,10 @@
+
+ ## [0.1.11] - Unreleased
+
++### Added
++
++- Added conservative terminal-silence analysis and trimming
++
+ ### Fixed
+
+ - Fixed terminal-silence detection to preserve resumed speech and reject isolated clicks
+diff --git a/tests/test_output_boundaries.py b/tests/test_output_boundaries.py
+index 2534104..3f6d72a 100644
+--- a/tests/test_output_boundaries.py
++++ b/tests/test_output_boundaries.py
+@@ -5,7 +5,14 @@ from collections.abc import Callable
+ import numpy as np
+ import pytest
+
+-from audiosig import AudioShapeError, InvalidParameterError, speech_end
++from audiosig import (
++    AudioShapeError,
++    InvalidParameterError,
++    TerminalSilenceAnalysis,
++    analyze_terminal_silence,
++    speech_end,
++    trim_terminal_silence,
++)
+ from audiosig.boundaries import (
+     _nonoverlap_frame_rms,
+     energy_fraction,
+@@ -302,3 +309,165 @@ def test_trim_trail_is_an_independent_prefix_copy_after_resumed_activity() -> No
+     np.testing.assert_array_equal(trimmed, source[:1_000])
+     assert trimmed.flags.c_contiguous
+     assert not np.shares_memory(trimmed, source)
++
++
++_TERMINAL_SAMPLE_RATE = 24_000
++
++
++def _terminal_fixture(
++    *, weak_tail_rms: float = 0.0, padding_seconds: float = 0.4
++) -> tuple[np.ndarray, int]:
++    active = np.full(12_000, 0.2, dtype=np.float32)
++    tail = (
++        np.random.default_rng(17).normal(0.0, weak_tail_rms, 1_920).astype(np.float32)
++        if weak_tail_rms > 0.0
++        else np.empty(0, dtype=np.float32)
++    )
++    padding = np.zeros(round(padding_seconds * _TERMINAL_SAMPLE_RATE), dtype=np.float32)
++    return np.concatenate((active, tail, padding)), active.size + tail.size
++
++
++def test_terminal_silence_preserves_low_power_final_tails() -> None:
++    for relative_db in (-40.0, -50.0, -60.0, -70.0):
++        tail_rms = 0.2 * 10.0 ** (relative_db / 20.0)
++        source, tail_end = _terminal_fixture(weak_tail_rms=tail_rms)
++        trimmed, analysis = trim_terminal_silence(source, sample_rate=_TERMINAL_SAMPLE_RATE)
++
++        assert isinstance(analysis, TerminalSilenceAnalysis)
++        assert not hasattr(analysis, "__dict__")
++        with pytest.raises(AttributeError):
++            analysis.confirmed = False
++        assert analysis.confirmed
++        assert analysis.trim_end_sample >= tail_end
++        assert trimmed.shape == (analysis.trim_end_sample,)
++        assert trimmed.size >= tail_end
++        assert not np.shares_memory(trimmed, source)
++
++
++@pytest.mark.parametrize("event_ms", (5, 10, 20, 30))
++def test_terminal_silence_preserves_short_peak_bearing_final_events(event_ms: int) -> None:
++    event_count = event_ms * _TERMINAL_SAMPLE_RATE // 1_000
++    event = np.zeros(event_count, dtype=np.float32)
++    event[::3] = 0.025
++    event[1::3] = -0.025
++    source = np.concatenate(
++        (np.full(12_000, 0.2, dtype=np.float32), event, np.zeros(9_600, dtype=np.float32))
++    )
++
++    trimmed, analysis = trim_terminal_silence(source, sample_rate=_TERMINAL_SAMPLE_RATE)
++
++    assert analysis.confirmed
++    assert trimmed.size >= 12_000 + event_count
++
++
++def test_terminal_silence_trims_clean_zero_and_stationary_noise_padding() -> None:
++    clean, active_end = _terminal_fixture()
++    clean_trimmed, clean_analysis = trim_terminal_silence(
++        clean, sample_rate=_TERMINAL_SAMPLE_RATE, keep_seconds=0.08
++    )
++    assert clean_analysis.confirmed
++    assert clean_trimmed.size == active_end + 0.08 * _TERMINAL_SAMPLE_RATE
++    np.testing.assert_array_equal(clean_trimmed, clean[: clean_trimmed.size])
++
++    noise = np.random.default_rng(29).normal(0.0, 0.0005, 9_600).astype(np.float32)
++    noisy = np.concatenate((np.full(12_000, 0.2, dtype=np.float32), noise))
++    noisy_trimmed, noisy_analysis = trim_terminal_silence(noisy, sample_rate=_TERMINAL_SAMPLE_RATE)
++    assert noisy_analysis.confirmed
++    assert noisy_trimmed.size < noisy.size
++
++
++def test_terminal_silence_fails_closed_for_ambiguous_decay_and_active_eof() -> None:
++    active = np.full(12_000, 0.2, dtype=np.float32)
++    transition = np.linspace(0.02, 0.001, 24_000, dtype=np.float32)
++    tail_noise = np.random.default_rng(31).normal(0.0, 0.001, 9_600).astype(np.float32)
++    ambiguous = np.concatenate((active, transition, tail_noise))
++    result = analyze_terminal_silence(ambiguous, sample_rate=_TERMINAL_SAMPLE_RATE)
++    trimmed, trim_result = trim_terminal_silence(ambiguous, sample_rate=_TERMINAL_SAMPLE_RATE)
++
++    assert not result.confirmed
++    assert result.trim_end_sample == ambiguous.size
++    assert result.removable_samples == 0
++    assert not trim_result.confirmed
++    np.testing.assert_array_equal(trimmed, ambiguous)
++
++    active_to_eof = np.full(12_000, 0.2, dtype=np.float32)
++    eof_result = analyze_terminal_silence(active_to_eof, sample_rate=_TERMINAL_SAMPLE_RATE)
++    eof_trimmed, _ = trim_terminal_silence(active_to_eof, sample_rate=_TERMINAL_SAMPLE_RATE)
++    assert not eof_result.confirmed
++    np.testing.assert_array_equal(eof_trimmed, active_to_eof)
++
++
++def test_terminal_silence_all_silence_is_unchanged_and_unconfirmed() -> None:
++    source = np.zeros(12_345, dtype=np.float32)
++    trimmed, analysis = trim_terminal_silence(source, sample_rate=_TERMINAL_SAMPLE_RATE)
++
++    assert not analysis.confirmed
++    assert analysis.trim_end_sample == source.size
++    assert analysis.removable_samples == 0
++    np.testing.assert_array_equal(trimmed, source)
++
++
++def test_terminal_silence_boundary_is_gain_scale_invariant() -> None:
++    source, _ = _terminal_fixture(weak_tail_rms=0.0004)
++    boundaries = [
++        analyze_terminal_silence(source * scale, sample_rate=_TERMINAL_SAMPLE_RATE).trim_end_sample
++        for scale in (0.01, 0.1, 1.0, 2.0)
++    ]
++
++    assert len(set(boundaries)) == 1
++
++
++def test_terminal_silence_handles_partial_frames_lanes_and_sample_axes() -> None:
++    one_lane, _ = _terminal_fixture()
++    source = np.stack((one_lane, one_lane * 0.5))[:, ::-1][:, ::-1]
++    analysis = analyze_terminal_silence(source, sample_rate=_TERMINAL_SAMPLE_RATE, axis=1)
++    trimmed, trim_analysis = trim_terminal_silence(
++        source, sample_rate=_TERMINAL_SAMPLE_RATE, axis=1, keep_seconds=0.04
++    )
++
++    assert analysis.confirmed
++    assert 0 <= analysis.trim_end_sample <= source.shape[1]
++    assert analysis.removable_samples == source.shape[1] - analysis.trim_end_sample
++    assert trimmed.shape == (2, trim_analysis.trim_end_sample)
++    assert trimmed.dtype == source.dtype
++    assert trimmed.flags.c_contiguous
++    assert not np.shares_memory(trimmed, source)
++
++    partial = np.concatenate(
++        (np.full(12_000, 0.2, dtype=np.float32), np.zeros(9_607, dtype=np.float32))
++    )
++    partial_analysis = analyze_terminal_silence(partial, sample_rate=_TERMINAL_SAMPLE_RATE)
++    assert partial_analysis.trim_end_sample <= partial.size
++
++
++def test_terminal_silence_preserves_resumed_activity_and_clicks() -> None:
++    resumed = np.zeros(36_000, dtype=np.float32)
++    resumed[0:8_000] = 0.2
++    resumed[16_000:20_000] = 0.08
++    resumed_trimmed, resumed_analysis = trim_terminal_silence(
++        resumed, sample_rate=_TERMINAL_SAMPLE_RATE, keep_seconds=0.0
++    )
++    assert resumed_analysis.confirmed
++    assert resumed_trimmed.size >= 20_000
++
++    clean, _ = _terminal_fixture()
++    click = clean.copy()
++    click[-5_000] = 0.8
++    clean_trimmed, _ = trim_terminal_silence(clean, sample_rate=_TERMINAL_SAMPLE_RATE)
++    click_trimmed, click_analysis = trim_terminal_silence(click, sample_rate=_TERMINAL_SAMPLE_RATE)
++    assert click_analysis.confirmed
++    assert click_trimmed.size >= clean_trimmed.size
++    assert click_trimmed[click.size - 5_000] == 0.8
++
++
++def test_terminal_silence_boundary_never_moves_earlier_when_padding_grows() -> None:
++    shorter, _ = _terminal_fixture(weak_tail_rms=0.0002, padding_seconds=0.2)
++    longer, _ = _terminal_fixture(weak_tail_rms=0.0002, padding_seconds=0.6)
++    short_trimmed, short_analysis = trim_terminal_silence(
++        shorter, sample_rate=_TERMINAL_SAMPLE_RATE
++    )
++    long_trimmed, long_analysis = trim_terminal_silence(longer, sample_rate=_TERMINAL_SAMPLE_RATE)
++
++    assert short_analysis.confirmed and long_analysis.confirmed
++    assert long_analysis.trim_end_sample >= short_analysis.trim_end_sample
++    assert long_trimmed.size >= short_trimmed.size
+diff --git a/tests/test_public_dsp.py b/tests/test_public_dsp.py
+index 42b6371..c1900ab 100644
+--- a/tests/test_public_dsp.py
++++ b/tests/test_public_dsp.py
+@@ -18,6 +18,9 @@ def test_new_dsp_primitives_are_available_from_the_package_root() -> None:
+         "energy_onset",
+         "energy_fraction",
+         "trim_lead",
++        "TerminalSilenceAnalysis",
++        "analyze_terminal_silence",
++        "trim_terminal_silence",
+         "trim_trail",
+         "fade_edges",
+         "join_with_edge_fades",

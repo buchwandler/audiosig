@@ -471,3 +471,96 @@ def test_terminal_silence_boundary_never_moves_earlier_when_padding_grows() -> N
     assert short_analysis.confirmed and long_analysis.confirmed
     assert long_analysis.trim_end_sample >= short_analysis.trim_end_sample
     assert long_trimmed.size >= short_trimmed.size
+
+
+@pytest.mark.parametrize("duration_ms", (20, 50, 100, 150, 200))
+@pytest.mark.parametrize("event_to_floor_ratio", (0.5, 1.0, 2.0, 4.0))
+@pytest.mark.parametrize(
+    "morphology", ("noise-like", "high-frequency", "sparse-burst", "gradual-decay")
+)
+def test_terminal_trim_preserves_weak_final_event_boundary(
+    duration_ms: int, event_to_floor_ratio: float, morphology: str
+) -> None:
+    sample_rate = 24_000
+    floor_rms = 5e-4
+    event_samples = duration_ms * sample_rate // 1_000
+    rng = np.random.default_rng(1234)
+
+    if morphology == "noise-like":
+        event = rng.normal(0.0, 1.0, event_samples)
+    elif morphology == "high-frequency":
+        times = np.arange(event_samples, dtype=np.float64) / sample_rate
+        event = np.sin(2.0 * np.pi * 8_000.0 * times)
+    elif morphology == "sparse-burst":
+        event = np.zeros(event_samples, dtype=np.float64)
+        event[::8] = 1.0
+        event[1::8] = -1.0
+    else:
+        envelope = np.linspace(1.0, 0.15, event_samples, dtype=np.float64)
+        event = rng.normal(0.0, 1.0, event_samples) * envelope
+
+    event *= floor_rms * event_to_floor_ratio / np.sqrt(np.mean(np.square(event)))
+    event = event.astype(np.float32)
+    active = np.full(round(0.5 * sample_rate), 0.2, dtype=np.float32)
+    padding = rng.normal(0.0, floor_rms, round(0.4 * sample_rate)).astype(np.float32)
+    source = np.concatenate((active, event, padding))
+    protected_end_sample = active.size + event.size
+
+    trimmed, analysis = trim_terminal_silence(source, sample_rate=sample_rate)
+    end_error_samples = analysis.trim_end_sample - protected_end_sample
+
+    assert end_error_samples >= 0
+    assert trimmed.size == analysis.trim_end_sample
+
+
+def test_terminal_trim_default_reserve_fixes_near_floor_event_cut() -> None:
+    sample_rate = 24_000
+    rng = np.random.default_rng(2024)
+    active = np.full(round(0.5 * sample_rate), 0.2, dtype=np.float32)
+    weak_event = rng.normal(0.0, 5e-4, round(0.1 * sample_rate)).astype(np.float32)
+    padding = rng.normal(0.0, 5e-4, round(0.4 * sample_rate)).astype(np.float32)
+    source = np.concatenate((active, weak_event, padding))
+    protected_end_sample = active.size + weak_event.size
+
+    short_trimmed, short_analysis = trim_terminal_silence(
+        source, sample_rate=sample_rate, keep_seconds=0.080
+    )
+    default_trimmed, default_analysis = trim_terminal_silence(source, sample_rate=sample_rate)
+
+    assert short_analysis.trim_end_sample < protected_end_sample
+    assert short_trimmed.size == short_analysis.trim_end_sample
+    assert default_analysis.trim_end_sample >= protected_end_sample
+    assert default_trimmed.size >= protected_end_sample
+
+
+def test_terminal_boundary_evaluator_reports_asymmetric_metrics(tmp_path) -> None:
+    import wave
+
+    from scripts.evaluate_terminal_boundaries import BoundaryLabel, evaluate
+
+    sample_rate = 24_000
+    samples = np.zeros(sample_rate, dtype="<i2")
+    samples[2_400:12_000] = 6_553
+    labels = [
+        BoundaryLabel("preserved.wav", 12_000),
+        BoundaryLabel("negative.wav", 19_500),
+    ]
+    for label in labels:
+        with wave.open(str(tmp_path / label.audio_path), "wb") as output:
+            output.setnchannels(1)
+            output.setsampwidth(2)
+            output.setframerate(sample_rate)
+            output.writeframes(samples.tobytes())
+
+    report = evaluate(tmp_path, labels)
+    summary = report["summary"]
+
+    assert summary["item_count"] == 2
+    assert summary["negative_end_error_counts"] == {
+        "0ms": 1,
+        "10ms": 1,
+        "25ms": 1,
+        "50ms": 1,
+    }
+    assert summary["mean_retained_tail_ms"] == pytest.approx(75.0)
+    assert summary["p95_retained_tail_ms"] == pytest.approx(142.5)

@@ -3,7 +3,7 @@ schema_version: 2
 object_type: release_entry
 versioning:
   schema_version: 1
-  revision: 1
+  revision: 2
 entry_id: entry-0001
 release_version: 0.1.11
 kind: fixed
@@ -15,6 +15,7 @@ audience: null
 scopes: []
 source_refs:
   - tl:task-0026
+  - git:4767a979512b905a2016dd2207842d41d495a78d
 paths:
   - audiosig/boundaries.py
   - tests/test_output_boundaries.py

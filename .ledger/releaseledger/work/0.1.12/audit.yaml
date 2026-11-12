@@ -1,0 +1,39 @@
+schema_version: 1
+object_type: commit_audit_sheet
+versioning:
+  schema_version: 1
+  revision: 1
+release_version: 0.1.12
+git_base_ref: v0.1.11
+git_base_sha: 4767a979512b905a2016dd2207842d41d495a78d
+git_head_ref: HEAD
+git_head_sha: afb18ade711964b7892c9d747cad45248531f5ad
+git_range: 4767a979512b905a2016dd2207842d41d495a78d..afb18ade711964b7892c9d747cad45248531f5ad
+commit_count: 1
+rows:
+  - sha: afb18ade711964b7892c9d747cad45248531f5ad
+    source_ref: git:afb18ade711964b7892c9d747cad45248531f5ad
+    short_sha: afb18ad
+    changed_paths:
+      - .ledger/releaseledger/data/ledgers/main/events/events.jsonl
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.11/entries/entry-0002.md
+      - .ledger/releaseledger/data/ledgers/main/releases/0.1.11/release.md
+      - README.md
+      - audiosig/__init__.py
+      - audiosig/boundaries.py
+      - docs/advanced.md
+      - docs/api-reference.md
+      - docs/changelog.md
+      - tests/test_output_boundaries.py
+      - tests/test_public_dsp.py
+    stats:
+      files_changed: 11
+      insertions: 481
+      deletions: 4
+    inspected: false
+    inspected_paths: []
+    observed_behavior: ""
+    public_impact: unknown
+    decision: needs_review
+    stale: false
+    evidence_subject: "feat: conservative silence detection"

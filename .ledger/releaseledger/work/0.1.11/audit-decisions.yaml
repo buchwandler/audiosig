@@ -1,1 +1,16 @@
-rows: []
+rows:
+  - sha: 4767a979512b905a2016dd2207842d41d495a78d
+    inspected: true
+    inspected_paths:
+      - README.md
+      - audiosig/boundaries.py
+      - docs/api-reference.md
+      - docs/changelog.md
+      - tests/test_output_boundaries.py
+    observed_behavior: "Updated speech_end to find terminal silence after the last qualifying activity island. Later release-level activity qualifies through a confirmed activation or minimum duration, preserving resumed phrases while rejecting isolated clicks; trim_trail forwards the new duration control."
+    public_impact: public
+    decision: accepted
+    target_entry_key: null
+    target_entry_id: null
+    notes: ""
+    stale: false

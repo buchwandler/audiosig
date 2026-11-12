@@ -1,0 +1,35 @@
+{
+  "candidate_count": 1,
+  "candidates": [
+    {
+      "additions": 481,
+      "deletions": 4,
+      "patch_file": "afb18ad.patch",
+      "patch_sha256": "3dcd6644158f2a319629a9fb4ef41fb16298cca1519292815a23983c694debbd",
+      "paths": [
+        ".ledger/releaseledger/data/ledgers/main/events/events.jsonl",
+        ".ledger/releaseledger/data/ledgers/main/releases/0.1.11/entries/entry-0002.md",
+        ".ledger/releaseledger/data/ledgers/main/releases/0.1.11/release.md",
+        "README.md",
+        "audiosig/__init__.py",
+        "audiosig/boundaries.py",
+        "docs/advanced.md",
+        "docs/api-reference.md",
+        "docs/changelog.md",
+        "tests/test_output_boundaries.py",
+        "tests/test_public_dsp.py"
+      ],
+      "sha": "afb18ade711964b7892c9d747cad45248531f5ad",
+      "short_sha": "afb18ad",
+      "source_ref": "git:afb18ade711964b7892c9d747cad45248531f5ad"
+    }
+  ],
+  "git_base_ref": "4767a979512b905a2016dd2207842d41d495a78d",
+  "git_base_sha": "4767a979512b905a2016dd2207842d41d495a78d",
+  "git_head_ref": "afb18ade711964b7892c9d747cad45248531f5ad",
+  "git_head_sha": "afb18ade711964b7892c9d747cad45248531f5ad",
+  "include_merges": "nontrivial",
+  "object_type": "git_evidence_manifest",
+  "release_version": "0.1.12",
+  "schema_version": 1
+}
