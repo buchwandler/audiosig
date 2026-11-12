@@ -222,6 +222,21 @@ choose application-specific speech/chapter policies.
 
 `speech_end()` confirms an initial sustained activation, then scans the complete signal for the last qualifying activity island. The enter threshold confirms speech or activity; the lower release threshold tracks continuation. Later release-level islands qualify through a confirmed strong activation or at least 30 ms of sustained activity, rejecting isolated clicks while retaining weak or short resumed phrases. A terminal gap must remain below release for 100 ms by default. The function returns that gap's unpadded start, `None` when no speech is confirmed, or the sample count when activity reaches EOF or terminal silence is too short. It is an energy-based terminal-boundary detector, not a linguistic VAD. `trim_trail()` retains 300 ms after the endpoint by default; `min_activity_seconds` and `min_silence_seconds` are separate controls from the retained trail.
 
+### Conservative terminal-silence trimming
+
+`analyze_terminal_silence()` and `trim_terminal_silence()` are separate from `speech_end()` and `trim_trail()`. They use adaptive terminal-floor and activity references plus RMS, peak, contiguous-run, and boundary-transition checks. Trimming is fail-closed: if terminal padding is not clearly separable from possible speech, the complete source is preserved. This is a waveform padding detector, not linguistic speech recognition or a replacement for general endpoint estimation.
+
+```python
+from audiosig import analyze_terminal_silence, trim_terminal_silence
+
+analysis = analyze_terminal_silence(audio, sample_rate=24_000)
+trimmed, analysis = trim_terminal_silence(
+    audio, sample_rate=24_000, keep_seconds=0.08
+)
+```
+
+The immutable analysis reports its confirmation, boundary, removable sample count, and adaptive RMS and peak diagnostics. Both functions support an arbitrary sample axis. The trim helper returns an independent C-contiguous array with the input dtype and retains a post-boundary hangover when trimming is confirmed.
+
 ## Silence trimming and VAD
 
 ```python

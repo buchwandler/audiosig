@@ -6,6 +6,10 @@
 
 ## [0.1.11] - Unreleased
 
+### Added
+
+- Added conservative terminal-silence analysis and trimming
+
 ### Fixed
 
 - Fixed terminal-silence detection to preserve resumed speech and reject isolated clicks

@@ -24,6 +24,8 @@ from .amplitude import (
 from .basic import downmix_to_mono, generate_silence
 from .boundaries import (
     PauseCropConfig,
+    TerminalSilenceAnalysis,
+    analyze_terminal_silence,
     crop_on_pause,
     energy_fraction,
     energy_onset,
@@ -31,6 +33,7 @@ from .boundaries import (
     speech_end,
     speech_onset,
     trim_lead,
+    trim_terminal_silence,
     trim_trail,
 )
 from .effects import PitchShiftMethod, TimeStretchMethod, pitch_shift, time_stretch
@@ -109,12 +112,14 @@ __all__ = [
     "SpeechEffectsEnvelopeMethod",
     "SpeechEffectsMethod",
     "SpeechLevel",
+    "TerminalSilenceAnalysis",
     "TimeStretchMethod",
     "__version__",
     "abs2",
     "activity_to_intervals",
     "amplitude_to_db",
     "analyze_loudness",
+    "analyze_terminal_silence",
     "apply_gain_db",
     "apply_speech_effects",
     "apply_speech_effects_envelope",
@@ -169,6 +174,7 @@ __all__ = [
     "time_stretch",
     "trim",
     "trim_lead",
+    "trim_terminal_silence",
     "trim_trail",
     "true_peak_dbtp",
     "zero_crossing_rate",

@@ -5,7 +5,14 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 
-from audiosig import AudioShapeError, InvalidParameterError, speech_end
+from audiosig import (
+    AudioShapeError,
+    InvalidParameterError,
+    TerminalSilenceAnalysis,
+    analyze_terminal_silence,
+    speech_end,
+    trim_terminal_silence,
+)
 from audiosig.boundaries import (
     _nonoverlap_frame_rms,
     energy_fraction,
@@ -302,3 +309,165 @@ def test_trim_trail_is_an_independent_prefix_copy_after_resumed_activity() -> No
     np.testing.assert_array_equal(trimmed, source[:1_000])
     assert trimmed.flags.c_contiguous
     assert not np.shares_memory(trimmed, source)
+
+
+_TERMINAL_SAMPLE_RATE = 24_000
+
+
+def _terminal_fixture(
+    *, weak_tail_rms: float = 0.0, padding_seconds: float = 0.4
+) -> tuple[np.ndarray, int]:
+    active = np.full(12_000, 0.2, dtype=np.float32)
+    tail = (
+        np.random.default_rng(17).normal(0.0, weak_tail_rms, 1_920).astype(np.float32)
+        if weak_tail_rms > 0.0
+        else np.empty(0, dtype=np.float32)
+    )
+    padding = np.zeros(round(padding_seconds * _TERMINAL_SAMPLE_RATE), dtype=np.float32)
+    return np.concatenate((active, tail, padding)), active.size + tail.size
+
+
+def test_terminal_silence_preserves_low_power_final_tails() -> None:
+    for relative_db in (-40.0, -50.0, -60.0, -70.0):
+        tail_rms = 0.2 * 10.0 ** (relative_db / 20.0)
+        source, tail_end = _terminal_fixture(weak_tail_rms=tail_rms)
+        trimmed, analysis = trim_terminal_silence(source, sample_rate=_TERMINAL_SAMPLE_RATE)
+
+        assert isinstance(analysis, TerminalSilenceAnalysis)
+        assert not hasattr(analysis, "__dict__")
+        with pytest.raises(AttributeError):
+            analysis.confirmed = False
+        assert analysis.confirmed
+        assert analysis.trim_end_sample >= tail_end
+        assert trimmed.shape == (analysis.trim_end_sample,)
+        assert trimmed.size >= tail_end
+        assert not np.shares_memory(trimmed, source)
+
+
+@pytest.mark.parametrize("event_ms", (5, 10, 20, 30))
+def test_terminal_silence_preserves_short_peak_bearing_final_events(event_ms: int) -> None:
+    event_count = event_ms * _TERMINAL_SAMPLE_RATE // 1_000
+    event = np.zeros(event_count, dtype=np.float32)
+    event[::3] = 0.025
+    event[1::3] = -0.025
+    source = np.concatenate(
+        (np.full(12_000, 0.2, dtype=np.float32), event, np.zeros(9_600, dtype=np.float32))
+    )
+
+    trimmed, analysis = trim_terminal_silence(source, sample_rate=_TERMINAL_SAMPLE_RATE)
+
+    assert analysis.confirmed
+    assert trimmed.size >= 12_000 + event_count
+
+
+def test_terminal_silence_trims_clean_zero_and_stationary_noise_padding() -> None:
+    clean, active_end = _terminal_fixture()
+    clean_trimmed, clean_analysis = trim_terminal_silence(
+        clean, sample_rate=_TERMINAL_SAMPLE_RATE, keep_seconds=0.08
+    )
+    assert clean_analysis.confirmed
+    assert clean_trimmed.size == active_end + 0.08 * _TERMINAL_SAMPLE_RATE
+    np.testing.assert_array_equal(clean_trimmed, clean[: clean_trimmed.size])
+
+    noise = np.random.default_rng(29).normal(0.0, 0.0005, 9_600).astype(np.float32)
+    noisy = np.concatenate((np.full(12_000, 0.2, dtype=np.float32), noise))
+    noisy_trimmed, noisy_analysis = trim_terminal_silence(noisy, sample_rate=_TERMINAL_SAMPLE_RATE)
+    assert noisy_analysis.confirmed
+    assert noisy_trimmed.size < noisy.size
+
+
+def test_terminal_silence_fails_closed_for_ambiguous_decay_and_active_eof() -> None:
+    active = np.full(12_000, 0.2, dtype=np.float32)
+    transition = np.linspace(0.02, 0.001, 24_000, dtype=np.float32)
+    tail_noise = np.random.default_rng(31).normal(0.0, 0.001, 9_600).astype(np.float32)
+    ambiguous = np.concatenate((active, transition, tail_noise))
+    result = analyze_terminal_silence(ambiguous, sample_rate=_TERMINAL_SAMPLE_RATE)
+    trimmed, trim_result = trim_terminal_silence(ambiguous, sample_rate=_TERMINAL_SAMPLE_RATE)
+
+    assert not result.confirmed
+    assert result.trim_end_sample == ambiguous.size
+    assert result.removable_samples == 0
+    assert not trim_result.confirmed
+    np.testing.assert_array_equal(trimmed, ambiguous)
+
+    active_to_eof = np.full(12_000, 0.2, dtype=np.float32)
+    eof_result = analyze_terminal_silence(active_to_eof, sample_rate=_TERMINAL_SAMPLE_RATE)
+    eof_trimmed, _ = trim_terminal_silence(active_to_eof, sample_rate=_TERMINAL_SAMPLE_RATE)
+    assert not eof_result.confirmed
+    np.testing.assert_array_equal(eof_trimmed, active_to_eof)
+
+
+def test_terminal_silence_all_silence_is_unchanged_and_unconfirmed() -> None:
+    source = np.zeros(12_345, dtype=np.float32)
+    trimmed, analysis = trim_terminal_silence(source, sample_rate=_TERMINAL_SAMPLE_RATE)
+
+    assert not analysis.confirmed
+    assert analysis.trim_end_sample == source.size
+    assert analysis.removable_samples == 0
+    np.testing.assert_array_equal(trimmed, source)
+
+
+def test_terminal_silence_boundary_is_gain_scale_invariant() -> None:
+    source, _ = _terminal_fixture(weak_tail_rms=0.0004)
+    boundaries = [
+        analyze_terminal_silence(source * scale, sample_rate=_TERMINAL_SAMPLE_RATE).trim_end_sample
+        for scale in (0.01, 0.1, 1.0, 2.0)
+    ]
+
+    assert len(set(boundaries)) == 1
+
+
+def test_terminal_silence_handles_partial_frames_lanes_and_sample_axes() -> None:
+    one_lane, _ = _terminal_fixture()
+    source = np.stack((one_lane, one_lane * 0.5))[:, ::-1][:, ::-1]
+    analysis = analyze_terminal_silence(source, sample_rate=_TERMINAL_SAMPLE_RATE, axis=1)
+    trimmed, trim_analysis = trim_terminal_silence(
+        source, sample_rate=_TERMINAL_SAMPLE_RATE, axis=1, keep_seconds=0.04
+    )
+
+    assert analysis.confirmed
+    assert 0 <= analysis.trim_end_sample <= source.shape[1]
+    assert analysis.removable_samples == source.shape[1] - analysis.trim_end_sample
+    assert trimmed.shape == (2, trim_analysis.trim_end_sample)
+    assert trimmed.dtype == source.dtype
+    assert trimmed.flags.c_contiguous
+    assert not np.shares_memory(trimmed, source)
+
+    partial = np.concatenate(
+        (np.full(12_000, 0.2, dtype=np.float32), np.zeros(9_607, dtype=np.float32))
+    )
+    partial_analysis = analyze_terminal_silence(partial, sample_rate=_TERMINAL_SAMPLE_RATE)
+    assert partial_analysis.trim_end_sample <= partial.size
+
+
+def test_terminal_silence_preserves_resumed_activity_and_clicks() -> None:
+    resumed = np.zeros(36_000, dtype=np.float32)
+    resumed[0:8_000] = 0.2
+    resumed[16_000:20_000] = 0.08
+    resumed_trimmed, resumed_analysis = trim_terminal_silence(
+        resumed, sample_rate=_TERMINAL_SAMPLE_RATE, keep_seconds=0.0
+    )
+    assert resumed_analysis.confirmed
+    assert resumed_trimmed.size >= 20_000
+
+    clean, _ = _terminal_fixture()
+    click = clean.copy()
+    click[-5_000] = 0.8
+    clean_trimmed, _ = trim_terminal_silence(clean, sample_rate=_TERMINAL_SAMPLE_RATE)
+    click_trimmed, click_analysis = trim_terminal_silence(click, sample_rate=_TERMINAL_SAMPLE_RATE)
+    assert click_analysis.confirmed
+    assert click_trimmed.size >= clean_trimmed.size
+    assert click_trimmed[click.size - 5_000] == 0.8
+
+
+def test_terminal_silence_boundary_never_moves_earlier_when_padding_grows() -> None:
+    shorter, _ = _terminal_fixture(weak_tail_rms=0.0002, padding_seconds=0.2)
+    longer, _ = _terminal_fixture(weak_tail_rms=0.0002, padding_seconds=0.6)
+    short_trimmed, short_analysis = trim_terminal_silence(
+        shorter, sample_rate=_TERMINAL_SAMPLE_RATE
+    )
+    long_trimmed, long_analysis = trim_terminal_silence(longer, sample_rate=_TERMINAL_SAMPLE_RATE)
+
+    assert short_analysis.confirmed and long_analysis.confirmed
+    assert long_analysis.trim_end_sample >= short_analysis.trim_end_sample
+    assert long_trimmed.size >= short_trimmed.size

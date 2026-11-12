@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Protocol
 
 import numpy as np
@@ -14,6 +14,24 @@ _LOCAL_RMS_WEIGHT = 0.50
 _ENDPOINT_AMPLITUDE_WEIGHT = 0.25
 _BOUNDARY_SLOPE_WEIGHT = 0.10
 _ANCHOR_DISTANCE_WEIGHT = 0.15
+
+
+@dataclass(frozen=True, slots=True)
+class TerminalSilenceAnalysis:
+    """Diagnostics for conservative destructive terminal-padding removal."""
+
+    sample_count: int
+    confirmed: bool
+    silence_start_sample: int | None
+    trim_end_sample: int
+    removable_samples: int
+    activity_reference_rms: float
+    tail_floor_rms: float
+    silence_threshold_rms: float
+    activity_reference_peak: float = 0.0
+    tail_floor_peak: float = 0.0
+    silence_threshold_peak: float = 0.0
+    separation_db: float = 0.0
 
 
 def _normalize_cost(values: np.ndarray) -> np.ndarray:
@@ -572,6 +590,225 @@ def speech_end(
     if terminal_silence_frames < minimum_silence_frames:
         return sample_count
     return min(last_qualifying_end * frame_length, sample_count)
+
+
+def _terminal_frame_features(
+    audio: np.ndarray, frame_length: int
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    sample_count = audio.shape[-1]
+    frame_count = (sample_count + frame_length - 1) // frame_length
+    rms = np.empty(frame_count, dtype=np.float64)
+    peaks = np.empty(frame_count, dtype=np.float64)
+    starts = np.arange(frame_count, dtype=np.int64) * frame_length
+    ends = np.minimum(starts + frame_length, sample_count)
+    for index, (start, end) in enumerate(zip(starts, ends, strict=True)):
+        frame = audio[..., start:end].astype(np.float64, copy=False)
+        rms[index] = float(np.max(np.sqrt(np.mean(np.square(frame), axis=-1))))
+        peaks[index] = float(np.max(np.abs(frame)))
+    return rms, peaks, starts, ends
+
+
+def analyze_terminal_silence(
+    audio: np.ndarray,
+    *,
+    sample_rate: int,
+    frame_seconds: float = 0.005,
+    tail_reference_seconds: float = 0.080,
+    min_silence_seconds: float = 0.120,
+    floor_margin_db: float = 4.0,
+    min_separation_db: float = 18.0,
+    transition_margin_db: float = 6.0,
+    axis: int = -1,
+) -> TerminalSilenceAnalysis:
+    """Confirm only a clearly separated, floor-like terminal padding region.
+
+    This is a conservative destructive-trimming analysis, not a linguistic
+    voice-activity detector. Ambiguous signals return an unconfirmed full-length
+    boundary so callers can preserve their source audio.
+    """
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
+    rate = validate_integer(sample_rate, "sample_rate")
+    frame_duration = validate_positive(frame_seconds, "frame_seconds")
+    tail_duration = validate_positive(tail_reference_seconds, "tail_reference_seconds")
+    minimum_silence = validate_finite(min_silence_seconds, "min_silence_seconds")
+    floor_margin = validate_finite(floor_margin_db, "floor_margin_db")
+    minimum_separation = validate_finite(min_separation_db, "min_separation_db")
+    transition_margin = validate_finite(transition_margin_db, "transition_margin_db")
+    if minimum_silence < 0.0:
+        raise InvalidParameterError("min_silence_seconds must be non-negative")
+    if floor_margin < 0.0:
+        raise InvalidParameterError("floor_margin_db must be non-negative")
+    if minimum_separation < 0.0:
+        raise InvalidParameterError("min_separation_db must be non-negative")
+    if transition_margin < 0.0:
+        raise InvalidParameterError("transition_margin_db must be non-negative")
+
+    frame_samples_float = frame_duration * rate
+    tail_samples_float = tail_duration * rate
+    silence_samples_float = minimum_silence * rate
+    if not np.isfinite(frame_samples_float) or frame_samples_float > np.iinfo(np.intp).max:
+        raise InvalidParameterError("frame_seconds is too large")
+    if not np.isfinite(tail_samples_float) or tail_samples_float > np.iinfo(np.intp).max:
+        raise InvalidParameterError("tail_reference_seconds is too large")
+    if not np.isfinite(silence_samples_float) or silence_samples_float > np.iinfo(np.intp).max:
+        raise InvalidParameterError("min_silence_seconds is too large")
+
+    frame_length = max(1, int(np.floor(frame_samples_float + 0.5)))
+    tail_samples = max(1, int(np.floor(tail_samples_float + 0.5)))
+    minimum_silence_samples = int(np.ceil(silence_samples_float))
+    moved = np.moveaxis(source, normalized_axis, -1)
+    sample_count = int(moved.shape[-1])
+    if sample_count == 0 or source.size == 0:
+        return TerminalSilenceAnalysis(sample_count, False, None, sample_count, 0, 0.0, 0.0, 0.0)
+
+    rms, peaks, starts, ends = _terminal_frame_features(moved, frame_length)
+    activity_reference_rms = float(np.quantile(rms, 0.90))
+    activity_reference_peak = float(np.quantile(peaks, 0.90))
+    tail_start = max(0, sample_count - tail_samples)
+    tail_frames = ends > tail_start
+    tail_floor_rms = float(np.quantile(rms[tail_frames], 0.90))
+    tail_floor_peak = float(np.quantile(peaks[tail_frames], 0.95))
+    if activity_reference_rms <= 0.0:
+        return TerminalSilenceAnalysis(
+            sample_count,
+            False,
+            None,
+            sample_count,
+            0,
+            activity_reference_rms,
+            tail_floor_rms,
+            0.0,
+            activity_reference_peak,
+            tail_floor_peak,
+            0.0,
+            0.0,
+        )
+
+    numerical_floor = max(activity_reference_rms * 1.0e-12, np.finfo(np.float64).tiny)
+    separation_db = 20.0 * np.log10(activity_reference_rms / max(tail_floor_rms, numerical_floor))
+    separation_cap = _db_amplitude(-minimum_separation, "min_separation_db")
+    rms_cap = activity_reference_rms * separation_cap
+    rms_threshold = min(
+        max(tail_floor_rms * _db_amplitude(floor_margin, "floor_margin_db"), numerical_floor),
+        rms_cap,
+    )
+    peak_scale = max(activity_reference_peak, np.finfo(np.float64).tiny)
+    peak_floor = max(activity_reference_peak * 1.0e-12, np.finfo(np.float64).tiny)
+    peak_cap = peak_scale * separation_cap
+    peak_threshold = min(
+        max(tail_floor_peak * _db_amplitude(floor_margin, "floor_margin_db"), peak_floor),
+        peak_cap,
+    )
+
+    def unconfirmed() -> TerminalSilenceAnalysis:
+        return TerminalSilenceAnalysis(
+            sample_count,
+            False,
+            None,
+            sample_count,
+            0,
+            activity_reference_rms,
+            tail_floor_rms,
+            rms_threshold,
+            activity_reference_peak,
+            tail_floor_peak,
+            peak_threshold,
+            float(separation_db),
+        )
+
+    if separation_db < minimum_separation:
+        return unconfirmed()
+
+    quiet = (rms <= rms_threshold) & (peaks <= peak_threshold)
+    if not bool(quiet[-1]):
+        return unconfirmed()
+    run_start = quiet.size - 1
+    while run_start > 0 and bool(quiet[run_start - 1]):
+        run_start -= 1
+    silence_start = int(starts[run_start])
+    if sample_count - silence_start < minimum_silence_samples or run_start == 0:
+        return unconfirmed()
+
+    transition_start = max(0, run_start - 3)
+    transition_rms = rms[transition_start:run_start]
+    transition_peaks = peaks[transition_start:run_start]
+    transition_factor = _db_amplitude(transition_margin, "transition_margin_db")
+    credible_transition = bool(
+        np.any(transition_rms > rms_threshold * transition_factor)
+        or np.any(transition_peaks > peak_threshold * transition_factor)
+    )
+    if not credible_transition:
+        return unconfirmed()
+
+    return TerminalSilenceAnalysis(
+        sample_count,
+        True,
+        silence_start,
+        silence_start,
+        sample_count - silence_start,
+        activity_reference_rms,
+        tail_floor_rms,
+        rms_threshold,
+        activity_reference_peak,
+        tail_floor_peak,
+        peak_threshold,
+        float(separation_db),
+    )
+
+
+def trim_terminal_silence(
+    audio: np.ndarray,
+    *,
+    sample_rate: int,
+    keep_seconds: float = 0.080,
+    frame_seconds: float = 0.005,
+    tail_reference_seconds: float = 0.080,
+    min_silence_seconds: float = 0.120,
+    floor_margin_db: float = 4.0,
+    min_separation_db: float = 18.0,
+    transition_margin_db: float = 6.0,
+    axis: int = -1,
+) -> tuple[np.ndarray, TerminalSilenceAnalysis]:
+    """Remove confirmed terminal padding while retaining a safety hangover.
+
+    When the analysis is unconfirmed, the complete source is returned in an
+    independent C-contiguous array. The attached analysis reports the actual
+    output boundary after applying ``keep_seconds``.
+    """
+    source, normalized_axis = validate_audio(audio, axis=axis, allow_empty=True)
+    rate = validate_integer(sample_rate, "sample_rate")
+    keep = validate_finite(keep_seconds, "keep_seconds")
+    if keep < 0.0:
+        raise InvalidParameterError("keep_seconds must be non-negative")
+    analysis = analyze_terminal_silence(
+        source,
+        sample_rate=rate,
+        frame_seconds=frame_seconds,
+        tail_reference_seconds=tail_reference_seconds,
+        min_silence_seconds=min_silence_seconds,
+        floor_margin_db=floor_margin_db,
+        min_separation_db=min_separation_db,
+        transition_margin_db=transition_margin_db,
+        axis=normalized_axis,
+    )
+    sample_count = analysis.sample_count
+    if analysis.confirmed and analysis.silence_start_sample is not None:
+        remaining = sample_count - analysis.silence_start_sample
+        if keep >= remaining / rate:
+            end = sample_count
+        else:
+            keep_samples = int(np.floor(keep * rate + 0.5))
+            end = min(sample_count, analysis.silence_start_sample + keep_samples)
+    else:
+        end = sample_count
+    result = np.moveaxis(np.moveaxis(source, normalized_axis, -1)[..., :end], -1, normalized_axis)
+    trimmed = np.array(result, copy=True, order="C")
+    reported_analysis = replace(
+        analysis,
+        trim_end_sample=end,
+        removable_samples=sample_count - end,
+    )
+    return trimmed, reported_analysis
 
 
 def energy_onset(
